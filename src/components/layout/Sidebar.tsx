@@ -72,7 +72,7 @@ const Sidebar: React.FC = () => {
             {/* 顶部Logo */}
             <div style={logoContainerStyle}>
                 <Database color="#2563eb" style={{ marginRight: '0.5rem' }} size={24} />
-                {sidebarExpanded && <h1 style={{ fontSize: '1.125rem', fontWeight: 600 }}>智政知脑</h1>}
+                {sidebarExpanded && <h1 style={{ fontSize: '1.125rem', fontWeight: 600 }}>智政智脑</h1>}
                 <button
                     style={{ marginLeft: 'auto', color: '#9ca3af', cursor: 'pointer' }}
                     onClick={toggleSidebar}
