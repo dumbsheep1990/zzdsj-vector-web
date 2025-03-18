@@ -1,9 +1,10 @@
 import React, { FC } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
-import Files from './pages/Files';
-import Models from './pages/Models';
+import KnowledgeBase from './pages/KnowledgeBase';
 import Vectors from './pages/Vectors';
+import Metadata from './pages/Metadata';
+import Models from './pages/Models';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 const AppContent: FC = () => {
@@ -12,25 +13,24 @@ const AppContent: FC = () => {
 
     const renderContent = () => {
         switch (activeSection) {
-            case 'files':
-                return <Files />;
-            case 'models':
-                return <Models />;
+            case 'knowledge-base':
+                return <KnowledgeBase />;
             case 'vectors':
                 return <Vectors />;
             case 'metadata':
-                return <div className="flex-1 p-6"><h1 className="text-2xl font-semibold">元数据管理（开发中）</h1></div>;
+                return <Metadata />;
+            case 'models':
+                return <Models />;
             case 'settings':
                 return <div className="flex-1 p-6"><h1 className="text-2xl font-semibold">系统设置（开发中）</h1></div>;
             default:
-                return <Files />;
+                return <KnowledgeBase />;
         }
     };
 
     return (
-        <div className="flex h-screen" style={{ display: 'flex', height: '100vh', backgroundColor: '#f3f4f6' }}>
+        <div className="flex h-screen bg-gray-50">
             <Sidebar />
-
             {renderContent()}
         </div>
     );

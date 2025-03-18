@@ -49,6 +49,7 @@ export interface KeywordItem {
     lastUsed: string;
     category: string;
     importance: 'high' | 'medium' | 'low';
+    relatedKeywords: number[];
 }
 
 // 搜索记录类型
@@ -75,7 +76,22 @@ export interface MetadataItem {
 export interface NavItem {
     id: string;
     label: string;
-    iconType: string; // 改为使用图标类型字符串
+    iconType: string; 
+    children?: NavItem[];
+}
+
+// 知识图谱节点类型
+export interface GraphNode {
+    id: string;
+    label: string;
+    type: string;
+}
+
+// 知识图谱连接类型
+export interface GraphLink {
+    source: string;
+    target: string;
+    value?: number;
 }
 
 // 统计卡片类型
@@ -92,6 +108,22 @@ export interface DetailPanelProps {
     selectedItem: FileItem | ModelItem | VectorItem | MetadataItem | KeywordItem | SearchRecordItem | null;
     setSelectedItem: React.Dispatch<React.SetStateAction<any | null>>;
     activeSection: string;
+}
+
+// 知识库类型
+export interface KnowledgeBaseItem {
+    id: number;
+    name: string;
+    description: string;
+    category: string;
+    fileCount: number;
+    lastUpdated: string;
+    size: string;
+    status: string;
+    vectorized: number;
+    pendingFiles: number;
+    tags: string[];
+    recentKeywords: string[];
 }
 
 // 应用全局状态

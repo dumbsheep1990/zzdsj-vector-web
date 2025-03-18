@@ -1,4 +1,4 @@
-import { FileItem, ModelItem, VectorItem, MetadataItem, KeywordItem, SearchRecordItem, KeywordRelevance } from "./types";
+import { FileItem, ModelItem, VectorItem, MetadataItem, KeywordItem, SearchRecordItem } from "./types";
 
 export const fileData: FileItem[] = [
     { 
@@ -181,62 +181,113 @@ export const metadataTemplates: MetadataItem[] = [
 ];
 
 export const navigationItems = [
-    { id: 'files', label: '文件管理', iconType: 'FileText' },
+    { 
+        id: 'files', 
+        label: '知识库管理', 
+        iconType: 'FileText',
+        children: [
+            { id: 'knowledge-base', label: '知识库', iconType: 'Library' },
+            { id: 'vectors', label: '向量化管理', iconType: 'Grid' },
+            { id: 'metadata', label: '元数据管理', iconType: 'Database' }
+        ]
+    },
     { id: 'models', label: '模型管理', iconType: 'Code' },
-    { id: 'vectors', label: '向量化管理', iconType: 'Grid' },
-    { id: 'metadata', label: '元数据管理', iconType: 'Database' },
     { id: 'settings', label: '系统设置', iconType: 'Settings' }
 ];
 
+export const knowledgeBaseData = [
+    {
+        id: 1,
+        name: '政策文档库',
+        description: '包含各类政策文件、解读和分析报告',
+        category: '政策文档',
+        fileCount: 126,
+        lastUpdated: '2025-03-16',
+        size: '458MB',
+        status: '活跃',
+        vectorized: 108,
+        pendingFiles: 18,
+        tags: ['政策', '文档', '解读'],
+        recentKeywords: ['智慧城市建设', '数字经济发展', '政策解读']
+    },
+    {
+        id: 2,
+        name: '法规条例库',
+        description: '各级法规条例及相关解释文件',
+        category: '法规标准',
+        fileCount: 84,
+        lastUpdated: '2025-03-14',
+        size: '312MB',
+        status: '活跃',
+        vectorized: 84,
+        pendingFiles: 0,
+        tags: ['法规', '条例', '标准'],
+        recentKeywords: ['法规标准', '政策解读', '城市规划']
+    },
+    {
+        id: 3,
+        name: '会议记录库',
+        description: '重要会议记录及会议纪要',
+        category: '历史会议记录',
+        fileCount: 53,
+        lastUpdated: '2025-03-10',
+        size: '215MB',
+        status: '活跃',
+        vectorized: 45,
+        pendingFiles: 8,
+        tags: ['会议', '记录', '纪要'],
+        recentKeywords: ['历史会议', '数据分析', '智慧城市建设']
+    },
+    {
+        id: 4,
+        name: '经济数据库',
+        description: '经济发展相关数据和分析报告',
+        category: '数据分析',
+        fileCount: 37,
+        lastUpdated: '2025-03-05',
+        size: '178MB',
+        status: '维护中',
+        vectorized: 32,
+        pendingFiles: 5,
+        tags: ['经济', '数据', '分析'],
+        recentKeywords: ['数字经济发展', '数据分析', '智慧城市建设']
+    }
+];
+
+interface GraphNode {
+    id: string;
+    label: string;
+    type: string;
+}
+
+interface GraphLink {
+    source: string;
+    target: string;
+    value: number;
+}
+
 // 生成知识图谱数据的辅助函数
 export const generateKnowledgeGraphData = () => {
-    const nodes = [];
-    const links = [];
+    const nodes: GraphNode[] = [];
+    const links: GraphLink[] = [];
     
     // 添加关键词节点
     keywordsData.forEach(keyword => {
         nodes.push({
             id: `keyword-${keyword.id}`,
             label: keyword.keyword,
-            type: 'keyword',
-            value: keyword.frequency / 10, // 节点大小基于频率
-            color: keyword.importance === 'high' ? '#ef4444' : 
-                   keyword.importance === 'medium' ? '#f59e0b' : '#10b981'
+            type: 'keyword'
         });
         
-        // 添加关键词之间的关联
-        if (keyword.relatedKeywords) {
-            keyword.relatedKeywords.forEach(relatedId => {
-                links.push({
-                    source: `keyword-${keyword.id}`,
-                    target: `keyword-${relatedId}`,
-                    value: 2 // 关键词之间的关联强度
-                });
+        // 添加关联关系
+        keyword.relatedKeywords.forEach((relatedId: number) => {
+            links.push({
+                source: `keyword-${keyword.id}`,
+                target: `keyword-${relatedId}`,
+                value: 1
             });
-        }
-    });
-    
-    // 添加文件节点
-    fileData.forEach(file => {
-        nodes.push({
-            id: `file-${file.id}`,
-            label: file.name,
-            type: 'file',
-            value: 3, // 文件节点大小固定
-            color: '#3b82f6'
         });
-        
-        // 添加文件与关键词的关联
-        if (file.keywords) {
-            file.keywords.forEach(keywordRel => {
-                links.push({
-                    source: `file-${file.id}`,
-                    target: `keyword-${keywordRel.keywordId}`,
-                    value: keywordRel.relevance / 25 // 关联强度基于相关性
-                });
-            });
-        }
     });
-    
+
     return { nodes, links };
 };

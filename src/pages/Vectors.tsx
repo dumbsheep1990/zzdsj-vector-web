@@ -4,8 +4,10 @@ import VectorsList from '../components/modules/vectors/VectorsList';
 import KeywordsList from '../components/modules/vectors/KeywordsList';
 import SearchRecordsList from '../components/modules/vectors/SearchRecordsList';
 import DetailPanel from '../components/layout/DetailPanel';
+import PageHeader from '../components/layout/PageHeader';
 import { vectorData, keywordsData, searchRecordsData } from '../utils/mockData';
 import { VectorItem, KeywordItem, SearchRecordItem } from '../utils/types';
+import { Upload, RefreshCw, Download } from 'lucide-react';
 
 const Vectors: React.FC = () => {
     const [activeModule, setActiveModule] = useState<'vectors' | 'keywords' | 'searchRecords'>('vectors');
@@ -74,8 +76,101 @@ const Vectors: React.FC = () => {
         }
     };
 
+    const getModuleTitle = () => {
+        switch (activeModule) {
+            case 'vectors':
+                return '向量数据';
+            case 'keywords':
+                return '关键词管理';
+            case 'searchRecords':
+                return '搜索记录';
+            default:
+                return '';
+        }
+    };
+
+    const getModuleDescription = () => {
+        switch (activeModule) {
+            case 'vectors':
+                return '管理和维护向量化后的数据，支持批量操作和数据更新';
+            case 'keywords':
+                return '管理系统中的关键词，优化搜索结果和数据分类';
+            case 'searchRecords':
+                return '查看和分析用户搜索记录，优化搜索体验';
+            default:
+                return '';
+        }
+    };
+
+    const getPrimaryActions = () => {
+        switch (activeModule) {
+            case 'vectors':
+                return [
+                    {
+                        icon: <Upload size={20} />,
+                        label: '批量导入',
+                        onClick: () => console.log('批量导入向量数据')
+                    },
+                    {
+                        icon: <RefreshCw size={20} />,
+                        label: '更新向量',
+                        onClick: () => console.log('更新向量数据')
+                    }
+                ];
+            case 'keywords':
+                return [
+                    {
+                        icon: <Upload size={20} />,
+                        label: '导入关键词',
+                        onClick: () => console.log('导入关键词')
+                    }
+                ];
+            case 'searchRecords':
+                return [
+                    {
+                        icon: <Download size={20} />,
+                        label: '导出记录',
+                        onClick: () => console.log('导出搜索记录')
+                    }
+                ];
+            default:
+                return [];
+        }
+    };
+
+    const tabsComponent = (
+        <TabsContainer>
+            <TabButton 
+                active={activeModule === 'vectors'} 
+                onClick={() => setActiveModule('vectors')}
+            >
+                向量数据
+            </TabButton>
+            <TabButton 
+                active={activeModule === 'keywords'} 
+                onClick={() => setActiveModule('keywords')}
+            >
+                关键词管理
+            </TabButton>
+            <TabButton 
+                active={activeModule === 'searchRecords'} 
+                onClick={() => setActiveModule('searchRecords')}
+            >
+                搜索记录
+            </TabButton>
+        </TabsContainer>
+    );
+
     // 样式定义
     const containerStyle = {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        overflow: 'hidden',
+        backgroundColor: '#f3f4f6'
+    };
+
+    const contentContainerStyle = {
         flex: 1,
         display: 'flex',
         overflow: 'hidden'
@@ -98,45 +193,31 @@ const Vectors: React.FC = () => {
 
     return (
         <div style={containerStyle}>
-            <div style={mainContentStyle}>
-                <h1 className="text-2xl font-bold mb-6">向量数据库管理</h1>
-                <p className="text-gray-600 mb-6">管理向量数据、关键词和搜索记录</p>
-
-                <TabsContainer>
-                    <TabButton 
-                        active={activeModule === 'vectors'} 
-                        onClick={() => setActiveModule('vectors')}
-                    >
-                        向量数据
-                    </TabButton>
-                    <TabButton 
-                        active={activeModule === 'keywords'} 
-                        onClick={() => setActiveModule('keywords')}
-                    >
-                        关键词管理
-                    </TabButton>
-                    <TabButton 
-                        active={activeModule === 'searchRecords'} 
-                        onClick={() => setActiveModule('searchRecords')}
-                    >
-                        搜索记录
-                    </TabButton>
-                </TabsContainer>
-
-                <div className="mt-6">
-                    {renderModuleContent()}
+            <PageHeader
+                parentTitle="知识库管理"
+                title={getModuleTitle()}
+                description={getModuleDescription()}
+                primaryActions={getPrimaryActions()}
+                filterComponent={tabsComponent}
+            />
+            
+            <div style={contentContainerStyle}>
+                <div style={mainContentStyle}>
+                    <div className="mt-6">
+                        {renderModuleContent()}
+                    </div>
                 </div>
+
+                {getSelectedItem() && (
+                    <div style={detailPanelStyle}>
+                        <DetailPanel 
+                            selectedItem={getSelectedItem()} 
+                            setSelectedItem={setSelectedItem}
+                            activeSection="vectors"
+                        />
+                    </div>
+                )}
             </div>
-
-            {getSelectedItem() && (
-                <div style={detailPanelStyle}>
-                    <DetailPanel 
-                        selectedItem={getSelectedItem()} 
-                        setSelectedItem={setSelectedItem}
-                        activeSection="vectors"
-                    />
-                </div>
-            )}
         </div>
     );
 };
