@@ -12,7 +12,7 @@ const ModelsHeader: React.FC<ModelsHeaderProps> = ({ models }) => {
         <div className="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
             <div className="p-4 bg-gradient-to-r from-purple-600 to-indigo-700">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-white">模型管理控制台</h2>
+                    <h2 className="text-xl font-semibold text-white">模型管理</h2>
                     <div className="flex space-x-2">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-purple-800">
               已连接: {models.filter(m => m.status === '已连接').length}/{models.length}

@@ -12,7 +12,7 @@ interface TabButtonProps {
 
 export const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
     return (
-        <div className="flex border-b border-gray-200 mb-4">
+        <div className="inline-flex items-center justify-center h-full w-auto space-x-1">
             {children}
         </div>
     );
@@ -21,7 +21,12 @@ export const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
 export const TabButton: React.FC<TabButtonProps> = ({ children, active, onClick }) => {
     return (
         <button
-            className={`px-4 py-2 font-medium text-sm rounded-md mr-2 ${active ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:text-gray-800'}`}
+            className={`
+                h-full px-4 flex items-center justify-center font-medium text-sm transition-all duration-200 ease-in-out
+                ${active ? 
+                    'bg-white text-blue-600 shadow-sm rounded-md border border-gray-200' : 
+                    'text-gray-600 hover:bg-gray-50 rounded-md'}
+            `}
             onClick={onClick}
         >
             {children}

@@ -2,19 +2,22 @@
 
 // 文件类型
 export interface FileItem {
-    id: number;
+    id: string | null;
     name: string;
     type: string;
     size: string;
     date: string;
-    status: string;
     category: string;
+    status: string;
+    isFolder: boolean;
+    parentId: string | null;
+    path: string;
+    children?: FileItem[];
     keywords?: KeywordRelevance[];
 }
 
 // 关键词关联度类型
 export interface KeywordRelevance {
-    keywordId: number;
     keyword: string;
     relevance: number; // 0-100的关联度分数
 }
@@ -29,6 +32,7 @@ export interface ModelItem {
     provider: string;
     version: string;
     usageCount: number;
+    parameters?: number;
 }
 
 // 向量库类型
@@ -48,7 +52,7 @@ export interface KeywordItem {
     frequency: number;
     lastUsed: string;
     category: string;
-    importance: 'high' | 'medium' | 'low';
+    importance: string;
     relatedKeywords: number[];
 }
 
@@ -112,18 +116,19 @@ export interface DetailPanelProps {
 
 // 知识库类型
 export interface KnowledgeBaseItem {
-    id: number;
+    id: string;
     name: string;
     description: string;
-    category: string;
     fileCount: number;
+    vectorCount: number;
     lastUpdated: string;
-    size: string;
-    status: string;
-    vectorized: number;
-    pendingFiles: number;
-    tags: string[];
-    recentKeywords: string[];
+    category?: string;
+    size?: string;
+    status?: string;
+    vectorized?: number;
+    pendingFiles?: number;
+    tags?: string[];
+    recentKeywords?: string[];
 }
 
 // 应用全局状态
@@ -131,4 +136,5 @@ export interface AppState {
     activeSection: string;
     sidebarExpanded: boolean;
     darkMode: boolean;
+    username: string;
 }

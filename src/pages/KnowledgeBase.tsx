@@ -1,157 +1,198 @@
 import React, { useState } from 'react';
-import { Plus, Filter, BarChart2, Power } from 'lucide-react';
+import { Plus, Filter, BarChart2 } from 'lucide-react';
 import { knowledgeBaseData } from '../utils/mockData';
 import type { KnowledgeBaseItem } from '../utils/types';
 import FileListModal from '../components/modals/FileListModal';
 import PageHeader from '../components/layout/PageHeader';
 import SearchInput from '../components/common/SearchInput';
+import Switch from '../components/ui/Switch';
+import { useAppContext } from '../context/AppContext';
+import { FileIcon, Database } from 'lucide-react';
 
 const KnowledgeBase: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBaseItem | null>(null);
+    const [knowledgeBaseItems, setKnowledgeBaseItems] = useState(knowledgeBaseData);
+    const { state } = useAppContext();
 
     const getCategoryGradient = (category: string) => {
         switch (category) {
-            case '政策文档':
-                return 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.12) 100%)';
+            case '文档':
+                return 'linear-gradient(135deg, #bfdbfe 0%, #3b82f6 100%)'; // 修改后的蓝色渐变
             case '法规标准':
-                return 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%)';
+            case '标准':
+                return 'linear-gradient(135deg, #bbf7d0 0%, #10b981 100%)'; // 修改后的绿色渐变
             case '历史会议记录':
-                return 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.12) 100%)';
+            case '会议记录':
+                return 'linear-gradient(135deg, #fed7aa 0%, #f97316 100%)'; // 修改后的橙色渐变
             case '数据分析':
-                return 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(109, 40, 217, 0.12) 100%)';
+                return 'linear-gradient(135deg, #ddd6fe 0%, #8b5cf6 100%)'; // 修改后的紫色渐变
+            case '配置':
+                return 'linear-gradient(135deg, #bae6fd 0%, #0ea5e9 100%)'; // 修改后的天蓝色渐变
             default:
-                return 'linear-gradient(135deg, rgba(156, 163, 175, 0.08) 0%, rgba(107, 114, 128, 0.12) 100%)';
+                return 'linear-gradient(135deg, #e5e7eb 0%, #6b7280 100%)'; // 修改后的灰色渐变
         }
     };
 
-    const getCategoryAccentColor = (category: string) => {
-        switch (category) {
-            case '政策文档':
-                return '#2563eb';
-            case '法规标准':
-                return '#059669';
-            case '历史会议记录':
-                return '#d97706';
-            case '数据分析':
-                return '#6d28d9';
-            default:
-                return '#6b7280';
-        }
+    const getTagColor = (tag: string) => {
+        const colorIndex = tag.charCodeAt(0) % 5;
+        const colors = [
+            '#93c5fd', // 浅蓝色
+            '#86efac', // 浅绿色
+            '#fdba74', // 浅橙色
+            '#f9a8d4', // 浅粉色
+            '#fde68a', // 浅黄色
+        ];
+        return colors[colorIndex];
     };
 
-    const filteredData = knowledgeBaseData.filter(kb => {
+    const getKeywordColor = (keyword: string) => {
+        const colorIndex = keyword.length % 4;
+        const colors = [
+            '#d1d5db', // 浅灰色
+            '#a5b4fc', // 浅靛蓝色
+            '#fcd34d', // 浅黄色
+            '#5eead4', // 浅青色
+        ];
+        return colors[colorIndex];
+    };
+
+    const getProgressColor = (percentage: number) => {
+        if (percentage < 30) return '#ef4444'; // 红色
+        if (percentage < 70) return '#f59e0b'; // 橙色
+        return '#10b981'; // 绿色
+    };
+
+    const filteredData = knowledgeBaseItems.filter(kb => {
         const matchesSearch = kb.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             kb.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            kb.category.toLowerCase().includes(searchTerm.toLowerCase());
+            (kb.category?.toLowerCase() || '').includes(searchTerm.toLowerCase());
         const matchesStatus = selectedStatus === 'all' || kb.status === selectedStatus;
         return matchesSearch && matchesStatus;
     });
-
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case '活跃':
-                return '#10b981';
-            case '维护中':
-                return '#f59e0b';
-            default:
-                return '#6b7280';
-        }
-    };
 
     const handleCardClick = (kb: KnowledgeBaseItem) => {
         setSelectedKnowledgeBase(kb);
     };
 
-    const handlePowerClick = (e: React.MouseEvent, kb: KnowledgeBaseItem) => {
-        e.stopPropagation(); // 防止触发卡片点击
-        // 处理启用/停用逻辑
-        console.log('Toggle power for:', kb.name);
+    const handleToggleStatus = (kb: KnowledgeBaseItem) => {
+        const updatedItems = knowledgeBaseItems.map(item => {
+            if (item.id === kb.id) {
+                return {
+                    ...item,
+                    status: item.status === '活跃' ? '非活跃' : '活跃'
+                };
+            }
+            return item;
+        });
+        setKnowledgeBaseItems(updatedItems);
     };
 
     const renderKnowledgeBaseCard = (kb: KnowledgeBaseItem) => {
-        const progressPercentage = Math.round((kb.vectorized / kb.fileCount) * 100);
-        const accentColor = getCategoryAccentColor(kb.category);
+        // Use default value of 0 if vectorized is undefined
+        const vectorizedCount = kb.vectorized ?? 0;
+        const progressPercentage = Math.round((vectorizedCount / kb.fileCount) * 100);
         
         return (
             <div 
                 key={kb.id} 
-                className="rounded-lg shadow-md p-6 hover:shadow-lg transition-all backdrop-blur-sm cursor-pointer"
+                className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer hover:translate-y-[-2px]"
                 style={{ 
-                    background: getCategoryGradient(kb.category),
-                    borderLeft: `4px solid ${accentColor}`
+                    background: getCategoryGradient(kb.category || 'default'),
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)'
                 }}
                 onClick={() => handleCardClick(kb)}
             >
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 className="text-xl font-semibold text-gray-900">{kb.name}</h3>
-                        <p className="text-gray-600 mt-1">{kb.description}</p>
+                <div className="relative z-10 p-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)' }}>
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{kb.name}</h3>
+                            <p className="text-gray-700 text-sm mt-1 line-clamp-2">{kb.description}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                            <div onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleToggleStatus(kb); }}>
+                                <Switch 
+                                    checked={kb.status === '活跃'}
+                                    onChange={() => {}}
+                                />
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium"
-                              style={{ backgroundColor: `${getStatusColor(kb.status)}20`, color: getStatusColor(kb.status) }}>
-                            {kb.status}
-                        </span>
-                        <button 
-                            className="p-1.5 rounded-full transition-colors duration-200 hover:bg-gray-100"
-                            style={{ color: kb.status === '活跃' ? '#10b981' : '#9ca3af' }}
-                            title={kb.status === '活跃' ? '点击停用' : '点击启用'}
-                            onClick={(e) => handlePowerClick(e, kb)}
-                        >
-                            <Power size={20} />
-                        </button>
-                    </div>
-                </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="text-gray-600">
-                        <div className="text-sm">文件总数</div>
-                        <div className="text-lg font-semibold text-gray-900">{kb.fileCount}</div>
+                    <div className="mt-4 bg-gray-100 rounded-lg p-3 border border-gray-200">
+                        <div className="flex justify-between text-gray-800 text-sm mb-2">
+                            <span className="font-medium">向量化进度</span>
+                            <span className="font-bold">{progressPercentage}%</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full rounded-full transition-all duration-500 ease-out"
+                                style={{ 
+                                    width: `${progressPercentage}%`,
+                                    backgroundColor: getProgressColor(progressPercentage),
+                                    boxShadow: `0 0 8px ${getProgressColor(progressPercentage)}` 
+                                }}
+                            ></div>
+                        </div>
                     </div>
-                    <div className="text-gray-600">
-                        <div className="text-sm">向量化文件</div>
-                        <div className="text-lg font-semibold text-gray-900">{kb.vectorized}</div>
-                    </div>
-                    <div className="text-gray-600">
-                        <div className="text-sm">待处理文件</div>
-                        <div className="text-lg font-semibold text-gray-900">{kb.pendingFiles}</div>
-                    </div>
-                </div>
 
-                <div className="mb-4">
-                    <div className="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>向量化进度</span>
-                        <span>{progressPercentage}%</span>
+                    <div className="mt-4 flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center">
+                                <FileIcon className="h-4 w-4 text-gray-700 mr-1.5" />
+                                <span className="text-sm text-gray-800 font-medium">{kb.fileCount}</span>
+                            </div>
+                            <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center">
+                                <Database className="h-4 w-4 text-gray-700 mr-1.5" />
+                                <span className="text-sm text-gray-800 font-medium">{vectorizedCount}</span>
+                            </div>
+                        </div>
+                        <div className="text-gray-700 text-xs bg-gray-100 px-2.5 py-1 rounded-full">
+                            {kb.lastUpdated}
+                        </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="h-2 rounded-full transition-all duration-300"
-                             style={{ width: `${progressPercentage}%`, backgroundColor: accentColor }}></div>
-                    </div>
-                </div>
 
-                <div className="mb-4">
-                    <div className="text-sm text-gray-600 mb-2">标签</div>
-                    <div className="flex flex-wrap gap-2">
-                        {kb.tags.map((tag, index) => (
-                            <span key={index}
-                                  className="px-2 py-1 rounded-md text-sm"
-                                  style={{ 
-                                      backgroundColor: `${accentColor}15`,
-                                      color: accentColor
-                                  }}>
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                </div>
+                    {kb.tags && kb.tags.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            {kb.tags.map((tag, index) => {
+                                const tagColor = getTagColor(tag);
+                                return (
+                                    <span 
+                                        key={index} 
+                                        className="px-2.5 py-1 text-xs rounded-full font-medium text-gray-900"
+                                        style={{
+                                            backgroundColor: tagColor
+                                        }}
+                                    >
+                                        {tag}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    )}
 
-                <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between items-center text-sm text-gray-600">
-                        <div>最近更新：{kb.lastUpdated}</div>
-                        <div>存储大小：{kb.size}</div>
-                    </div>
+                    {kb.recentKeywords && kb.recentKeywords.length > 0 && (
+                        <div className="mt-3">
+                            <p className="text-gray-700 text-xs mb-1 font-medium">最近搜索关键词</p>
+                            <div className="flex flex-wrap gap-2">
+                                {kb.recentKeywords.map((keyword, index) => {
+                                    const keywordColor = getKeywordColor(keyword);
+                                    return (
+                                        <span 
+                                            key={index} 
+                                            className="px-2.5 py-1 text-xs rounded-full text-gray-900"
+                                            style={{
+                                                backgroundColor: keywordColor
+                                            }}
+                                        >
+                                            {keyword}
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -216,6 +257,7 @@ const KnowledgeBase: React.FC = () => {
                 ]}
                 searchComponent={searchComponent}
                 filterComponent={filterComponent}
+                username={state.username || '管理员'}
             />
 
             <div className="flex-1 p-6">

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Search, ChevronDown, Filter, Upload, PlusCircle } from 'lucide-react';
 import { FileItem } from '../../../utils/types';
 
@@ -8,14 +8,14 @@ interface FilesHeaderProps {
 
 const FilesHeader: FC<FilesHeaderProps> = ({ files }) => {
     return (
-        <div className="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+        <div className="bg-white mb-6 overflow-hidden rounded-xl shadow-sm">
             <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-700">
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">文件管理控制台</h2>
                     <div className="flex space-x-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800">
-              总计: {files.length} 个文件
-            </span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800">
+                            总计: {files.length} 个文件
+                        </span>
                     </div>
                 </div>
             </div>

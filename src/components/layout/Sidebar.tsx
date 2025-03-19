@@ -155,7 +155,7 @@ const Sidebar: React.FC = () => {
                 </button>
                 {hasChildren && isExpanded && sidebarExpanded && (
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                        {item.children.map((child: NavigationItem) => renderNavItem(child, true))}
+                        {(item.children || []).map((child: NavigationItem) => renderNavItem(child, true))}
                     </ul>
                 )}
             </li>

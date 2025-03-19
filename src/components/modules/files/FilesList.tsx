@@ -1,97 +1,240 @@
-import React, { FC } from 'react';
-import { FileText, Share2, Download, MoreHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/Table';
+import { Button } from '../../../components/ui/Button';
+import { Checkbox } from '../../../components/ui/Checkbox';
+import { Badge } from '../../../components/ui/Badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/DropdownMenu';
+import { MoreHorizontal, ChevronRight, ChevronDown, Folder, FileText } from 'lucide-react';
 import { FileItem } from '../../../utils/types';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '../../../components/ui/Pagination';
 
 interface FilesListProps {
-    files: FileItem[];
-    selectedItem: FileItem | null;
-    setSelectedItem: (item: FileItem | null) => void;
+  files: FileItem[];
+  selectedItem: FileItem | null;
+  setSelectedItem: (item: FileItem | null) => void;
+  onFolderClick: (folderId: string | null) => void;
 }
 
-const FilesList: FC<FilesListProps> = ({ files, selectedItem, setSelectedItem }) => {
-    return (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文件名</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大小</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">更新日期</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                {files.map((file) => (
-                    <tr
-                        key={file.id}
-                        className={`hover:bg-gray-50 cursor-pointer ${selectedItem?.id === file.id ? 'bg-indigo-50' : ''}`}
-                        onClick={() => setSelectedItem(file)}
+const FilesList: React.FC<FilesListProps> = ({ files, selectedItem, setSelectedItem, onFolderClick }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const itemsPerPage = 10;
+
+  // Build a hierarchical structure from the flat files list
+  const buildFileHierarchy = (files: FileItem[]): FileItem[] => {
+    const fileMap = new Map<string, FileItem>();
+    const rootItems: FileItem[] = [];
+
+    // First pass: create a map of all items by ID
+    files.forEach(item => {
+      if (item.id !== null) {
+        fileMap.set(item.id, {...item, children: []});
+      }
+    });
+
+    // Second pass: build the hierarchy
+    files.forEach(item => {
+      if (item.parentId === null) {
+        if (item.id !== null) {
+          rootItems.push(fileMap.get(item.id)!);
+        }
+      } else {
+        const parent = fileMap.get(item.parentId);
+        if (parent && item.id !== null) {
+          parent.children = parent.children || [];
+          parent.children.push(fileMap.get(item.id)!);
+        }
+      }
+    });
+
+    return rootItems;
+  };
+
+  // Toggle folder expansion
+  const toggleFolder = (folderId: string | null, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (folderId !== null) {
+      setExpandedFolders(prev => ({
+        ...prev,
+        [folderId]: !prev[folderId]
+      }));
+    }
+  };
+
+  // Handle folder click
+  const handleFolderClick = (folder: FileItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onFolderClick(folder.id);
+  };
+
+  // Flatten the hierarchy for display based on expanded state
+  const getFlattenedItems = (items: FileItem[], depth = 0, result: {item: FileItem, depth: number}[] = []) => {
+    items.forEach(item => {
+      result.push({item, depth});
+      
+      if (item.isFolder && item.id !== null && expandedFolders[item.id] && item.children && item.children.length > 0) {
+        getFlattenedItems(item.children, depth + 1, result);
+      }
+    });
+    
+    return result;
+  };
+
+  const hierarchicalFiles = buildFileHierarchy(files);
+  const flattenedItems = getFlattenedItems(hierarchicalFiles);
+  
+  // Pagination logic
+  const totalPages = Math.ceil(flattenedItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = flattenedItems.slice(startIndex, startIndex + itemsPerPage);
+
+  return (
+    <div className="flex flex-col h-full rounded-lg overflow-hidden">
+      <div className="overflow-auto flex-grow">
+        <Table>
+          <TableHeader className="bg-gray-50">
+            <TableRow>
+              <TableHead className="w-12"></TableHead>
+              <TableHead>文件名</TableHead>
+              <TableHead>类型</TableHead>
+              <TableHead>大小</TableHead>
+              <TableHead>日期</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedItems.map(({item, depth}) => (
+              <TableRow 
+                key={item.id || `temp-${Math.random()}`}
+                className={`${selectedItem?.id === item.id ? 'bg-blue-50' : ''} hover:bg-gray-50 cursor-pointer`}
+                onClick={() => setSelectedItem(item)}
+              >
+                <TableCell>
+                  <Checkbox 
+                    checked={selectedItem?.id === item.id} 
+                    onCheckedChange={() => setSelectedItem(item)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <div style={{ width: `${depth * 20}px` }}></div>
+                    {item.isFolder && item.children && item.children.length > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-0 mr-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFolder(item.id, e);
+                        }}
+                      >
+                        {item.id !== null && expandedFolders[item.id] ? 
+                          <ChevronDown className="h-4 w-4" /> : 
+                          <ChevronRight className="h-4 w-4" />}
+                      </Button>
+                    )}
+                    <div 
+                      className="flex items-center"
+                      onClick={(e) => item.isFolder && handleFolderClick(item, e)}
                     >
-                        <td className="px-6 py-4">
-                            <div className="flex items-center">
-                                <FileText size={18} className={`mr-2 ${
-                                    file.type === 'pdf' ? 'text-red-500' :
-                                        file.type === 'docx' ? 'text-blue-500' :
-                                            file.type === 'xlsx' ? 'text-green-500' :
-                                                file.type === 'pptx' ? 'text-orange-500' :
-                                                    'text-gray-500'
-                                }`} />
-                                <span className="font-medium">{file.name}</span>
-                            </div>
-                        </td>
-                        <td className="px-6 py-4">
-                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                  {file.type.toUpperCase()}
-                </span>
-                        </td>
-                        <td className="px-6 py-4">
-                            <span>{file.category}</span>
-                        </td>
-                        <td className="px-6 py-4">{file.size}</td>
-                        <td className="px-6 py-4">{file.date}</td>
-                        <td className="px-6 py-4">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    file.status === '已向量化' ? 'bg-green-100 text-green-800' :
-                        file.status === '处理中' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                }`}>
-                  {file.status}
-                </span>
-                        </td>
-                        <td className="px-6 py-4">
-                            <div className="flex space-x-2">
-                                <button className="text-gray-400 hover:text-indigo-600">
-                                    <Share2 size={16} />
-                                </button>
-                                <button className="text-gray-400 hover:text-indigo-600">
-                                    <Download size={16} />
-                                </button>
-                                <button className="text-gray-400 hover:text-gray-600">
-                                    <MoreHorizontal size={16} />
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <div className="px-6 py-3 flex items-center justify-between border-t">
-                <div className="text-sm text-gray-500">
-                    显示 <span className="font-medium">1</span> 至 <span className="font-medium">{files.length}</span> 条，共 <span className="font-medium">324</span> 条
-                </div>
-                <div className="flex space-x-1">
-                    <button className="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50">上一页</button>
-                    <button className="px-3 py-1 border rounded-md bg-indigo-600 text-white">1</button>
-                    <button className="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50">2</button>
-                    <button className="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50">3</button>
-                    <button className="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50">下一页</button>
-                </div>
-            </div>
-        </div>
-    );
+                      {item.isFolder ? 
+                        <Folder className="h-5 w-5 mr-2 text-blue-500" /> : 
+                        <FileText className="h-5 w-5 mr-2 text-gray-500" />}
+                      <span className="font-medium">{item.name}</span>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{item.type}</TableCell>
+                <TableCell>{item.size}</TableCell>
+                <TableCell>{item.date}</TableCell>
+                <TableCell>
+                  {!item.isFolder && (
+                    <Badge variant={item.status === '已向量化' ? 'default' : 
+                                  item.status === '处理中' ? 'secondary' : 'outline'}
+                    >
+                      {item.status}
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {item.isFolder ? (
+                        <>
+                          <DropdownMenuItem>新建文件夹</DropdownMenuItem>
+                          <DropdownMenuItem>上传文件</DropdownMenuItem>
+                          <DropdownMenuItem>重命名</DropdownMenuItem>
+                          <DropdownMenuItem>删除</DropdownMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <DropdownMenuItem>查看详情</DropdownMenuItem>
+                          <DropdownMenuItem>下载</DropdownMenuItem>
+                          <DropdownMenuItem>向量化</DropdownMenuItem>
+                          <DropdownMenuItem>删除</DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      
+      <div className="py-4 bg-white border-t">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNumber;
+              if (totalPages <= 5) {
+                pageNumber = i + 1;
+              } else if (currentPage <= 3) {
+                pageNumber = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNumber = totalPages - 4 + i;
+              } else {
+                pageNumber = currentPage - 2 + i;
+              }
+              
+              return (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink 
+                    isActive={currentPage === pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </div>
+  );
 };
 
 export default FilesList;

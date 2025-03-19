@@ -3,9 +3,10 @@ import { AppState } from '../utils/types';
 
 // 创建上下文的默认值
 const defaultState: AppState = {
-    activeSection: 'files',
+    activeSection: 'dashboard',
     sidebarExpanded: true,
-    darkMode: false
+    darkMode: false,
+    username: 'u7ba1u7406u5458',
 };
 
 // 创建上下文类型

@@ -5,12 +5,14 @@ import SearchInput from '../components/common/SearchInput';
 import ModelsHeader from '../components/modules/models/ModelsHeader';
 import ModelsList from '../components/modules/models/ModelsList';
 import DetailPanel from '../components/layout/DetailPanel';
-import { modelData } from '../utils/mockData';
+import { modelsData } from '../utils/mockData';
 import { ModelItem } from '../utils/types';
+import { useAppContext } from '../context/AppContext';
 
 const Models: React.FC = () => {
     const [selectedItem, setSelectedItem] = useState<ModelItem | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const { state } = useAppContext();
 
     const searchComponent = (
         <SearchInput
@@ -79,24 +81,23 @@ const Models: React.FC = () => {
                 ]}
                 searchComponent={searchComponent}
                 filterComponent={filterComponent}
+                username={state.username}
             />
 
             <div className="flex-1 p-6">
-                <div className="flex-1 flex overflow-hidden">
-                    <div className={`${selectedItem ? 'w-1/2' : 'w-full'} overflow-auto transition-all duration-300 p-6`}>
-                        <h1 className="text-2xl font-semibold mb-6">模型管理</h1>
-
-                        <ModelsHeader models={modelData} />
+                <div className="flex-1 flex overflow-hidden h-[calc(100vh-12rem)]">
+                    <div style={{ width: selectedItem ? 'calc(50% - 0.75rem)' : '100%' }} className="overflow-auto transition-all duration-300 bg-white rounded-lg shadow-sm p-6">
+                        <ModelsHeader models={modelsData} />
 
                         <ModelsList
-                            models={modelData}
+                            models={modelsData}
                             selectedItem={selectedItem}
                             setSelectedItem={setSelectedItem}
                         />
                     </div>
 
                     {selectedItem && (
-                        <div className="w-1/2 border-l bg-white overflow-auto transition-all duration-300">
+                        <div style={{ width: 'calc(50% - 0.75rem)', marginLeft: '1.5rem' }} className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300">
                             <DetailPanel
                                 selectedItem={selectedItem}
                                 setSelectedItem={setSelectedItem}

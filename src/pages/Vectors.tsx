@@ -8,12 +8,14 @@ import PageHeader from '../components/layout/PageHeader';
 import { vectorData, keywordsData, searchRecordsData } from '../utils/mockData';
 import { VectorItem, KeywordItem, SearchRecordItem } from '../utils/types';
 import { Upload, RefreshCw, Download } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 const Vectors: React.FC = () => {
     const [activeModule, setActiveModule] = useState<'vectors' | 'keywords' | 'searchRecords'>('vectors');
     const [selectedVector, setSelectedVector] = useState<VectorItem | null>(null);
     const [selectedKeyword, setSelectedKeyword] = useState<KeywordItem | null>(null);
     const [selectedSearchRecord, setSelectedSearchRecord] = useState<SearchRecordItem | null>(null);
+    const { state } = useAppContext();
 
     // 获取当前选中的项目（根据当前活动模块）
     const getSelectedItem = () => {
@@ -173,22 +175,28 @@ const Vectors: React.FC = () => {
     const contentContainerStyle = {
         flex: 1,
         display: 'flex',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        padding: '0 1.5rem 1.5rem 1.5rem'
     };
 
     const mainContentStyle = {
-        width: getSelectedItem() ? '50%' : '100%',
+        width: getSelectedItem() ? 'calc(50% - 0.75rem)' : '100%',
         overflow: 'auto',
         transition: 'width 0.3s ease',
+        backgroundColor: 'white',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         padding: '1.5rem'
     };
 
     const detailPanelStyle = {
-        width: '50%',
-        borderLeft: '1px solid #e5e7eb',
+        width: 'calc(50% - 0.75rem)',
         backgroundColor: 'white',
         overflow: 'auto',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+        marginLeft: '1.5rem',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
     };
 
     return (
@@ -199,6 +207,7 @@ const Vectors: React.FC = () => {
                 description={getModuleDescription()}
                 primaryActions={getPrimaryActions()}
                 filterComponent={tabsComponent}
+                username={state.username}
             />
             
             <div style={contentContainerStyle}>
