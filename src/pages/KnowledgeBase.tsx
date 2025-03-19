@@ -19,41 +19,31 @@ const KnowledgeBase: React.FC = () => {
     const getCategoryGradient = (category: string) => {
         switch (category) {
             case '文档':
-                return 'linear-gradient(135deg, #bfdbfe 0%, #3b82f6 100%)'; // 修改后的蓝色渐变
+                return 'linear-gradient(135deg, #bfdbfe 0%, #3b82f6 100%)'; // 蓝色渐变
             case '法规标准':
             case '标准':
-                return 'linear-gradient(135deg, #bbf7d0 0%, #10b981 100%)'; // 修改后的绿色渐变
+                return 'linear-gradient(135deg, #bbf7d0 0%, #10b981 100%)'; // 绿色渐变
             case '历史会议记录':
             case '会议记录':
-                return 'linear-gradient(135deg, #fed7aa 0%, #f97316 100%)'; // 修改后的橙色渐变
+                return 'linear-gradient(135deg, #fed7aa 0%, #f97316 100%)'; // 橙色渐变
             case '数据分析':
-                return 'linear-gradient(135deg, #ddd6fe 0%, #8b5cf6 100%)'; // 修改后的紫色渐变
+                return 'linear-gradient(135deg, #ddd6fe 0%, #8b5cf6 100%)'; // 紫色渐变
             case '配置':
-                return 'linear-gradient(135deg, #bae6fd 0%, #0ea5e9 100%)'; // 修改后的天蓝色渐变
+                return 'linear-gradient(135deg, #bae6fd 0%, #0ea5e9 100%)'; // 天蓝色渐变
             default:
-                return 'linear-gradient(135deg, #e5e7eb 0%, #6b7280 100%)'; // 修改后的灰色渐变
+                return 'linear-gradient(135deg, #e5e7eb 0%, #6b7280 100%)'; // 灰色渐变
         }
     };
 
     const getTagColor = (tag: string) => {
-        const colorIndex = tag.charCodeAt(0) % 5;
+        const colorIndex = tag.charCodeAt(0) % 6;
         const colors = [
-            '#93c5fd', // 浅蓝色
-            '#86efac', // 浅绿色
-            '#fdba74', // 浅橙色
-            '#f9a8d4', // 浅粉色
-            '#fde68a', // 浅黄色
-        ];
-        return colors[colorIndex];
-    };
-
-    const getKeywordColor = (keyword: string) => {
-        const colorIndex = keyword.length % 4;
-        const colors = [
-            '#d1d5db', // 浅灰色
-            '#a5b4fc', // 浅靛蓝色
-            '#fcd34d', // 浅黄色
-            '#5eead4', // 浅青色
+            { bg: '#f0f9ff', border: '#bae6fd' }, // 蓝色
+            { bg: '#f0fdf4', border: '#bbf7d0' }, // 绿色
+            { bg: '#fff7ed', border: '#fed7aa' }, // 橙色
+            { bg: '#fdf2f8', border: '#fbcfe8' }, // 粉色
+            { bg: '#fefce8', border: '#fef08a' }, // 黄色
+            { bg: '#f5f3ff', border: '#ddd6fe' }, // 紫色
         ];
         return colors[colorIndex];
     };
@@ -61,7 +51,13 @@ const KnowledgeBase: React.FC = () => {
     const getProgressColor = (percentage: number) => {
         if (percentage < 30) return '#ef4444'; // 红色
         if (percentage < 70) return '#f59e0b'; // 橙色
-        return '#10b981'; // 绿色
+        return 'linear-gradient(90deg, #3b82f6, #8b5cf6)'; // 蓝色到紫色渐变
+    };
+
+    const getIncompleteColor = (percentage: number) => {
+        if (percentage < 30) return 'rgba(239, 68, 68, 0.1)'; // 淡红色
+        if (percentage < 70) return 'rgba(245, 158, 11, 0.1)'; // 淡橙色
+        return 'rgba(59, 130, 246, 0.05)'; // 淡蓝色
     };
 
     const filteredData = knowledgeBaseItems.filter(kb => {
@@ -120,18 +116,24 @@ const KnowledgeBase: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mt-4 bg-gray-100 rounded-lg p-3 border border-gray-200">
+                    <div className="mt-4 backdrop-blur-sm bg-white/30 rounded-lg p-3 border border-gray-200 shadow-sm">
                         <div className="flex justify-between text-gray-800 text-sm mb-2">
                             <span className="font-medium">向量化进度</span>
                             <span className="font-bold">{progressPercentage}%</span>
                         </div>
-                        <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                            className="w-full h-2.5 rounded-full overflow-hidden relative"
+                            style={{ 
+                                backgroundColor: getIncompleteColor(progressPercentage),
+                                backdropFilter: 'blur(4px)'
+                            }}
+                        >
                             <div 
-                                className="h-full rounded-full transition-all duration-500 ease-out"
+                                className="h-full rounded-full transition-all duration-500 ease-out absolute top-0 left-0"
                                 style={{ 
                                     width: `${progressPercentage}%`,
-                                    backgroundColor: getProgressColor(progressPercentage),
-                                    boxShadow: `0 0 8px ${getProgressColor(progressPercentage)}` 
+                                    background: getProgressColor(progressPercentage),
+                                    boxShadow: progressPercentage >= 70 ? '0 0 10px rgba(139, 92, 246, 0.5)' : `0 0 8px ${getProgressColor(progressPercentage)}` 
                                 }}
                             ></div>
                         </div>
@@ -154,39 +156,21 @@ const KnowledgeBase: React.FC = () => {
                     </div>
 
                     {kb.tags && kb.tags.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                            {kb.tags.map((tag, index) => {
-                                const tagColor = getTagColor(tag);
-                                return (
-                                    <span 
-                                        key={index} 
-                                        className="px-2.5 py-1 text-xs rounded-full font-medium text-gray-900"
-                                        style={{
-                                            backgroundColor: tagColor
-                                        }}
-                                    >
-                                        {tag}
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    {kb.recentKeywords && kb.recentKeywords.length > 0 && (
                         <div className="mt-3">
-                            <p className="text-gray-700 text-xs mb-1 font-medium">最近搜索关键词</p>
+                            <p className="text-gray-700 text-xs mb-1 font-medium">知识库相关标签</p>
                             <div className="flex flex-wrap gap-2">
-                                {kb.recentKeywords.map((keyword, index) => {
-                                    const keywordColor = getKeywordColor(keyword);
+                                {kb.tags.map((tag, index) => {
+                                    const tagColor = getTagColor(tag);
                                     return (
                                         <span 
                                             key={index} 
-                                            className="px-2.5 py-1 text-xs rounded-full text-gray-900"
+                                            className="px-2.5 py-1 text-xs rounded-lg font-medium text-gray-700 transition-all duration-200 hover:shadow-sm"
                                             style={{
-                                                backgroundColor: keywordColor
+                                                backgroundColor: tagColor.bg,
+                                                border: `1px solid ${tagColor.border}`
                                             }}
                                         >
-                                            {keyword}
+                                            {tag}
                                         </span>
                                     );
                                 })}
