@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Filter, BarChart2 } from 'lucide-react';
+import { Plus, Filter, BarChart2, Settings } from 'lucide-react';
 import { knowledgeBaseData } from '../utils/mockData';
 import type { KnowledgeBaseItem } from '../utils/types';
 import FileListModal from '../components/modals/FileListModal';
@@ -77,12 +77,18 @@ const KnowledgeBase: React.FC = () => {
             if (item.id === kb.id) {
                 return {
                     ...item,
-                    status: item.status === '活跃' ? '非活跃' : '活跃'
+                    status: item.status === '活跃' ? '维护中' : '活跃'
                 };
             }
             return item;
         });
         setKnowledgeBaseItems(updatedItems);
+    };
+
+    const handleSettingsClick = (kb: KnowledgeBaseItem, e: React.MouseEvent) => {
+        e.stopPropagation();
+        console.log('Settings clicked for:', kb.name);
+        // 这里可以添加设置相关的逻辑，比如打开设置对话框等
     };
 
     const renderKnowledgeBaseCard = (kb: KnowledgeBaseItem) => {
@@ -106,7 +112,7 @@ const KnowledgeBase: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900">{kb.name}</h3>
                             <p className="text-gray-700 text-sm mt-1 line-clamp-2">{kb.description}</p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 items-center">
                             <div onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleToggleStatus(kb); }}>
                                 <Switch 
                                     checked={kb.status === '活跃'}
@@ -155,28 +161,35 @@ const KnowledgeBase: React.FC = () => {
                         </div>
                     </div>
 
-                    {kb.tags && kb.tags.length > 0 && (
-                        <div className="mt-3">
-                            <p className="text-gray-700 text-xs mb-1 font-medium">知识库相关标签</p>
-                            <div className="flex flex-wrap gap-2">
-                                {kb.tags.map((tag, index) => {
-                                    const tagColor = getTagColor(tag);
-                                    return (
-                                        <span 
-                                            key={index} 
-                                            className="px-2.5 py-1 text-xs rounded-lg font-medium text-gray-700 transition-all duration-200 hover:shadow-sm"
-                                            style={{
-                                                backgroundColor: tagColor.bg,
-                                                border: `1px solid ${tagColor.border}`
-                                            }}
-                                        >
-                                            {tag}
-                                        </span>
-                                    );
-                                })}
+                    <div className="mt-3">
+                        <p className="text-gray-700 text-xs mb-1 font-medium">{kb.tags && kb.tags.length > 0 ? '知识库相关标签' : '知识库配置'}</p>
+                        <div className="flex justify-between items-center">
+                            <div className="flex flex-wrap gap-2 flex-1">
+                                {kb.tags && kb.tags.length > 0 ? (
+                                    kb.tags.map((tag, index) => {
+                                        const tagColor = getTagColor(tag);
+                                        return (
+                                            <span 
+                                                key={index} 
+                                                className="px-2.5 py-1 text-xs rounded-lg font-medium text-gray-700 transition-all duration-200 hover:shadow-sm"
+                                                style={{
+                                                    backgroundColor: tagColor.bg,
+                                                    border: `1px solid ${tagColor.border}`
+                                                }}
+                                            >
+                                                {tag}
+                                            </span>
+                                        );
+                                    })
+                                ) : (
+                                    <span className="text-gray-500 text-xs">没有标签</span>
+                                )}
+                            </div>
+                            <div onClick={(e: React.MouseEvent) => handleSettingsClick(kb, e)} className="cursor-pointer ml-2">
+                                <Settings size={18} className="text-gray-600 hover:text-gray-800 transition-colors" />
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         );
@@ -188,7 +201,7 @@ const KnowledgeBase: React.FC = () => {
                 className={`px-4 py-2 rounded-md ${selectedStatus === 'all' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
                 onClick={() => setSelectedStatus('all')}
             >
-                全部
+                所有
             </button>
             <button
                 className={`px-4 py-2 rounded-md ${selectedStatus === '活跃' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
@@ -219,7 +232,7 @@ const KnowledgeBase: React.FC = () => {
             <PageHeader
                 parentTitle="知识库管理"
                 title="知识库"
-                description="管理和组织您的知识库资源，支持文件管理、向量化和元数据管理"
+                description="管理和组织您的知识库资源，支持文件管理、向量化和数据管理"
                 primaryActions={[
                     {
                         icon: <Plus size={20} />,
