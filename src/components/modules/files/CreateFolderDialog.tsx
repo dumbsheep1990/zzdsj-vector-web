@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Folder } from 'lucide-react';
 
 interface CreateFolderDialogProps {
   isOpen: boolean;
@@ -53,6 +53,22 @@ const CreateFolderDialog: React.FC<CreateFolderDialogProps> = ({
         </div>
         
         <form onSubmit={handleSubmit} className="p-4">
+          {/* Show current location information */}
+          <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+            <p className="text-sm text-gray-600 mb-1">当前位置：</p>
+            <div className="flex items-center">
+              <Folder className="h-4 w-4 text-blue-500 mr-2" />
+              <span className="text-sm font-medium">
+                {currentFolderId ? '选中的文件夹内' : '根目录'}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {currentFolderId 
+                ? '新文件夹将创建在当前选中的文件夹内' 
+                : '新文件夹将创建在根目录下'}
+            </p>
+          </div>
+
           <div className="mb-4">
             <label htmlFor="folderName" className="block text-sm font-medium text-gray-700 mb-1">
               文件夹名称
