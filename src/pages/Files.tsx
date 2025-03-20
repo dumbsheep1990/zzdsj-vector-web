@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '../components/ui/Button';
-import { Search, Plus, Upload, FileText, Image, Video, Music, Filter } from 'lucide-react';
+import { Search, Plus, Upload, FileText, Image, Video, Music, Filter, Trash2 } from 'lucide-react';
+import { Checkbox } from '../components/ui/Checkbox';
 import FilesList from '../components/modules/files/FilesList';
 import CreateFolderDialog from '../components/modules/files/CreateFolderDialog';
 import { FileItem } from '../utils/types';
@@ -19,8 +20,10 @@ const Files: React.FC = () => {
     ]);
     
     const [selectedItem, setSelectedItem] = useState<FileItem | null>(null);
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [showCreateFolderDialog, setShowCreateFolderDialog] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>('all');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Get the path of a parent folder
     const getParentPath = (parentId: string): string => {
@@ -66,6 +69,37 @@ const Files: React.FC = () => {
         });
     };
 
+    // Handle select all files
+    const handleSelectAll = () => {
+        const filesToSelect = activeTab === 'all' 
+            ? filteredFiles 
+            : filteredFiles.filter(file => {
+                if (activeTab === 'documents') return file.category === 'document' || file.isFolder;
+                if (activeTab === 'images') return file.category === 'image' || file.isFolder;
+                if (activeTab === 'videos') return file.category === 'video' || file.isFolder;
+                if (activeTab === 'audio') return file.category === 'audio' || file.isFolder;
+                return false;
+            });
+
+        if (selectedItems.length === filesToSelect.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(filesToSelect.map(file => file.id || ''));
+        }
+    };
+
+    // Handle delete selected files
+    const handleDeleteSelected = () => {
+        setShowDeleteConfirm(true);
+    };
+
+    // Confirm delete selected files
+    const confirmDeleteSelected = () => {
+        setFiles(prevFiles => prevFiles.filter(file => !selectedItems.includes(file.id || '')));
+        setSelectedItems([]);
+        setShowDeleteConfirm(false);
+    };
+
     // Filter files based on search query
     const filteredFiles = searchQuery
         ? files.filter(file => 
@@ -105,42 +139,75 @@ const Files: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex border-b mb-4 px-4 overflow-x-auto">
-                <button 
-                    className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-                    onClick={() => setActiveTab('all')}
-                >
-                    <Filter className="h-4 w-4 mr-1.5" />
-                    全部
-                </button>
-                <button 
-                    className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'documents' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-                    onClick={() => setActiveTab('documents')}
-                >
-                    <FileText className="h-4 w-4 mr-1.5" />
-                    文档
-                </button>
-                <button 
-                    className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'images' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-                    onClick={() => setActiveTab('images')}
-                >
-                    <Image className="h-4 w-4 mr-1.5" />
-                    图片
-                </button>
-                <button 
-                    className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'videos' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-                    onClick={() => setActiveTab('videos')}
-                >
-                    <Video className="h-4 w-4 mr-1.5" />
-                    视频
-                </button>
-                <button 
-                    className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'audio' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-                    onClick={() => setActiveTab('audio')}
-                >
-                    <Music className="h-4 w-4 mr-1.5" />
-                    音频
-                </button>
+            <div className="flex border-b mb-4 px-4 overflow-x-auto justify-between">
+                <div className="flex">
+                    <button 
+                        className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                        onClick={() => setActiveTab('all')}
+                    >
+                        <Filter className="h-4 w-4 mr-1.5" />
+                        全部
+                    </button>
+                    <button 
+                        className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'documents' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                        onClick={() => setActiveTab('documents')}
+                    >
+                        <FileText className="h-4 w-4 mr-1.5" />
+                        文档
+                    </button>
+                    <button 
+                        className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'images' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                        onClick={() => setActiveTab('images')}
+                    >
+                        <Image className="h-4 w-4 mr-1.5" />
+                        图片
+                    </button>
+                    <button 
+                        className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'videos' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                        onClick={() => setActiveTab('videos')}
+                    >
+                        <Video className="h-4 w-4 mr-1.5" />
+                        视频
+                    </button>
+                    <button 
+                        className={`px-4 py-2.5 font-medium flex items-center ${activeTab === 'audio' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                        onClick={() => setActiveTab('audio')}
+                    >
+                        <Music className="h-4 w-4 mr-1.5" />
+                        音频
+                    </button>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <div className="flex items-center">
+                        <Checkbox 
+                            id="select-all"
+                            checked={selectedItems.length > 0 && (
+                                activeTab === 'all' 
+                                    ? selectedItems.length === filteredFiles.length 
+                                    : selectedItems.length === filteredFiles.filter(file => {
+                                        if (activeTab === 'documents') return file.category === 'document' || file.isFolder;
+                                        if (activeTab === 'images') return file.category === 'image' || file.isFolder;
+                                        if (activeTab === 'videos') return file.category === 'video' || file.isFolder;
+                                        if (activeTab === 'audio') return file.category === 'audio' || file.isFolder;
+                                        return false;
+                                    }).length
+                            )}
+                            onCheckedChange={handleSelectAll}
+                            className="mr-2"
+                        />
+                        <label htmlFor="select-all" className="text-sm cursor-pointer">全选</label>
+                    </div>
+                    <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="flex items-center"
+                        onClick={handleDeleteSelected}
+                        disabled={selectedItems.length === 0}
+                    >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        删除所选
+                    </Button>
+                </div>
             </div>
             
             <div className="flex-grow px-4 pb-4">
@@ -150,6 +217,8 @@ const Files: React.FC = () => {
                             files={filteredFiles} 
                             selectedItem={selectedItem} 
                             setSelectedItem={handleItemSelect}
+                            selectedItems={selectedItems}
+                            setSelectedItems={setSelectedItems}
                         />
                     )}
                     
@@ -158,6 +227,8 @@ const Files: React.FC = () => {
                             files={filteredFiles.filter(file => file.category === 'document' || file.isFolder)} 
                             selectedItem={selectedItem} 
                             setSelectedItem={handleItemSelect}
+                            selectedItems={selectedItems}
+                            setSelectedItems={setSelectedItems}
                         />
                     )}
                     
@@ -166,6 +237,8 @@ const Files: React.FC = () => {
                             files={filteredFiles.filter(file => file.category === 'image' || file.isFolder)} 
                             selectedItem={selectedItem} 
                             setSelectedItem={handleItemSelect}
+                            selectedItems={selectedItems}
+                            setSelectedItems={setSelectedItems}
                         />
                     )}
                     
@@ -174,6 +247,8 @@ const Files: React.FC = () => {
                             files={filteredFiles.filter(file => file.category === 'video' || file.isFolder)} 
                             selectedItem={selectedItem} 
                             setSelectedItem={handleItemSelect}
+                            selectedItems={selectedItems}
+                            setSelectedItems={setSelectedItems}
                         />
                     )}
                     
@@ -182,6 +257,8 @@ const Files: React.FC = () => {
                             files={filteredFiles.filter(file => file.category === 'audio' || file.isFolder)} 
                             selectedItem={selectedItem} 
                             setSelectedItem={handleItemSelect}
+                            selectedItems={selectedItems}
+                            setSelectedItems={setSelectedItems}
                         />
                     )}
                 </div>

@@ -3,36 +3,31 @@ import { Badge } from '../../../components/ui/Badge';
 
 interface FileStatusBadgeProps {
   status: string;
-  fileStatus: string;
-  isFolder: boolean;
 }
 
-const FileStatusBadge: React.FC<FileStatusBadgeProps> = ({ status, fileStatus, isFolder }) => {
-  // Determine the effective status based on both status and fileStatus
-  const getEffectiveStatus = () => {
-    // fileStatus takes precedence over item.status since it represents the current action
-    if (fileStatus === 'vectorizing') return '处理中'; // Processing
-    if (fileStatus === 'paused') return '已暂停'; // Paused
-    
-    // If no fileStatus, use the original status
-    return status;
+const FileStatusBadge: React.FC<FileStatusBadgeProps> = ({ status }) => {
+  // Map status values to display text
+  const getDisplayStatus = () => {
+    switch(status) {
+      case 'processing':
+        return '处理中';
+      case 'paused':
+        return '已暂停';
+      case 'completed':
+        return '已完成';
+      case 'pending':
+        return '待处理';
+      case 'error':
+        return '错误';
+      default:
+        return status;
+    }
   };
   
-  const effectiveStatus = getEffectiveStatus();
+  const displayStatus = getDisplayStatus();
   
-  if (isFolder) {
-    return (
-      <Badge 
-        variant="outline" 
-        className="px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border-gray-200"
-      >
-        文件夹
-      </Badge>
-    );
-  }
-
   // 已完成向量化
-  if (effectiveStatus === '已完成向量化' || effectiveStatus === '已向量化') {
+  if (displayStatus === '已完成' || status === 'completed') {
     return (
       <Badge 
         variant="default" 
@@ -44,7 +39,7 @@ const FileStatusBadge: React.FC<FileStatusBadgeProps> = ({ status, fileStatus, i
   }
 
   // 处理中
-  if (effectiveStatus === '处理中' || fileStatus === 'vectorizing') {
+  if (displayStatus === '处理中' || status === 'processing') {
     return (
       <Badge 
         variant="secondary" 
@@ -56,24 +51,36 @@ const FileStatusBadge: React.FC<FileStatusBadgeProps> = ({ status, fileStatus, i
   }
 
   // 已暂停
-  if (effectiveStatus === '已暂停' || fileStatus === 'paused') {
+  if (displayStatus === '已暂停' || status === 'paused') {
     return (
       <Badge 
         variant="outline" 
-        className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border-blue-200"
+        className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-800 border-blue-200 shadow-sm"
       >
         已暂停
       </Badge>
     );
   }
 
-  // 未处理
+  // 错误
+  if (displayStatus === '错误' || status === 'error') {
+    return (
+      <Badge 
+        variant="destructive" 
+        className="px-2.5 py-1 text-xs rounded-full shadow-sm"
+      >
+        错误
+      </Badge>
+    );
+  }
+
+  // 默认状态：待处理
   return (
     <Badge 
       variant="outline" 
-      className="px-2.5 py-1 text-xs rounded-full bg-rose-100 text-rose-800 border-rose-200 shadow-sm"
+      className="px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border-gray-200 shadow-sm"
     >
-      {effectiveStatus || '未处理'}
+      待处理
     </Badge>
   );
 };

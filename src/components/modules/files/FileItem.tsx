@@ -2,7 +2,7 @@ import React from 'react';
 import { TableRow, TableCell } from '../../../components/ui/Table';
 import { Button } from '../../../components/ui/Button';
 import { Checkbox } from '../../../components/ui/Checkbox';
-import { ChevronRight, ChevronDown, AlertCircle } from 'lucide-react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 import { FileItem as FileItemType } from '../../../utils/types';
 import FileStatusBadge from './FileStatusBadge';
 import FileActionButtons from './FileActionButtons';
@@ -12,17 +12,19 @@ import FileIcon from './FileIcon';
 interface FileItemProps {
   item: FileItemType;
   depth?: number;
-  isExpanded: boolean;
+  isExpanded?: boolean;
   selectedItem: FileItemType | null;
   fileStatuses: Record<string, string>;
   vectorizeSettingsChanged: Record<string, boolean>;
   toggleFolder: (folderId: string) => void;
   setSelectedItem: (item: FileItemType | null) => void;
-  handleFolderClick: (folder: FileItemType, e: React.MouseEvent) => void;
-  handleStartVectorize: (fileId: string, e: React.MouseEvent) => void;
-  handlePauseVectorize: (fileId: string, e: React.MouseEvent) => void;
-  toggleVectorizeSettings: (fileId: string, e: React.MouseEvent) => void;
+  handleStartVectorize: (fileId: string) => void;
+  handlePauseVectorize: (fileId: string) => void;
+  toggleVectorizeSettings: (fileId: string) => void;
   renderFileItem: (item: FileItemType, depth?: number) => React.ReactNode;
+  isSelected?: boolean;
+  onSelectionChange: (itemId: string, isSelected: boolean) => void;
+  onShowDetails?: (file: FileItemType) => void;
 }
 
 const FileItemComponent: React.FC<FileItemProps> = ({
@@ -34,31 +36,58 @@ const FileItemComponent: React.FC<FileItemProps> = ({
   vectorizeSettingsChanged,
   toggleFolder,
   setSelectedItem,
-  handleFolderClick,
   handleStartVectorize,
   handlePauseVectorize,
   toggleVectorizeSettings,
-  renderFileItem
+  renderFileItem,
+  isSelected = false,
+  onSelectionChange,
+  onShowDetails
 }) => {
-  const childrenExist = item.children && item.children.length > 0;
+  // Handle row click based on item type
+  const handleRowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (item.isFolder) {
+      // For folders, toggle expansion
+      toggleFolder(item.id || '');
+    } else {
+      // For files, show details in the side panel
+      if (onShowDetails) {
+        onShowDetails(item);
+      }
+    }
+  };
+
+  // Handle checkbox change
+  const handleCheckboxChange = (checked: boolean) => {
+    if (onSelectionChange && item.id) {
+      onSelectionChange(item.id, checked);
+    }
+    // Still keep the legacy selection for compatibility
+    if (checked) {
+      setSelectedItem(item);
+    } else if (selectedItem?.id === item.id) {
+      setSelectedItem(null);
+    }
+  };
+
+  // Calculate file size in KB
+  const getFileSizeInKB = (sizeInBytes: number | string | undefined): string => {
+    if (!sizeInBytes) return '-';
+    // 确保 sizeInBytes 是数字类型
+    const size = typeof sizeInBytes === 'string' ? parseInt(sizeInBytes, 10) : sizeInBytes;
+    return `${Math.floor(size / 1024)} KB`;
+  };
 
   return (
     <React.Fragment key={item.id || `temp-${Math.random()}`}>
       <TableRow 
-        className={`border-b hover:bg-gray-50 transition-colors cursor-pointer ${selectedItem?.id === item.id ? 'bg-blue-50' : ''}`}
-        onClick={() => setSelectedItem(item)}
+        className={`border-b hover:bg-gray-50 transition-colors cursor-pointer ${selectedItem?.id === item.id ? 'bg-blue-50' : ''} ${isSelected ? 'bg-blue-50' : ''}`}
+        onClick={handleRowClick}
       >
-        <TableCell>
-          <Checkbox 
-            checked={selectedItem?.id === item.id}
-            onCheckedChange={() => setSelectedItem(item)}
-            onClick={(e) => e.stopPropagation()}
-            className="border-gray-300"
-          />
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center">
-            <div style={{ width: `${depth * 20}px` }} className="flex items-center"></div>
+        <TableCell className="p-0 w-5/12">
+          <div className="flex items-center justify-start pl-2">
+            <div style={{ width: `${depth * 20}px` }} className="flex-shrink-0"></div>
             {item.isFolder && (
               <Button 
                 variant="ghost" 
@@ -74,67 +103,51 @@ const FileItemComponent: React.FC<FileItemProps> = ({
                   <ChevronRight className="h-4 w-4 text-gray-500" />}
               </Button>
             )}
-            <div 
-              className="flex items-center cursor-pointer"
-              onClick={(e) => item.isFolder && handleFolderClick(item, e)}
-            >
-              <div className="mr-2">
+            <div className="flex items-center">
+              <div className="mr-2 flex-shrink-0">
                 <FileIcon item={item} />
               </div>
-              <div className="flex items-center">
-                <span className={`${selectedItem?.id === item.id ? 'font-medium' : ''}`}>
-                  {item.name}
-                </span>
-              </div>
+              <span className="font-medium truncate">{item.name}</span>
             </div>
           </div>
         </TableCell>
-        <TableCell className="text-gray-600">{item.type}</TableCell>
-        <TableCell className="text-gray-600">{item.size}</TableCell>
-        <TableCell>
-          <FileStatusBadge 
-            status={item.status || ''} 
-            fileStatus={fileStatuses[item.id || ''] || ''} 
-            isFolder={item.isFolder} 
-          />
+        <TableCell className="text-center w-1/12">{item.type || '-'}</TableCell>
+        <TableCell className="text-center w-1/12">{getFileSizeInKB(item.size)}</TableCell>
+        <TableCell className="text-center w-2/12">{item.date || '-'}</TableCell>
+        <TableCell className="text-center w-1/12">
+          {!item.isFolder && (
+            <FileStatusBadge status={fileStatuses[item.id || ''] || 'pending'} />
+          )}
         </TableCell>
-        <TableCell className="text-gray-600">{item.date}</TableCell>
-        <TableCell>
-          {!item.isFolder ? (
-            <FileActionButtons 
-              item={item}
-              fileStatus={fileStatuses[item.id || ''] || ''}
-              vectorizeSettingsChanged={vectorizeSettingsChanged[item.id || ''] || false}
-              handleStartVectorize={handleStartVectorize}
-              handlePauseVectorize={handlePauseVectorize}
-              toggleVectorizeSettings={toggleVectorizeSettings}
-            />
+        <TableCell className="text-center w-1/12">
+          {item.isFolder ? (
+            <FolderActionButtons folder={item} />
           ) : (
-            <FolderActionButtons 
-              onNewFolderClick={(e) => e.stopPropagation()}
-              onSettingsClick={(e) => e.stopPropagation()}
-              onDeleteClick={(e) => e.stopPropagation()}
+            <FileActionButtons 
+              file={item} 
+              status={fileStatuses[item.id || ''] || 'pending'}
+              settingsChanged={vectorizeSettingsChanged[item.id || ''] || false}
+              onStartVectorize={() => handleStartVectorize(item.id || '')}
+              onPauseVectorize={() => handlePauseVectorize(item.id || '')}
+              onToggleSettings={() => toggleVectorizeSettings(item.id || '')}
             />
           )}
+        </TableCell>
+        <TableCell className="text-center w-1/12">
+          <Checkbox 
+            id={`select-${item.id}`}
+            checked={isSelected}
+            onCheckedChange={handleCheckboxChange}
+            onClick={(e) => e.stopPropagation()}
+            className="flex-shrink-0 mx-auto"
+          />
         </TableCell>
       </TableRow>
 
       {/* Render children if folder is expanded */}
-      {item.isFolder && isExpanded && childrenExist && (
-        item.children!.map(child => renderFileItem(child, depth + 1))
-      )}
-
-      {/* Show empty folder message */}
-      {item.isFolder && isExpanded && (!item.children || item.children.length === 0) && (
-        <TableRow>
-          <TableCell colSpan={7} className="py-4 text-center text-gray-500">
-            <div className="flex items-center justify-center">
-              <AlertCircle className="h-4 w-4 mr-2 text-gray-400" />
-              <span>该文件夹为空</span>
-            </div>
-          </TableCell>
-        </TableRow>
-      )}
+      {item.isFolder && isExpanded && item.children && item.children.map(child => (
+        renderFileItem(child, depth + 1)
+      ))}
     </React.Fragment>
   );
 };
