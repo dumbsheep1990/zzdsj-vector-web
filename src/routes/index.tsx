@@ -1,0 +1,30 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import AssistantList from '../pages/AssistantList';
+import QAManagement from '../pages/QAManagement';
+import Datasets from '../pages/Datasets';
+import KnowledgeBase from '../pages/KnowledgeBase';
+import Vectors from '../pages/Vectors';
+import Metadata from '../pages/Metadata';
+import Models from '../pages/Models';
+import Settings from '../pages/Settings';
+
+const AppRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/qa-assistant/assistant-list" replace />} />
+      <Route path="/qa-assistant" element={<Navigate to="/qa-assistant/assistant-list" replace />} />
+      <Route path="/qa-assistant/assistant-list" element={<AssistantList />} />
+      <Route path="/qa-assistant/qa-management" element={<QAManagement />} />
+      <Route path="/qa-assistant/datasets" element={<Datasets />} />
+      <Route path="/knowledge-base" element={<Navigate to="/knowledge-base/files" replace />} />
+      <Route path="/knowledge-base/files" element={<KnowledgeBase />} />
+      <Route path="/knowledge-base/vectors" element={<Vectors />} />
+      <Route path="/knowledge-base/metadata" element={<Metadata />} />
+      <Route path="/models" element={<Models />} />
+      <Route path="/settings" element={<Settings />} />
+    </Routes>
+  );
+};
+
+export default AppRoutes;
