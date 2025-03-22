@@ -9,3 +9,4 @@ export * from './mockData/keywordData';
 export * from './mockData/metadataData';
 export * from './mockData/navigationData';
 export * from './mockData/graphData';
+export * from './mockData/assistantData';
