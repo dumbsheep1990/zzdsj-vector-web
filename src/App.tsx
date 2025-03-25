@@ -6,6 +6,7 @@ import Vectors from './pages/Vectors';
 import Metadata from './pages/Metadata';
 import Models from './pages/Models';
 import AssistantList from './pages/AssistantList';
+import DataProcessingTools from './pages/DataProcessingTools';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 const AppContent: FC = () => {
@@ -24,6 +25,8 @@ const AppContent: FC = () => {
                 return <Models />;
             case 'assistant-list':
                 return <AssistantList />;
+            case 'data-processing-tools':
+                return <DataProcessingTools />;
             case 'settings':
                 return <div className="flex-1 p-6"><h1 className="text-2xl font-semibold">系统设置（开发中）</h1></div>;
             default:

@@ -95,7 +95,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     }, [showNotifications, showServiceStatus, showUserMenu]);
     
     return (
-        <>
+        <div className="sticky top-0 z-50 shadow-sm">
             {/* 标题栏 - 与侧边栏完全对齐 */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50" style={{
                 height: '56px',
@@ -342,7 +342,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

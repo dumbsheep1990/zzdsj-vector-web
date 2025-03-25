@@ -57,7 +57,7 @@ export const navigationItems: NavItem[] = [
     iconType: 'Wrench',
     children: [
       {
-        id: 'data-processing',
+        id: 'data-processing-tools',
         label: '数据处理',
         iconType: 'BarChart2'
       },
