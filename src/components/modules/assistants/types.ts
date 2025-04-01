@@ -8,7 +8,7 @@ export interface KnowledgeBase {
 export interface UsageStats {
   totalChats: number;
   satisfactionRate: number; // 保留但不使用
-  tokenUsage?: number; // 新增token消耗
+  tokenUsage: number; // 改为必需字段
   apiCalls?: number; // 新增接口调用次数
 }
 

@@ -28,14 +28,9 @@ interface NavigationItem {
 }
 
 const Sidebar: React.FC = () => {
-    const { state, setActiveSection } = useAppContext();
-    const { activeSection } = state;
-    const [sidebarExpanded, setSidebarExpanded] = useState(true);
+    const { state, setActiveSection, toggleSidebar } = useAppContext();
+    const { activeSection, sidebarExpanded } = state;
     const [expandedItems, setExpandedItems] = useState<string[]>(['qa-management', 'knowledge-base', 'tool-plaza']);
-
-    const toggleSidebar = () => {
-        setSidebarExpanded(!sidebarExpanded);
-    };
 
     const toggleExpanded = (itemId: string) => {
         if (expandedItems.includes(itemId)) {
@@ -85,10 +80,11 @@ const Sidebar: React.FC = () => {
     const sidebarStyle = {
         background: 'linear-gradient(180deg, #f0f9ff 0%, #e6f7ff 50%, #dcf2ff 100%)',
         borderRight: '1px solid #e5e7eb',
-        width: sidebarExpanded ? '16rem' : '5rem',
+        width: sidebarExpanded ? '240px' : '64px',
+        minWidth: sidebarExpanded ? '240px' : '64px',
         display: 'flex',
         flexDirection: 'column' as const,
-        transition: 'width 0.3s ease',
+        transition: 'all 0.3s ease',
         height: '100vh',
         overflow: 'hidden'
     };
@@ -319,23 +315,17 @@ const Sidebar: React.FC = () => {
 
             {/* 底部用户信息 */}
             <div style={footerStyle}>
-                {sidebarExpanded ? (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={userAvatarStyle}>
-                            A
-                        </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={userAvatarStyle}>
+                        {state.username?.slice(0, 2) || '管理'}
+                    </div>
+                    {sidebarExpanded && (
                         <div style={userInfoContainerStyle}>
-                            <div style={userNameStyle}>管理员</div>
-                            <div style={userEmailStyle}>admin@example.com</div>
+                            <div style={userNameStyle}>{state.username || '管理员'}</div>
+                            <div style={userEmailStyle}>系统管理员</div>
                         </div>
-                    </div>
-                ) : (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div style={userAvatarStyle}>
-                            A
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );

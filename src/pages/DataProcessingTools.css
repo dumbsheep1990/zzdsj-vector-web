@@ -1,5 +1,11 @@
 /* DataProcessingTools.css */
 
+/* 主内容区域样式 */
+.data-processing-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
 /* 固定标签栏样式 */
 .sticky-tabs {
   position: relative;

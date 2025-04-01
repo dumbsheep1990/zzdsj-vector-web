@@ -1,8 +1,19 @@
 import React from 'react';
 import { PlusCircle, PencilIcon as Pencil, TrashIcon as Trash } from 'lucide-react';
 
+interface DocumentItem {
+  name: string;
+  type?: string;
+  description?: string;
+  date?: string;
+  size?: string;
+  category?: string;
+  creator?: string;
+  status?: '已向量化' | '处理中' | '未处理';
+}
+
 interface BasicInfoTabProps {
-  selectedItem: any;
+  selectedItem: DocumentItem;
 }
 
 const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ selectedItem }) => {
@@ -65,7 +76,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({ selectedItem }) => {
                 {selectedItem.status || '未处理'}
               </span>
               <span className="text-sm text-gray-500">
-                {selectedItem.status === '已向量化' ? '向量化完成于 ' + (selectedItem as any).date :
+                {selectedItem.status === '已向量化' ? '向量化完成于 ' + selectedItem.date :
                   selectedItem.status === '处理中' ? '正在处理...' : '尚未向量化'}
               </span>
             </div>

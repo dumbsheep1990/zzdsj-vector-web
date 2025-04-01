@@ -7,6 +7,7 @@ import {
   ApiOutlined, NodeIndexOutlined, SortAscendingOutlined,
   CheckCircleFilled, CloseCircleFilled, MoreOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const { Text } = Typography;
 
@@ -59,6 +60,8 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
   handleDelete,
   handleStatusChange
 }) => {
+  const navigate = useNavigate(); // 添加导航钩子
+  
   const cardStyle = { 
     width: "100%",
     borderRadius: "16px",
@@ -102,6 +105,16 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
 
   const onStatusChange = (checked: boolean) => {
     handleStatusChange(assistant.id, checked ? 'online' : 'offline');
+  };
+  
+  // 添加导航到聊天页面的处理函数
+  const handleStartChat = () => {
+    // 仅当助手在线时允许开始对话
+    if (assistant.status === 'online') {
+      navigate(`/chat/${assistant.id}`);
+    } else {
+      message.warning('助手当前处于离线状态，请先将其设置为在线');
+    }
   };
 
   return (
@@ -725,10 +738,14 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
         <Button
           size="middle"
           icon={<MessageOutlined />}
+          onClick={handleStartChat} 
+          disabled={assistant.status !== 'online'} 
           style={{ 
-            background: 'linear-gradient(135deg, #096dd9, #1890ff)', 
+            background: assistant.status === 'online' 
+              ? 'linear-gradient(135deg, #096dd9, #1890ff)' 
+              : 'linear-gradient(135deg, #d9d9d9, #f0f0f0)', 
             borderColor: 'transparent', 
-            color: 'white',
+            color: assistant.status === 'online' ? 'white' : 'rgba(0, 0, 0, 0.25)',
             borderRadius: '8px',
             fontSize: '14px',
             padding: '0 20px',
@@ -736,19 +753,25 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 10px rgba(24, 144, 255, 0.3)',
+            boxShadow: assistant.status === 'online' 
+              ? '0 2px 10px rgba(24, 144, 255, 0.3)' 
+              : '0 2px 10px rgba(0, 0, 0, 0.1)',
             transition: 'all 0.3s ease',
             width: 'calc(100% - 16px)', 
             maxWidth: '500px', 
             margin: '0 auto', 
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #1890ff, #40a9ff)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.4)';
+            if (assistant.status === 'online') {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #1890ff, #40a9ff)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.4)';
+            }
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #096dd9, #1890ff)';
-            e.currentTarget.style.boxShadow = '0 2px 10px rgba(24, 144, 255, 0.3)';
+            if (assistant.status === 'online') {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #096dd9, #1890ff)';
+              e.currentTarget.style.boxShadow = '0 2px 10px rgba(24, 144, 255, 0.3)';
+            }
           }}
         >
           开始对话

@@ -3,8 +3,6 @@ import {
   Tabs, 
   Input, 
   Button,
-  Space,
-  Divider,
   Modal,
   Form,
   Upload,
@@ -23,6 +21,7 @@ import {
   TableOutlined,
   ApiOutlined
 } from '@ant-design/icons';
+import { useAppContext } from '../context/AppContext';
 import ToolCard from '../components/modules/tools/ToolCard';
 import PageHeader from '../components/layout/PageHeader';
 import './DataProcessingTools.css'; // 导入自定义样式
@@ -67,6 +66,9 @@ const toolIcons: Record<string, React.ReactNode> = {
 };
 
 const DataProcessingTools: React.FC = () => {
+  const { state } = useAppContext();
+  const { sidebarExpanded } = state;
+  
   // 工具数据
   const tools: Tool[] = [
     // 数据爬取
@@ -296,7 +298,7 @@ const DataProcessingTools: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-50">
+    <div className={`data-processing-container ${sidebarExpanded ? 'expanded' : ''}`}>
       <PageHeader 
         title="数据处理工具集合"
         description="协助您处理数据的工具集，包括采集、清洗、格式化与数据标注生成等功能"

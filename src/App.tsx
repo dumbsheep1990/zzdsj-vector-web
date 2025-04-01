@@ -1,13 +1,36 @@
 import React, { FC } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import KnowledgeBase from './pages/KnowledgeBase';
 import Vectors from './pages/Vectors';
 import Metadata from './pages/Metadata';
 import Models from './pages/Models';
 import AssistantList from './pages/AssistantList';
+import AssistantChat from './pages/AssistantChat';
 import DataProcessingTools from './pages/DataProcessingTools';
 import { AppProvider, useAppContext } from './context/AppContext';
+
+const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
+    return (
+        <div style={{ 
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            overflow: 'hidden'
+        }}>
+            <Sidebar />
+            <main style={{
+                flex: 1,
+                minWidth: 0,
+                height: '100vh',
+                overflow: 'auto',
+                backgroundColor: '#f9fafb'
+            }}>
+                {children}
+            </main>
+        </div>
+    );
+};
 
 const AppContent: FC = () => {
     const { state } = useAppContext();
@@ -35,10 +58,11 @@ const AppContent: FC = () => {
     };
 
     return (
-        <div className="flex h-screen bg-gray-50">
-            <Sidebar />
-            {renderContent()}
-        </div>
+        <Routes>
+            <Route path="/" element={<MainLayout>{renderContent()}</MainLayout>} />
+            <Route path="/chat/:assistantId" element={<AssistantChat />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
     );
 };
 
