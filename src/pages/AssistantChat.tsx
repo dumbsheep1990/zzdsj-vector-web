@@ -2,15 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Button, Avatar, Spin, Space, message, Tooltip, Layout, theme, Typography, 
-  Modal, Form, Select, Switch, Slider, Badge
+  Modal, Form, Select, Switch, Slider, Badge, InputNumber
 } from 'antd';
 import { 
-  RobotOutlined, UserOutlined, SettingOutlined, 
-  LeftOutlined, MessageOutlined, BulbOutlined, FileTextOutlined,
-  PictureOutlined, FileAddOutlined, SendOutlined
+  SettingOutlined, RobotOutlined, LeftOutlined, UserOutlined, 
+  SendOutlined, MessageOutlined, PictureOutlined, FileAddOutlined,
+  SoundOutlined, SearchOutlined, AudioOutlined, ClearOutlined
 } from '@ant-design/icons';
-import { Bubble, Sender } from '@ant-design/x';
+import { Bubble } from '@ant-design/x';
 import ChatSidebar, { ChatHistory } from '../components/chat/ChatSidebar';
+import { formatTime as formatTimeUtil } from '../utils/timeUtils';
 
 const { Text, Title } = Typography;
 const { Header, Content, Footer } = Layout;
@@ -37,15 +38,15 @@ interface Settings {
   model: string;
   temperature: number;
   maxTokens: number;
-  saveHistory: boolean;
+  historyRounds: number;
   autoScroll: boolean;
 }
 
 const defaultSettings: Settings = {
-  model: 'gpt-4',
+  model: 'deepseek-coder',
   temperature: 0.7,
-  maxTokens: 2000,
-  saveHistory: true,
+  maxTokens: 2048,
+  historyRounds: 3,
   autoScroll: true,
 };
 
@@ -75,47 +76,8 @@ const sendMessageToAPI = async (assistantId: string, message: string) => {
 
 // 格式化时间函数
 const formatTime = (date: Date) => {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  if (diffDays > 0) {
-    return `${diffDays}天前`;
-  }
-  
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours > 0) {
-    return `${diffHours}小时前`;
-  }
-  
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  if (diffMinutes > 0) {
-    return `${diffMinutes}分钟前`;
-  }
-  
-  return '刚刚';
+  return formatTimeUtil(date);
 };
-
-const EmptyStateCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({
-  icon,
-  title,
-  description
-}) => (
-  <div style={{
-    padding: '24px',
-    background: '#fff',
-    borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-    textAlign: 'center',
-    margin: '8px 0'
-  }}>
-    <div style={{ fontSize: '28px', color: '#1677ff', marginBottom: '16px' }}>
-      {icon}
-    </div>
-    <Title level={5} style={{ marginBottom: '8px' }}>{title}</Title>
-    <Text type="secondary">{description}</Text>
-  </div>
-);
 
 const SettingsModal: React.FC<{
   visible: boolean;
@@ -124,6 +86,7 @@ const SettingsModal: React.FC<{
   onSave: (settings: Settings) => void;
 }> = ({ visible, onClose, settings, onSave }) => {
   const [form] = Form.useForm();
+  const { token } = theme.useToken();
 
   useEffect(() => {
     if (visible) {
@@ -144,12 +107,45 @@ const SettingsModal: React.FC<{
 
   return (
     <Modal
-      title="对话设置"
+      title={<div style={{ fontSize: '17px', fontWeight: 600, color: token.colorTextHeading }}>对话设置</div>}
       open={visible}
       onCancel={onClose}
       onOk={handleSave}
+      okText="确定"
+      cancelText="取消"
+      okButtonProps={{ 
+        style: { 
+          background: token.colorPrimary, 
+          borderColor: token.colorPrimary,
+          boxShadow: '0 2px 4px rgba(24, 144, 255, 0.35)',
+          fontWeight: 500
+        } 
+      }}
       width={600}
       destroyOnClose
+      styles={{
+        header: {
+          background: token.colorPrimaryBg,
+          borderRadius: '10px 10px 0 0',
+          padding: '16px 24px',
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        },
+        body: {
+          padding: '24px',
+        },
+        footer: {
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+          padding: '12px 24px',
+        },
+        mask: {
+          background: 'rgba(0, 0, 0, 0.45)',
+          backdropFilter: 'blur(3px)'
+        },
+        content: {
+          borderRadius: '10px',
+          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
+        }
+      }}
     >
       <Form
         form={form}
@@ -162,9 +158,11 @@ const SettingsModal: React.FC<{
           tooltip="选择不同的语言模型将影响回答的质量和速度"
         >
           <Select>
-            <Select.Option value="gpt-4">GPT-4（推荐）</Select.Option>
-            <Select.Option value="gpt-3.5-turbo">GPT-3.5 Turbo</Select.Option>
-            <Select.Option value="claude-3">Claude 3</Select.Option>
+            <Select.Option value="deepseek-coder">Deepseek Coder</Select.Option>
+            <Select.Option value="deepseek-chat">Deepseek Chat</Select.Option>
+            <Select.Option value="qwen-plus">Qwen Plus</Select.Option>
+            <Select.Option value="qwen-max">Qwen Max</Select.Option>
+            <Select.Option value="qwen-turbo">Qwen Turbo</Select.Option>
           </Select>
         </Form.Item>
 
@@ -186,29 +184,33 @@ const SettingsModal: React.FC<{
         </Form.Item>
 
         <Form.Item
-          label="最大令牌数"
+          label="最大Token数"
           name="maxTokens"
           tooltip="单次回复的最大字符数量"
         >
-          <Slider
+          <InputNumber
             min={500}
-            max={4000}
-            step={100}
-            marks={{
-              500: '简短',
-              2000: '中等',
-              4000: '详细'
-            }}
+            max={8000}
+            defaultValue={2048}
+            style={{ width: '100%' }}
           />
         </Form.Item>
 
         <Form.Item
-          label="保存历史记录"
-          name="saveHistory"
-          valuePropName="checked"
-          tooltip="是否保存对话历史记录"
+          label="历史轮数"
+          name="historyRounds"
+          tooltip="设置固定数量的历史轮数，超过该数量的轮数将被删除"
         >
-          <Switch />
+          <Slider
+            min={1}
+            max={12}
+            step={1}
+            marks={{
+              1: '1',
+              6: '6',
+              12: '12'
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -227,424 +229,586 @@ const SettingsModal: React.FC<{
 const AssistantChat: React.FC = () => {
   const { assistantId } = useParams<{ assistantId: string }>();
   const navigate = useNavigate();
-  const { token } = theme.useToken();
-  
-  // 状态管理
-  const [assistant, setAssistant] = useState<Assistant | null>(null);
-  const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [sending, setSending] = useState(false);
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [assistant, setAssistant] = useState<Assistant | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [sending, setSending] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
-  const [activeChatId, setActiveChatId] = useState<string>();
+  const [settingsVisible, setSettingsVisible] = useState<boolean>(false);
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const { token } = theme.useToken();
   
-  // 加载数据
+  // 保持当前选中的聊天ID
+  const [currentChatId, setCurrentChatId] = useState<string | undefined>(assistantId);
+  
   useEffect(() => {
-    const loadData = async () => {
-      if (!assistantId) {
-        message.error('助手ID不存在');
-        return;
-      }
-      
+    if (!assistantId) return;
+
+    // 当URL参数改变时更新当前选中的聊天ID
+    setCurrentChatId(assistantId);
+    console.log('URL参数改变:', assistantId);
+    
+    // 获取当前助手信息
+    const loadAssistantInfo = async () => {
       try {
         setLoading(true);
         const assistantInfo = await fetchAssistantInfo(assistantId);
         setAssistant(assistantInfo);
+
+        // 重置当前聊天的消息
+        setMessages([]);
+
+        // 检查当前聊天ID是否已存在于历史记录中
+        const existingChatIndex = chatHistory.findIndex(chat => chat.id === assistantId);
+
+        // 如果是新的聊天ID，就添加到历史记录，但不重排序
+        if (existingChatIndex === -1) {
+          setChatHistory(prev => [
+            {
+              id: assistantId,
+              title: '新对话',
+              lastMessage: '您好，我是AI助手，有什么可以帮助您的吗？',
+              timestamp: new Date(),
+            },
+            ...prev
+          ]);
+        }
+
+        setLoading(false);
       } catch (error) {
-        console.error('加载数据失败:', error);
-        message.error('加载数据失败');
-      } finally {
+        console.error('获取助手信息失败:', error);
+        message.error('获取助手信息失败');
         setLoading(false);
       }
     };
+
+    loadAssistantInfo();
     
-    loadData();
+    console.log('当前活动聊天ID:', assistantId);
   }, [assistantId]);
-  
-  // 滚动到最新消息
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-  
-  // 加载聊天历史
+    if (settings.autoScroll) {
+      scrollToBottom();
+    }
+  }, [messages, settings.autoScroll]);
+
   useEffect(() => {
-    const loadChatHistory = async () => {
-      // 模拟加载聊天历史
-      const mockHistory: ChatHistory[] = [
+    if (chatHistory.length === 0) {
+      // 创建两个ID以保持一致性
+      const chat1Id = 'chat_' + Date.now();
+      const chat2Id = 'chat_' + (Date.now() + 1);
+      
+      setChatHistory([
         {
-          id: '1',
-          title: '关于项目开发的讨论',
-          lastMessage: '好的，我明白了，让我帮你分析一下这个问题',
-          timestamp: new Date(Date.now() - 1000 * 60 * 30),
-          unread: 2,
+          id: chat1Id,
+          title: '如何实现向量检索',
+          lastMessage: '向量检索的原理是...',
+          timestamp: new Date(Date.now() - 86400000 * 2),
         },
         {
-          id: '2',
-          title: '技术架构设计咨询',
-          lastMessage: '这种情况下我建议使用微服务架构',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-        },
-        {
-          id: '3',
-          title: '代码优化建议',
-          lastMessage: '可以考虑使用设计模式来优化这部分代码',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-        },
-      ];
-      setChatHistory(mockHistory);
-      setActiveChatId(mockHistory[0].id);
-    };
-    loadChatHistory();
+          id: chat2Id,
+          title: 'Embedding模型选择',
+          lastMessage: '根据您的使用场景...',
+          timestamp: new Date(Date.now() - 86400000),
+          unread: 2
+        }
+      ]);
+      
+      // 如果没有当前选中的聊天ID，则导航到第一个聊天
+      if (!assistantId) {
+        navigate(`/chat/${chat1Id}`, { replace: true });
+      }
+    }
   }, []);
-  
-  // 发送消息
-  const handleSendMessage = async (content: string) => {
-    if (!content.trim() || !assistantId) return;
-    
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSend = async () => {
+    if (!inputValue.trim() || sending || !assistant) return;
+
     const userMessage: Message = {
       id: `msg_${Date.now()}`,
-      content: content,
+      content: inputValue,
       sender: 'user',
-      timestamp: new Date(),
-      status: 'sending'
+      timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
     setSending(true);
-    
+
     try {
-      const response = await sendMessageToAPI(assistantId, content);
-      const assistantMessage: Message = {
-        id: response.id,
-        content: response.content,
-        sender: response.sender,
-        timestamp: response.timestamp,
-        status: 'sent'
-      };
-      
-      setMessages(prev => [
-        ...prev.map(msg => msg.id === userMessage.id ? { ...msg, status: 'sent' as const } : msg),
-        assistantMessage
-      ]);
+      // 发送用户消息到API并获取助手回复
+      const assistantMessage = await sendMessageToAPI(assistant.id, inputValue);
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('发送消息失败:', error);
-      setMessages(prev => 
-        prev.map(msg => msg.id === userMessage.id ? { ...msg, status: 'error' as const } : msg)
-      );
       message.error('发送消息失败');
     } finally {
       setSending(false);
     }
   };
-  
-  const items = messages.map((message) => ({
-    key: message.id,
-    content: message.content,
-    avatar: message.sender === 'user' ? <UserOutlined /> : <RobotOutlined />,
-    position: message.sender === 'user' ? 'right' : 'left',
-    extra: (
-      <div style={{ 
-        fontSize: 12, 
-        color: token.colorTextSecondary,
-        textAlign: message.sender === 'user' ? 'right' : 'left'
-      }}>
-        {formatTime(message.timestamp)}
-      </div>
-    )
-  }));
-  
-  const renderEmptyState = () => (
-    <div style={{ 
-      maxWidth: '600px', 
-      margin: '0 auto', 
-      padding: '40px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <Title level={3}>欢迎使用AI助手</Title>
-        <Text type="secondary">开始一段新的对话，探索无限可能</Text>
-      </div>
-      
-      <EmptyStateCard
-        icon={<MessageOutlined />}
-        title="自然对话"
-        description="像与朋友聊天一样自然，AI助手会理解您的需求并提供帮助"
-      />
 
-      <EmptyStateCard
-        icon={<BulbOutlined />}
-        title="智能解答"
-        description="无论是技术问题还是创意想法，都能得到专业的解答和建议"
-      />
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
-      <EmptyStateCard
-        icon={<FileTextOutlined />}
-        title="知识沉淀"
-        description="对话内容可以保存和回顾，帮助您积累知识和经验"
-      />
+  const handleSettingsSave = (newSettings: Settings) => {
+    setSettings(newSettings);
+  };
 
-      <div style={{ 
-        marginTop: '32px',
-        textAlign: 'center',
-        padding: '16px',
-        background: '#f5f5f5',
-        borderRadius: '8px'
-      }}>
-        <Text type="secondary">
-          💡 提示：试试问我"你能帮我做什么？"
-        </Text>
-                </div>
-              </div>
-  );
+  const handleCreateChat = () => {
+    const newChatId = `chat_${Date.now()}`;
+    
+    // 将新聊天添加到历史记录最前面
+    setChatHistory(prev => [
+      {
+        id: newChatId,
+        title: '新对话',
+        lastMessage: '开始一个新的对话',
+        timestamp: new Date(),
+      },
+      ...prev
+    ]);
+    
+    // 更新当前选中的聊天ID
+    setCurrentChatId(newChatId);
+    
+    // 重置消息列表
+    setMessages([]);
+    
+    // 导航到新聊天，并确保URL参数更新
+    navigate(`/chat/${newChatId}`, { replace: true });
+    
+    console.log('新聊天创建:', newChatId);
+  };
 
   const handleChatSelect = (chatId: string) => {
-    setActiveChatId(chatId);
-    // TODO: 加载选中的聊天记录
+    if (chatId !== currentChatId) {
+      // 更新当前选中的聊天ID
+      setCurrentChatId(chatId);
+      
+      // 重置消息列表
+      setMessages([]);
+      
+      // 导航到选中的聊天
+      navigate(`/chat/${chatId}`, { replace: true });
+      
+      console.log('选中聊天:', chatId);
+    }
   };
 
   const handleChatDelete = (chatId: string) => {
     setChatHistory(prev => prev.filter(chat => chat.id !== chatId));
-    message.success('删除成功');
+    if (chatId === currentChatId) {
+      // 如果删除的是当前对话，则导航到第一个对话或返回助手列表
+      if (chatHistory.length > 1) {
+        const firstChat = chatHistory.find(chat => chat.id !== chatId);
+        if (firstChat) {
+          navigate(`/chat/${firstChat.id}`);
+          return;
+        }
+      }
+      navigate('/');
+    }
   };
 
-  const handleChatEdit = (chatId: string) => {
-    // TODO: 实现编辑功能
-    message.info('编辑功能开发中');
+  const handleClearContext = () => {
+    // 保存用户消息
+    const userMessages = messages.filter(msg => msg.sender === 'user');
+    // 如果用户消息列表不为空，则保留最新的一条用户消息
+    const lastUserMessage = userMessages.length > 0 ? [userMessages[userMessages.length - 1]] : [];
+    // 添加一条系统消息
+    const systemMessage: Message = {
+      id: `system-${Date.now()}`,
+      content: '对话内容已清除，您可以开始新的对话。',
+      sender: 'assistant',
+      timestamp: new Date(),
+    };
+    
+    // 更新消息列表
+    setMessages([...lastUserMessage, systemMessage]);
+    message.success('对话内容已清除');
+  };
+
+  const renderMessageContent = (msg: Message) => {
+    return (
+      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        {msg.content}
+      </div>
+    );
   };
 
   return (
-    <Layout style={{ 
-      width: '100vw',
-      height: '100vh',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      background: token.colorBgLayout,
-      overflow: 'hidden',
-    }}>
-      <ChatSidebar
-        chatHistory={chatHistory}
-        activeChatId={activeChatId}
-        onChatSelect={handleChatSelect}
-        onChatDelete={handleChatDelete}
-        onChatEdit={handleChatEdit}
+    <Layout style={{ height: '100vh', background: '#f0f2f5' }}>
+      <ChatSidebar 
+        chatHistory={chatHistory} 
+        activeChatId={currentChatId} 
+        onChatSelect={handleChatSelect} 
+        onChatDelete={handleChatDelete} 
+        onCreateChat={handleCreateChat} 
       />
-      <Layout>
+
+      <Layout style={{ marginLeft: 320, height: '100vh', background: '#f7f9fc' }}>
         <Header style={{ 
-          padding: '0 32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
+          height: '64px',
+          padding: '0 24px', 
+          background: '#e6f4ff',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+          display: 'flex', 
+          alignItems: 'center', 
           justifyContent: 'space-between',
-          position: 'fixed',
+          position: 'sticky',
           top: 0,
-          left: 320,
-          right: 0,
-          zIndex: 100,
+          zIndex: 1,
+          borderBottom: `1px solid #eaeaea`
         }}>
-          <Space size={24}>
+          <div style={{ display: 'flex', alignItems: 'center', maxWidth: '70%' }}>
             <Button 
-              type="text" 
               icon={<LeftOutlined />} 
-              onClick={() => navigate(-1)}
-              style={{ fontSize: 16 }}
-            />
+              onClick={() => navigate('/')}
+              type="text"
+              style={{
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                marginRight: '12px'
+              }}
+            >
+              返回
+            </Button>
+            
             {assistant && (
-              <Space align="center" style={{ height: 40 }}>
-                <Badge 
-                  status={assistant.status === 'online' ? 'success' : 'default'}
-                  offset={[-6, 34]}
-                >
-                  <Avatar 
-                    size={40}
-                    icon={<RobotOutlined />} 
-                    style={{ 
-                      backgroundColor: token.colorPrimary,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    }}
-                  />
-                </Badge>
-                <div>
-                  <Text strong style={{ 
-                    fontSize: 16,
-                    display: 'block',
-                    lineHeight: '22px',
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                width: '240px',
+              }}>
+                <Avatar 
+                  icon={<RobotOutlined />} 
+                  style={{ 
+                    backgroundColor: token.colorPrimary,
+                    marginRight: '10px',
+                    flexShrink: 0
+                  }} 
+                  size={32}
+                />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flex: '1',
+                  minWidth: 0,
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontSize: '16px',
+                    marginRight: '8px',
+                    maxWidth: '130px'
                   }}>
                     {assistant.name}
-                  </Text>
-                  <Text type="secondary" style={{ 
-                    fontSize: 12,
-                    lineHeight: '18px',
-                    display: 'block',
-                    marginTop: -1,
-                    fontFamily: 'monospace',
-                  }}>
-                    ID: {assistant.id}
-                  </Text>
+                  </div>
+                  <Badge 
+                    status={assistant.status === 'online' ? 'success' : 'default'} 
+                    text={assistant.status === 'online' ? '在线' : '离线'}
+                    style={{ fontSize: '12px' }}
+                  />
                 </div>
-              </Space>
+              </div>
             )}
-          </Space>
-          
-          <Space size={16}>
-            <Select
-              value={settings.model}
-              onChange={(value) => setSettings({ ...settings, model: value })}
-              style={{ width: 120 }}
-              options={[
-                { label: 'GPT-4', value: 'gpt-4' },
-                { label: 'GPT-3.5', value: 'gpt-3.5-turbo' },
-                { label: 'Claude 3', value: 'claude-3' },
-              ]}
-              bordered={false}
-            />
+          </div>
+
+          <Space>
+            <Tooltip title="清除对话">
+              <Button 
+                icon={<ClearOutlined />} 
+                onClick={handleClearContext}
+                type="text"
+                style={{
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              />
+            </Tooltip>
             <Tooltip title="设置">
               <Button 
-                type="text" 
                 icon={<SettingOutlined />} 
                 onClick={() => setSettingsVisible(true)}
-                style={{ fontSize: 16 }}
+                type="text"
+                shape="circle"
+                style={{ fontSize: '16px' }}
               />
             </Tooltip>
           </Space>
         </Header>
-        
+
         <Content style={{ 
-          height: 'calc(100vh - 128px)',
-          padding: '88px 24px 24px',
+          padding: '24px', 
+          height: 'calc(100vh - 64px - 100px)',
+          overflow: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          position: 'relative',
-          marginLeft: 320,
         }}>
-          <div style={{
-            maxWidth: '1000px',
-            width: '100%',
-            margin: '0 auto',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
-          }}>
-            {loading ? (
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                height: '100%' 
-              }}>
-                <Spin size="large" />
-              </div>
-            ) : messages.length === 0 ? (
-              renderEmptyState()
-            ) : (
-              <div style={{ 
-                flex: 1, 
-                overflow: 'auto',
-                padding: '0 0 24px',
-              }}>
-                <Bubble.List 
-                  items={items}
-                  style={{
-                    background: token.colorBgElevated,
-                    borderRadius: '16px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          {loading ? (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: '100%' 
+            }}>
+              <Spin size="large" tip="加载中..." />
+            </div>
+          ) : messages.length > 0 ? (
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {messages.map(msg => (
+                <div 
+                  key={msg.id} 
+                  style={{ 
+                    marginBottom: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start',
                   }}
-                />
-                <div ref={messagesEndRef} />
+                >
+                  <Space 
+                    align="start" 
+                    style={{ 
+                      maxWidth: '80%',
+                    }}
+                  >
+                    {msg.sender === 'assistant' && (
+                      <Avatar 
+                        icon={<RobotOutlined />}
+                        style={{ 
+                          backgroundColor: token.colorPrimary,
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                    <div>
+                      <Bubble 
+                        style={{ 
+                          maxWidth: '100%',
+                          background: msg.sender === 'user' ? token.colorPrimaryBg : '#f2f3f5',
+                          color: msg.sender === 'user' ? token.colorPrimaryText : token.colorText,
+                          border: `1px solid ${msg.sender === 'user' ? token.colorPrimaryBorder : '#eaeaea'}`,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                          padding: '12px 16px',
+                          borderRadius: msg.sender === 'user' ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
+                        }}
+                        content={renderMessageContent(msg)}
+                      />
+                      <div style={{ 
+                        fontSize: '12px', 
+                        color: token.colorTextSecondary,
+                        marginTop: '4px',
+                        textAlign: msg.sender === 'user' ? 'right' : 'left',
+                      }}>
+                        {formatTime(msg.timestamp)}
+                      </div>
+                    </div>
+                    {msg.sender === 'user' && (
+                      <Avatar 
+                        icon={<UserOutlined />}
+                        style={{ 
+                          backgroundColor: token.colorInfo,
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </Space>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          ) : (
+            <div style={{ 
+              height: '100%', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              padding: '40px 0'
+            }}>
+              <div style={{
+                maxWidth: '400px',
+                textAlign: 'center',
+                padding: '40px',
+                background: '#fff',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px'
+              }}>
+                <MessageOutlined style={{ fontSize: '48px', color: token.colorPrimary, marginBottom: '16px' }} />
+                <Title level={3} style={{ margin: 0, fontSize: '20px' }}>
+                  开始一次对话
+                </Title>
+                <Text style={{ color: token.colorTextSecondary, fontSize: '16px' }}>
+                  输入您的问题，AI助手将为您提供帮助和答案
+                </Text>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </Content>
-        
-        <Footer style={{ 
-          padding: '16px 32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderTop: `1px solid ${token.colorBorderSecondary}`,
-          position: 'fixed',
-          bottom: 0,
-          left: 320,
-          right: 0,
-          zIndex: 100,
+
+        <Footer style={{  
+          padding: '16px 24px',
+          background: '#fff',
+          borderTop: '1px solid #eaeaea',
+          boxShadow: '0 -2px 8px rgba(0,0,0,0.03)',
         }}>
-          <div style={{
+          <div style={{ 
+            display: 'flex', 
+            gap: '12px',
             maxWidth: '1000px',
             margin: '0 auto',
-            width: '100%',
-            display: 'flex',
-            gap: 16,
-            alignItems: 'flex-end'
           }}>
-            <div style={{
+            <div style={{ 
               flex: 1,
-              background: token.colorBgElevated,
-              borderRadius: '16px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              border: `1px solid ${token.colorBorderSecondary}`,
-              padding: '12px 16px',
-              position: 'relative',
+              border: `1px solid #eaeaea`,
+              borderRadius: '12px',
+              overflow: 'hidden',
+              backgroundColor: '#fff',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
             }}>
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                marginBottom: 8,
-                borderBottom: `1px solid ${token.colorBorderSecondary}`,
-                paddingBottom: 8,
+                padding: '12px 16px',
+                borderBottom: '1px solid #f0f0f0',
               }}>
-                <Tooltip title="上传图片">
-                  <Button 
-                    type="text" 
-                    icon={<PictureOutlined />}
-                    style={{ fontSize: 16 }}
-                    onClick={() => message.info('上传图片功能开发中')}
-                  />
-                </Tooltip>
-                <Tooltip title="上传文件">
-                  <Button 
-                    type="text" 
-                    icon={<FileAddOutlined />}
-                    style={{ fontSize: 16 }}
-                    onClick={() => message.info('上传文件功能开发中')}
-                  />
-                </Tooltip>
+                <Space size="small">
+                  <Tooltip title="上传图片">
+                    <Button 
+                      type="text" 
+                      icon={<PictureOutlined style={{ fontSize: '16px', color: token.colorTextSecondary }} />} 
+                      size="small"
+                      disabled={sending}
+                    />
+                  </Tooltip>
+                  <Tooltip title="上传文件">
+                    <Button 
+                      type="text" 
+                      icon={<FileAddOutlined style={{ fontSize: '16px', color: token.colorTextSecondary }} />} 
+                      size="small"
+                      disabled={sending}
+                    />
+                  </Tooltip>
+                  <Tooltip title="语音播报">
+                    <Button 
+                      type="text" 
+                      icon={<SoundOutlined style={{ fontSize: '16px', color: token.colorTextSecondary }} />} 
+                      size="small"
+                      disabled={sending}
+                    />
+                  </Tooltip>
+                  <Tooltip title="语音对话">
+                    <Button 
+                      type="text" 
+                      icon={<AudioOutlined style={{ fontSize: '16px', color: token.colorTextSecondary }} />} 
+                      size="small"
+                      disabled={sending}
+                    />
+                  </Tooltip>
+                  <Tooltip title="联网搜索">
+                    <Button 
+                      type="text" 
+                      icon={<SearchOutlined style={{ fontSize: '16px', color: token.colorTextSecondary }} />} 
+                      size="small"
+                      disabled={sending}
+                    />
+                  </Tooltip>
+                </Space>
               </div>
-              <Sender 
-                onSubmit={handleSendMessage} 
-                loading={sending}
-                placeholder="输入消息，按 Enter 发送..."
-              />
-              <Button 
-                type="primary" 
-                icon={<SendOutlined />}
-                loading={sending}
-                style={{ 
-                  position: 'absolute',
-                  right: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  borderRadius: '8px',
-                }}
-                onClick={() => handleSendMessage('')}
-              />
+              <div style={{ 
+                display: 'flex',
+                padding: '0 16px 16px',
+              }}>
+                <textarea
+                  id="message-input"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="输入您的问题..."
+                  style={{ 
+                    width: '100%', 
+                    height: '60px', 
+                    border: 'none',
+                    resize: 'none',
+                    padding: '12px 0',
+                    outline: 'none',
+                    fontSize: '14px',
+                    lineHeight: 1.5,
+                    backgroundColor: 'transparent',
+                  }}
+                  disabled={loading || sending}
+                />
+                <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '12px', gap: '8px' }}>
+                  <Tooltip title="语音对话">
+                    <Button 
+                      type="default" 
+                      icon={<AudioOutlined />} 
+                      style={{ 
+                        height: '36px',
+                        width: '36px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        borderRadius: '8px',
+                      }}
+                      disabled={loading || sending}
+                    />
+                  </Tooltip>
+                  <Tooltip title="发送">
+                    <Button 
+                      type="default"
+                      icon={<SendOutlined />} 
+                      onClick={handleSend}
+                      loading={sending}
+                      disabled={!inputValue.trim() || loading}
+                      style={{ 
+                        height: '36px',
+                        width: '36px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        borderRadius: '8px',
+                        border: inputValue.trim() ? 'none' : undefined,
+                        backgroundColor: inputValue.trim() ? '#1677ff' : undefined,
+                        color: inputValue.trim() ? '#fff' : undefined,
+                      }}
+                    />
+                  </Tooltip>
+                </div>
+              </div>
             </div>
           </div>
         </Footer>
       </Layout>
-
-      <SettingsModal
-        visible={settingsVisible}
+      
+      <SettingsModal 
+        visible={settingsVisible} 
         onClose={() => setSettingsVisible(false)}
         settings={settings}
-        onSave={setSettings}
+        onSave={handleSettingsSave}
       />
     </Layout>
   );
