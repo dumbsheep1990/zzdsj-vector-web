@@ -324,6 +324,11 @@ const AssistantChat: React.FC = () => {
     navigate(`/chat/${newChatId}`);
   };
 
+  const handleSelectChat = (chatId: string) => {
+    // Navigate to the selected chat
+    navigate(`/chat/${chatId}`);
+  };
+
   return (
     <>
       <ChatModal
@@ -338,6 +343,7 @@ const AssistantChat: React.FC = () => {
         onSettingsClick={() => setSettingsVisible(true)}
         onNewChat={handleNewChat}
         onDeleteChat={handleDeleteChat}
+        onSelectChat={handleSelectChat}
         messagesEndRef={messagesEndRef}
       />
 

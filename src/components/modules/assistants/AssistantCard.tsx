@@ -8,46 +8,25 @@ import {
   CheckCircleFilled, CloseCircleFilled, MoreOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { Assistant } from './types';
 
 const { Text } = Typography;
 
-// 助手类型定义
-interface KnowledgeBase {
-  id: string;
-  name: string;
-  documentCount: number;
-}
-
-interface Model {
-  type: string;
-  name: string;
-}
-
-interface UsageStats {
-  totalChats: number;
-  tokenUsage: number;
-  apiCalls: number;
-}
-
-interface Assistant {
-  id: string;
-  name: string;
-  avatar?: string;
-  description?: string;
-  status: 'online' | 'offline';
-  model?: string;
-  models?: Model[];
-  capabilities: string[];
-  createTime: string;
-  knowledgeBases?: KnowledgeBase[];
-  usageStats?: UsageStats;
-}
+// Modify the Assistant interface to replace usageStats with our local version
+export type ModifiedAssistant = Omit<Assistant, 'usageStats'> & {
+  usageStats?: {
+    totalChats: number;
+    tokenUsage: number;
+    apiCalls: number;
+    satisfactionRate: number; // Added to match the imported type
+  };
+};
 
 interface AssistantCardProps {
-  assistant: Assistant;
+  assistant: ModifiedAssistant;
   isFavorite: boolean;
   toggleFavorite: (id: string) => void;
-  handleEdit: (assistant: Assistant) => void;
+  handleEdit: (assistant: ModifiedAssistant) => void;
   handleDelete: (id: string) => void;
   handleStatusChange: (id: string, status: 'online' | 'offline') => void;
 }
@@ -295,7 +274,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           className="text-gray-600"
           style={{ margin: '0 0 8px 0', minHeight: '42px' }}
         >
-          {assistant.description || '暂无描述'}
+          {assistant.description}
         </Typography.Paragraph>
         
         <Space wrap style={{ marginBottom: '8px' }}>

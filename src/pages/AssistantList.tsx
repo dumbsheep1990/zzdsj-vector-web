@@ -6,9 +6,8 @@ import {
   AssistantCard, 
   AssistantFilter, 
   AssistantForm, 
-  getFilteredAssistants, 
-  getRandomGradient,
-  Assistant
+  getFilteredAssistants,
+  ModifiedAssistant as Assistant
 } from '../components/modules/assistants';
 import { mockAssistants } from '../utils/mockData';
 
@@ -154,7 +153,6 @@ const AssistantList: React.FC = () => {
                   handleEdit={handleEdit}
                   handleDelete={handleDelete}
                   handleStatusChange={handleStatusChange}
-                  getRandomGradient={getRandomGradient}
                 />
               </Badge.Ribbon>
             </List.Item>
