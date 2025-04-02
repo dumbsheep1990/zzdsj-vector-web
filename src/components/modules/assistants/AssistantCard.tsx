@@ -263,7 +263,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
         flex: '1',
         display: 'flex',
         flexDirection: 'column' as const,
-        background: 'transparent', // 移除背景使用卡片背景
+        // background: 'transparent', // 移除背景使用卡片背景
         overflow: 'visible', 
         minHeight: '0', 
       }}
