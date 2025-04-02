@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { StatsCardProps } from '../../utils/types';
 
 const StatsCard: FC<StatsCardProps> = ({ icon, title, value, color, bgGradient }) => {

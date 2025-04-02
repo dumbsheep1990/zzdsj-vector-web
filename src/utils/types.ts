@@ -52,7 +52,7 @@ export interface KeywordItem {
     frequency: number;
     lastUsed: string;
     category: string;
-    importance: string;
+    importance: 'high' | 'medium' | 'low';
     relatedKeywords: number[];
 }
 

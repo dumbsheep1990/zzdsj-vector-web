@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Tag, BarChart, AlertCircle, X, Search as FileSearch } from 'lucide-react';
+import { FileText, Tag, BarChart, AlertCircle, X } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { TabsContainer, TabButton } from '../../ui/Tabs';
 import ForceGraph2D from 'react-force-graph-2d';

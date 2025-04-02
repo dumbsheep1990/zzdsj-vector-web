@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Tag, BarChart, Edit, Trash2 } from 'lucide-react';
 import { KeywordItem } from '../../../utils/types';
 

@@ -12,8 +12,6 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   activeSection,
   title,
   onClose,
-  className,
-  children 
 }) => {
   const [activeTab, setActiveTab] = useState('基本信息');
 

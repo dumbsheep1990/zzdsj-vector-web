@@ -21,7 +21,7 @@ const AssistantList: React.FC = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'alphabetical'>('newest');
-  const [searchText, setSearchText] = useState<string>('');
+  const [searchText] = useState<string>('');
 
   // 切换收藏状态
   const toggleFavorite = (id: string) => {

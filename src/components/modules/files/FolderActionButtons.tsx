@@ -7,11 +7,7 @@ interface FolderActionButtonsProps {
   folder: FileItem;
 }
 
-const FolderActionButtons: React.FC<FolderActionButtonsProps> = ({
-  // 我们在组件中暂时不使用folder参数，但它保留着以备将来需要
-  // 在以后某个时候，我们可以使用folder的属性来决定按钮的显示
-  folder
-}) => {
+const FolderActionButtons: React.FC<FolderActionButtonsProps> = ({}) => {
   return (
     <div className="flex items-center space-x-1">
       {/* 新建文件夹按钮 */}
