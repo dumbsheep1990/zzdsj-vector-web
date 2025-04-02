@@ -6,7 +6,6 @@ import {
   AssistantCard, 
   AssistantFilter, 
   AssistantForm, 
-  getFilteredAssistants,
   ModifiedAssistant as Assistant
 } from '../components/modules/assistants';
 import { mockAssistants } from '../utils/mockData';
@@ -18,19 +17,9 @@ const AssistantList: React.FC = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentAssistant, setCurrentAssistant] = useState<Assistant | null>(null);
   const [form] = Form.useForm();
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'alphabetical'>('newest');
   const [searchText] = useState<string>('');
-
-  // 切换收藏状态
-  const toggleFavorite = (id: string) => {
-    if (favorites.includes(id)) {
-      setFavorites(favorites.filter(fav => fav !== id));
-    } else {
-      setFavorites([...favorites, id]);
-    }
-  };
 
   // 切换在线状态
   const handleStatusChange = (id: string, status: 'online' | 'offline') => {
@@ -110,7 +99,28 @@ const AssistantList: React.FC = () => {
   };
 
   // 获取过滤后的助手列表
-  const filteredAssistants = getFilteredAssistants(assistants, filterStatus, sortOrder, searchText);
+  const filteredAssistants = assistants
+    .filter(a => {
+      // 根据状态筛选
+      if (filterStatus && a.status !== filterStatus) return false;
+      
+      // 根据搜索文本筛选
+      if (searchText && !a.name.toLowerCase().includes(searchText.toLowerCase())) return false;
+      
+      return true;
+    })
+    .sort((a, b) => {
+      // 根据排序方式排序
+      if (sortOrder === 'alphabetical') {
+        return a.name.localeCompare(b.name);
+      } else if (sortOrder === 'newest') {
+        // 使用 id 属性进行排序
+        return (b.id || '').localeCompare(a.id || '');
+      } else {
+        // 使用 id 属性进行排序
+        return (a.id || '').localeCompare(b.id || '');
+      }
+    });
 
   return (
     <div className="flex-1 flex flex-col overflow-auto">
@@ -141,20 +151,12 @@ const AssistantList: React.FC = () => {
           dataSource={filteredAssistants}
           renderItem={(item) => (
             <List.Item className="mb-3">
-              <Badge.Ribbon 
-                text={favorites.includes(item.id) ? '已收藏' : null} 
-                color="gold" 
-                style={{ display: favorites.includes(item.id) ? 'block' : 'none' }}
-              >
-                <AssistantCard
-                  assistant={item}
-                  isFavorite={favorites.includes(item.id)}
-                  toggleFavorite={toggleFavorite}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                  handleStatusChange={handleStatusChange}
-                />
-              </Badge.Ribbon>
+              <AssistantCard
+                assistant={item}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                handleStatusChange={handleStatusChange}
+              />
             </List.Item>
           )}
         />

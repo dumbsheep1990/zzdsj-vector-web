@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Avatar, Button, Typography, Tag, Space, Switch, message, Tooltip, Row, Col, Divider, Dropdown, Menu } from 'antd';
 import { 
   RobotOutlined, MessageOutlined, EditOutlined, BarChartOutlined, 
-  DeleteOutlined, StarOutlined, StarFilled, 
+  DeleteOutlined, 
   InfoCircleOutlined, BookOutlined,
   ApiOutlined, NodeIndexOutlined, SortAscendingOutlined,
   CheckCircleFilled, CloseCircleFilled, MoreOutlined
@@ -24,8 +24,6 @@ export type ModifiedAssistant = Omit<Assistant, 'usageStats'> & {
 
 interface AssistantCardProps {
   assistant: ModifiedAssistant;
-  isFavorite: boolean;
-  toggleFavorite: (id: string) => void;
   handleEdit: (assistant: ModifiedAssistant) => void;
   handleDelete: (id: string) => void;
   handleStatusChange: (id: string, status: 'online' | 'offline') => void;
@@ -33,8 +31,6 @@ interface AssistantCardProps {
 
 const AssistantCard: React.FC<AssistantCardProps> = ({ 
   assistant, 
-  isFavorite, 
-  toggleFavorite, 
   handleEdit, 
   handleDelete,
   handleStatusChange
@@ -82,6 +78,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
     }
   };
 
+  // 状态切换处理函数
   const onStatusChange = (checked: boolean) => {
     handleStatusChange(assistant.id, checked ? 'online' : 'offline');
   };
@@ -141,23 +138,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                   </div>
                 </Tooltip>
                 
-                {/* 添加助手ID标签 */}
-                <Tooltip title={`ID: ${assistant.id}`}>
-                  <div style={{ 
-                    fontSize: '11px', 
-                    padding: '1px 6px', 
-                    borderRadius: '4px', 
-                    background: 'rgba(0, 0, 0, 0.04)',
-                    color: '#666',
-                    border: '1px solid rgba(0, 0, 0, 0.06)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    height: '20px',
-                    fontFamily: 'monospace'
-                  }}>
-                    ID: {assistant.id.substring(0, 8)}...
-                  </div>
-                </Tooltip>
+                {/* IDu6807u7b7eu5df2u79fbu9664 */}
               </div>
               <div style={{ 
                 fontSize: '12px', 
@@ -172,43 +153,40 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                 }}>
                   {assistant.status === 'online' ? <CheckCircleFilled /> : <CloseCircleFilled />}
                 </span>
-                {assistant.status === 'online' ? '在线' : '离线'}
+                <Tooltip title={`ID: ${assistant.id}`}>
+                  <div>
+                    ID: {assistant.id.substring(0, 8)}...
+                  </div>
+                </Tooltip>
               </div>
             </div>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {/* 收藏按钮 */}
-            <Button 
-              type="text" 
-              icon={isFavorite ? <StarFilled style={{ color: '#faad14' }} /> : <StarOutlined />} 
-              onClick={() => toggleFavorite(assistant.id)}
-              style={{ marginRight: '4px' }}
-            />
-            
             {/* 状态开关 */}
             <Switch
               checkedChildren="在线"
               unCheckedChildren="离线"
               checked={assistant.status === 'online'}
-              onChange={onStatusChange}
-              size="small"
-              style={assistant.status === 'online' ? switchStyle.online : switchStyle.offline}
+              onChange={(checked) => onStatusChange(checked)}
+              size="default"
+              style={{
+                ...((assistant.status === 'online') ? switchStyle.online : switchStyle.offline),
+                transform: 'scale(1.2)',
+                marginRight: '12px'
+              }}
             />
             
             {/* 更多操作菜单 */}
             <Dropdown 
               overlay={
-                <Menu>
-                  <Menu.Item key="edit" onClick={() => handleEdit(assistant)} icon={<EditOutlined />}>
-                    编辑
-                  </Menu.Item>
+                <Menu onClick={(e) => e.domEvent.stopPropagation()}>  {/* 阻止事件冒泡 */}
                   <Menu.Item key="api" onClick={() => {
                     // Copy API to clipboard
                     navigator.clipboard.writeText(`/api/v1/assistants/${assistant.id}`);
                     message.success('API地址已复制到剪贴板');
                   }} icon={<ApiOutlined />}>
-                    复制API
+                    API
                   </Menu.Item>
                   <Menu.Divider />
                   <Menu.Item 
@@ -221,10 +199,14 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                   </Menu.Item>
                 </Menu>
               }
-              placement="bottomRight"
               trigger={['click']}
             >
-              <Button type="text" icon={<MoreOutlined />} />
+              <Button 
+                type="text" 
+                icon={<MoreOutlined />} 
+                style={{ border: '1px solid #d9d9d9', borderRadius: '50%' }} 
+                onClick={(e) => e.stopPropagation()} // 阻止Button点击事件被深
+              />
             </Dropdown>
           </div>
         </div>
@@ -242,7 +224,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
         flex: '1',
         display: 'flex',
         flexDirection: 'column' as const,
-        // background: 'transparent', // 移除背景使用卡片背景
+        // background: 'transparent', // u79fbu9664u80ccu666f\u7528u5361u7247u80ccu666f
         overflow: 'visible', 
         minHeight: '0', 
       }}
@@ -288,7 +270,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           ))}
         </Space>
 
-        {/* 模型信息区块 - 简化和美化 */}
+        {/* 模型信息 */}
         <Row gutter={[8, 10]}>
           <Col span={24}>
             <div style={{ 
@@ -318,48 +300,44 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
               </div>
             </div>
             
-            {/* 模型卡片区域 */}
+            {/* 模型卡片 */}
             <div style={{ 
               display: 'flex', 
               flexDirection: 'row',
               gap: '8px',
               flexWrap: 'wrap'
             }}>
-              {/* 推理模型卡片 */}
+              {/* 推理模型 */}
               <div style={{
                 flex: '1 0 calc(33.333% - 8px)',
                 minWidth: '100px',
-                background: 'linear-gradient(145deg, #ffffff, #f0f7ff)',
-                borderRadius: '10px',
                 padding: '8px 10px',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px rgba(24, 144, 255, 0.06)',
-                border: '1px solid rgba(24, 144, 255, 0.1)'
+                background: 'white',
+                borderRadius: '8px',
+                border: '1px solid #f0f0f0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '3px'
               }}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  marginBottom: '4px'
-                }}>
-                  <Tag color="blue" style={{ 
-                    margin: 0, 
-                    borderRadius: '4px',
-                    fontSize: '10px',
-                    padding: '0 4px',
-                    height: '18px',
-                    lineHeight: '18px',
-                    background: 'rgba(24, 144, 255, 0.1)',
-                    border: '1px solid rgba(24, 144, 255, 0.2)',
-                    color: '#1890ff'
-                  }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Tag 
+                    style={{
+                      marginRight: 0,
+                      borderRadius: '4px',
+                      fontSize: '10px',
+                      padding: '0 4px',
+                      background: 'rgba(24, 144, 255, 0.1)',
+                      border: '1px solid rgba(24, 144, 255, 0.2)',
+                      color: '#1890ff'
+                    }}>
                     <RobotOutlined style={{ marginRight: '2px', fontSize: '10px' }} />推理
                   </Tag>
                 </div>
                 <Text style={{ 
-                  fontSize: '11px',
-                  color: '#333', 
-                  fontWeight: '500',
-                  whiteSpace: 'nowrap',
+                  fontSize: '12px',
+                  color: '#666',
                   overflow: 'hidden',
+                  whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   display: 'block'
                 }}>
@@ -367,41 +345,37 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                 </Text>
               </div>
 
-              {/* 向量模型卡片 */}
+              {/* 向量模型 */}
               <div style={{
                 flex: '1 0 calc(33.333% - 8px)',
                 minWidth: '100px',
-                background: 'linear-gradient(145deg, #ffffff, #f0fff4)',
-                borderRadius: '10px',
                 padding: '8px 10px',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px rgba(82, 196, 26, 0.06)',
-                border: '1px solid rgba(82, 196, 26, 0.1)'
+                background: 'white',
+                borderRadius: '8px',
+                border: '1px solid #f0f0f0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '3px'
               }}>
-                <div style={{
-                  display: 'flex', 
-                  alignItems: 'center',
-                  marginBottom: '4px'
-                }}>
-                  <Tag color="green" style={{ 
-                    margin: 0, 
-                    borderRadius: '4px',
-                    fontSize: '10px',
-                    padding: '0 4px',
-                    height: '18px',
-                    lineHeight: '18px',
-                    background: 'rgba(82, 196, 26, 0.1)',
-                    border: '1px solid rgba(82, 196, 26, 0.2)',
-                    color: '#52c41a'
-                  }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Tag 
+                    style={{
+                      marginRight: 0,
+                      borderRadius: '4px',
+                      fontSize: '10px',
+                      padding: '0 4px',
+                      background: 'rgba(82, 196, 26, 0.1)',
+                      border: '1px solid rgba(82, 196, 26, 0.2)',
+                      color: '#52c41a'
+                    }}>
                     <NodeIndexOutlined style={{ marginRight: '2px', fontSize: '10px' }} />向量
                   </Tag>
                 </div>
                 <Text style={{ 
-                  fontSize: '11px',
-                  color: '#333', 
-                  fontWeight: '500',
-                  whiteSpace: 'nowrap',
+                  fontSize: '12px',
+                  color: '#666',
                   overflow: 'hidden',
+                  whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   display: 'block'
                 }}>
@@ -409,41 +383,37 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                 </Text>
               </div>
 
-              {/* 重排模型卡片 */}
+              {/* 重排模型 */}
               <div style={{
                 flex: '1 0 calc(33.333% - 8px)',
                 minWidth: '100px',
-                background: 'linear-gradient(145deg, #ffffff, #fffbe6)',
-                borderRadius: '10px',
                 padding: '8px 10px',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px rgba(250, 173, 20, 0.06)',
-                border: '1px solid rgba(250, 173, 20, 0.1)'
+                background: 'white',
+                borderRadius: '8px',
+                border: '1px solid #f0f0f0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '3px'
               }}>
-                <div style={{
-                  display: 'flex', 
-                  alignItems: 'center',
-                  marginBottom: '4px'
-                }}>
-                  <Tag color="orange" style={{ 
-                    margin: 0, 
-                    borderRadius: '4px',
-                    fontSize: '10px',
-                    padding: '0 4px',
-                    height: '18px',
-                    lineHeight: '18px',
-                    background: 'rgba(250, 173, 20, 0.1)',
-                    border: '1px solid rgba(250, 173, 20, 0.2)',
-                    color: '#faad14'
-                  }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Tag 
+                    style={{
+                      marginRight: 0,
+                      borderRadius: '4px',
+                      fontSize: '10px',
+                      padding: '0 4px',
+                      background: 'rgba(250, 173, 20, 0.1)',
+                      border: '1px solid rgba(250, 173, 20, 0.2)',
+                      color: '#faad14'
+                    }}>
                     <SortAscendingOutlined style={{ marginRight: '2px', fontSize: '10px' }} />重排
                   </Tag>
                 </div>
                 <Text style={{ 
-                  fontSize: '11px',
-                  color: '#333', 
-                  fontWeight: '500',
-                  whiteSpace: 'nowrap',
+                  fontSize: '12px',
+                  color: '#666',
                   overflow: 'hidden',
+                  whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   display: 'block'
                 }}>
@@ -454,7 +424,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           </Col>
         </Row>
 
-        {/* 使用统计区块 */}
+        {/* 用户统计 */}
         {assistant.usageStats && (
           <>
             <Divider style={{ margin: '12px 0 8px', borderColor: 'rgba(0, 0, 0, 0.06)' }} />
@@ -480,7 +450,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                       fontSize: '12px',
                       fontWeight: 500
                     }}>
-                      使用统计
+                      用户统计
                     </Text>
                   </div>
                 </div>
@@ -596,7 +566,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           </>
         )}
 
-        {/* 知识库信息区块 */}
+        {/* 知识库信息 */}
         <Divider style={{ margin: '12px 0 8px', borderColor: 'rgba(0, 0, 0, 0.06)' }} />
         <Row>
           <Col span={24}>
@@ -694,7 +664,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                   gap: '6px'
                 }}>
                   <InfoCircleOutlined />
-                  暂未关联知识库
+                  当前未关联知识库
                 </div>
               </div>
             )}
@@ -702,18 +672,20 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
         </Row>
       </div>
       
-      {/* 底部操作区域 - 移到卡片底部中央位置 */}
+      {/* 已部署模型信息 */}
       <div style={{ 
         padding: '12px 16px 16px', 
-        background: 'transparent', // 移除背景使用卡片背景
-        borderTop: '1px solid rgba(255, 255, 255, 0.2)', // 更明显的分隔线
+        background: 'transparent',
+        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
         borderBottomLeftRadius: '16px',
         borderBottomRightRadius: '16px',
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'space-between', // 改变为两端对齐
         alignItems: 'center',
-        flexShrink: 0, 
+        flexShrink: 0,
+        gap: '12px' // 添加间距
       }}>
+        {/* 开始对话 */}
         <Button
           size="middle"
           icon={<MessageOutlined />}
@@ -736,9 +708,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
               ? '0 2px 10px rgba(24, 144, 255, 0.3)' 
               : '0 2px 10px rgba(0, 0, 0, 0.1)',
             transition: 'all 0.3s ease',
-            width: 'calc(100% - 16px)', 
-            maxWidth: '500px', 
-            margin: '0 auto', 
+            flex: 1, // 填充剩余空间
           }}
           onMouseOver={(e) => {
             if (assistant.status === 'online') {
@@ -754,6 +724,38 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           }}
         >
           开始对话
+        </Button>
+        
+        {/* 编辑助手 */}
+        <Button
+          size="middle"
+          icon={<EditOutlined />}
+          onClick={() => handleEdit(assistant)}
+          style={{ 
+            background: 'linear-gradient(135deg, #ffffff, #f5f5f5)',
+            borderColor: '#d9d9d9', 
+            color: 'rgba(0, 0, 0, 0.65)',
+            borderRadius: '8px',
+            fontSize: '14px',
+            padding: '0 20px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+            transition: 'all 0.3s ease',
+            flex: 1, // 填充剩余空间
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #fafafa, #f0f0f0)';
+            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, #f5f5f5)';
+            e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.05)';
+          }}
+        >
+          编辑助手
         </Button>
       </div>
     </Card>
