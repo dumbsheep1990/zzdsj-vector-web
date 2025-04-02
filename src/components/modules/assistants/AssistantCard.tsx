@@ -1,14 +1,15 @@
-import React from 'react';
-import { Card, Avatar, Button, Typography, Tag, Space, Switch, message, Tooltip, Row, Col, Divider, Dropdown, Menu } from 'antd';
+import React, { useState } from 'react';
+import { Card, Avatar, Button, Typography, Tag, Space, Switch, message, Tooltip, Row, Col, Divider, Dropdown } from 'antd';
 import { 
-  RobotOutlined, MessageOutlined, EditOutlined, BarChartOutlined, 
+  RobotOutlined, MessageOutlined, BarChartOutlined, 
   DeleteOutlined, 
   InfoCircleOutlined, BookOutlined,
   ApiOutlined, NodeIndexOutlined, SortAscendingOutlined,
-  CheckCircleFilled, CloseCircleFilled, MoreOutlined
+  CheckCircleFilled, CloseCircleFilled, MoreOutlined, SettingOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Assistant } from './types';
+import AssistantSettingsModal from './AssistantSettingsModal';
 
 const { Text } = Typography;
 
@@ -35,7 +36,8 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
   handleDelete,
   handleStatusChange
 }) => {
-  const navigate = useNavigate(); // 添加导航钩子
+  const navigate = useNavigate(); 
+  const [settingsVisible, setSettingsVisible] = useState(false);
   
   const cardStyle = { 
     width: "100%",
@@ -83,13 +85,16 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
     handleStatusChange(assistant.id, checked ? 'online' : 'offline');
   };
   
-  // 添加导航到聊天页面的处理函数
-  const handleStartChat = () => {
-    // 仅当助手在线时允许开始对话
-    if (assistant.status === 'online') {
-      navigate(`/chat/${assistant.id}`);
-    } else {
-      message.warning('助手当前处于离线状态，请先将其设置为在线');
+  // 配置保存处理函数
+  const handleSettingsSave = (updatedAssistant: ModifiedAssistant) => {
+    // 这里可以调用API保存更新的助手配置
+    // 然后关闭模态框
+    message.success('助手配置已更新');
+    setSettingsVisible(false);
+    
+    // 如果有更新整个助手的回调，可以在这里调用
+    if (handleEdit) {
+      handleEdit(updatedAssistant);
     }
   };
 
@@ -179,26 +184,31 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
             
             {/* 更多操作菜单 */}
             <Dropdown 
-              overlay={
-                <Menu onClick={(e) => e.domEvent.stopPropagation()}>  {/* 阻止事件冒泡 */}
-                  <Menu.Item key="api" onClick={() => {
-                    // Copy API to clipboard
-                    navigator.clipboard.writeText(`/api/v1/assistants/${assistant.id}`);
-                    message.success('API地址已复制到剪贴板');
-                  }} icon={<ApiOutlined />}>
-                    API
-                  </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Item 
-                    key="delete" 
-                    onClick={() => handleDelete(assistant.id)} 
-                    icon={<DeleteOutlined />}
-                    danger
-                  >
-                    删除
-                  </Menu.Item>
-                </Menu>
-              }
+              menu={{
+                onClick: (e) => e.domEvent.stopPropagation(),
+                items: [
+                  {
+                    key: 'api',
+                    icon: <ApiOutlined />,
+                    label: 'API',
+                    onClick: () => {
+                      // Copy API to clipboard
+                      navigator.clipboard.writeText(`/api/v1/assistants/${assistant.id}`);
+                      message.success('API地址已复制到剪贴板');
+                    }
+                  },
+                  {
+                    type: 'divider'
+                  },
+                  {
+                    key: 'delete',
+                    icon: <DeleteOutlined />,
+                    label: '删除',
+                    danger: true,
+                    onClick: () => handleDelete(assistant.id)
+                  }
+                ]
+              }}
               trigger={['click']}
             >
               <Button 
@@ -674,90 +684,85 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
       
       {/* 已部署模型信息 */}
       <div style={{ 
-        padding: '12px 16px 16px', 
-        background: 'transparent',
-        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-        borderBottomLeftRadius: '16px',
-        borderBottomRightRadius: '16px',
+        borderTop: '1px solid #f0f0f0',
+        padding: '12px',
         display: 'flex',
-        justifyContent: 'space-between', // 改变为两端对齐
-        alignItems: 'center',
-        flexShrink: 0,
-        gap: '12px' // 添加间距
+        justifyContent: 'space-between',
+        background: 'linear-gradient(to bottom, rgba(240, 245, 255, 0.5), rgba(245, 250, 255, 0.8))',
+        borderRadius: '0 0 8px 8px'
       }}>
-        {/* 开始对话 */}
-        <Button
-          size="middle"
-          icon={<MessageOutlined />}
-          onClick={handleStartChat} 
-          disabled={assistant.status !== 'online'} 
-          style={{ 
-            background: assistant.status === 'online' 
-              ? 'linear-gradient(135deg, #096dd9, #1890ff)' 
-              : 'linear-gradient(135deg, #d9d9d9, #f0f0f0)', 
-            borderColor: 'transparent', 
-            color: assistant.status === 'online' ? 'white' : 'rgba(0, 0, 0, 0.25)',
-            borderRadius: '8px',
-            fontSize: '14px',
-            padding: '0 20px',
+        {/* 配置按钮，现在同时处理编辑和配置功能 */}
+        <Button 
+          icon={<SettingOutlined />} 
+          onClick={(e) => {
+            e.stopPropagation();
+            setSettingsVisible(true);
+          }}
+          style={{
+            background: 'linear-gradient(135deg, #1677ff, #40a9ff)',
+            borderColor: 'transparent',
+            color: 'white',
+            boxShadow: '0 2px 6px rgba(24, 144, 255, 0.2)',
+            width: 'calc(50% - 6px)',
             height: '40px',
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: assistant.status === 'online' 
-              ? '0 2px 10px rgba(24, 144, 255, 0.3)' 
-              : '0 2px 10px rgba(0, 0, 0, 0.1)',
-            transition: 'all 0.3s ease',
-            flex: 1, // 填充剩余空间
+            alignItems: 'center',
+            borderRadius: '6px',
+            fontWeight: 500
           }}
-          onMouseOver={(e) => {
-            if (assistant.status === 'online') {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #1890ff, #40a9ff)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(24, 144, 255, 0.4)';
-            }
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #0958d9, #1677ff)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(24, 144, 255, 0.3)';
           }}
-          onMouseOut={(e) => {
-            if (assistant.status === 'online') {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #096dd9, #1890ff)';
-              e.currentTarget.style.boxShadow = '0 2px 10px rgba(24, 144, 255, 0.3)';
-            }
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #1677ff, #40a9ff)';
+            e.currentTarget.style.boxShadow = '0 2px 6px rgba(24, 144, 255, 0.2)';
+          }}
+        >
+          配置
+        </Button>
+        
+        {/* 开始对话按钮 */}
+        <Button 
+          icon={<MessageOutlined />}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/chat/${assistant.id}`);
+          }}
+          style={{
+            background: 'linear-gradient(135deg, #13c2c2, #36cfc9)',
+            borderColor: 'transparent',
+            color: 'white',
+            boxShadow: '0 2px 6px rgba(19, 194, 194, 0.2)',
+            width: 'calc(50% - 6px)',
+            height: '40px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '6px',
+            fontWeight: 500
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #108ee9, #2bb7f6)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(19, 194, 194, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #13c2c2, #36cfc9)';
+            e.currentTarget.style.boxShadow = '0 2px 6px rgba(19, 194, 194, 0.2)';
           }}
         >
           开始对话
         </Button>
-        
-        {/* 编辑助手 */}
-        <Button
-          size="middle"
-          icon={<EditOutlined />}
-          onClick={() => handleEdit(assistant)}
-          style={{ 
-            background: 'linear-gradient(135deg, #ffffff, #f5f5f5)',
-            borderColor: '#d9d9d9', 
-            color: 'rgba(0, 0, 0, 0.65)',
-            borderRadius: '8px',
-            fontSize: '14px',
-            padding: '0 20px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
-            transition: 'all 0.3s ease',
-            flex: 1, // 填充剩余空间
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #fafafa, #f0f0f0)';
-            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff, #f5f5f5)';
-            e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.05)';
-          }}
-        >
-          编辑助手
-        </Button>
       </div>
+      
+      {/* 设置模态框 */}
+      <AssistantSettingsModal
+        visible={settingsVisible}
+        assistant={assistant}
+        onClose={() => setSettingsVisible(false)}
+        onSave={handleSettingsSave}
+      />
     </Card>
   );
 };
