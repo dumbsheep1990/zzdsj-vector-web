@@ -8,6 +8,7 @@ import Models from './pages/Models';
 import AssistantList from './pages/AssistantList';
 import AssistantChat from './pages/AssistantChat';
 import DataProcessingTools from './pages/DataProcessingTools';
+import QAManagement from './pages/QAManagement';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -48,6 +49,8 @@ const AppContent: FC = () => {
                 return <Models />;
             case 'assistant-list':
                 return <AssistantList />;
+            case 'qa-management':
+                return <QAManagement />;
             case 'data-processing-tools':
                 return <DataProcessingTools />;
             case 'settings':
@@ -61,6 +64,7 @@ const AppContent: FC = () => {
         <Routes>
             <Route path="/" element={<MainLayout>{renderContent()}</MainLayout>} />
             <Route path="/chat/:assistantId" element={<AssistantChat />} />
+            <Route path="/qa-management" element={<MainLayout><QAManagement /></MainLayout>} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );

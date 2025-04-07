@@ -730,29 +730,40 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
             e.stopPropagation();
             navigate(`/chat/${assistant.id}`);
           }}
+          disabled={assistant.status === 'offline'}
           style={{
-            background: 'linear-gradient(135deg, #13c2c2, #36cfc9)',
+            background: assistant.status === 'online' 
+              ? 'linear-gradient(135deg, #13c2c2, #36cfc9)'
+              : 'linear-gradient(135deg, #d9d9d9, #bfbfbf)',
             borderColor: 'transparent',
             color: 'white',
-            boxShadow: '0 2px 6px rgba(19, 194, 194, 0.2)',
+            boxShadow: assistant.status === 'online'
+              ? '0 2px 6px rgba(19, 194, 194, 0.2)'
+              : '0 2px 6px rgba(0, 0, 0, 0.1)',
             width: 'calc(50% - 6px)',
             height: '40px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: '6px',
-            fontWeight: 500
+            fontWeight: 500,
+            cursor: assistant.status === 'online' ? 'pointer' : 'not-allowed',
+            opacity: assistant.status === 'online' ? 1 : 0.7
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #108ee9, #2bb7f6)';
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(19, 194, 194, 0.3)';
+            if (assistant.status === 'online') {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #108ee9, #2bb7f6)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(19, 194, 194, 0.3)';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #13c2c2, #36cfc9)';
-            e.currentTarget.style.boxShadow = '0 2px 6px rgba(19, 194, 194, 0.2)';
+            if (assistant.status === 'online') {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #13c2c2, #36cfc9)';
+              e.currentTarget.style.boxShadow = '0 2px 6px rgba(19, 194, 194, 0.2)';
+            }
           }}
         >
-          开始对话
+          {assistant.status === 'online' ? '开始对话' : '助手已下线'}
         </Button>
       </div>
       

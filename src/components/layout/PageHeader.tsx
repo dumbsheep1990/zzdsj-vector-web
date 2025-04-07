@@ -95,14 +95,18 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     }, [showNotifications, showServiceStatus, showUserMenu]);
     
     return (
-        <div className="sticky top-0 z-50 shadow-sm">
+        <div className="fixed top-0 right-0 z-50 bg-white" style={{ 
+            width: 'calc(100% - 240px)', // 减去侧边栏宽度
+            marginLeft: '240px', // 与侧边栏宽度相同
+            borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)'
+        }}>
             {/* 标题栏 - 与侧边栏完全对齐 */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50" style={{
                 height: '56px',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 1.5rem',
-                borderBottom: '1px solid #e5e7eb',
+                padding: '0 24px',
                 justifyContent: 'space-between'
             }}>
                 <div className="flex items-center">
@@ -113,7 +117,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         </>
                     )}
                     <span style={{ 
-                        fontSize: '18px',
+                        fontSize: '16px',
                         fontWeight: 600,
                         color: '#1e293b',
                         lineHeight: '1'
@@ -122,7 +126,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     </span>
                     {description && (
                         <span style={{ 
-                            fontSize: '15px',
+                            fontSize: '14px',
                             color: '#64748b',
                             marginLeft: '1rem',
                             paddingLeft: '1rem',
@@ -132,9 +136,41 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         </span>
                     )}
                 </div>
-                
-                {/* 右侧功能区：通知、服务状态、主题切换 */}
+
+                {/* 右侧功能区：操作按钮、通知、服务状态、用户菜单 */}
                 <div className="flex items-center space-x-4">
+                    {/* 主要操作按钮 */}
+                    {primaryActions.length > 0 && (
+                        <div className="flex items-center space-x-3 mr-4">
+                            {primaryActions.map((action) => (
+                                <button
+                                    key={action.label}
+                                    onClick={action.onClick}
+                                    className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                                >
+                                    {action.icon && <span className="mr-1.5">{action.icon}</span>}
+                                    {action.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* 次要操作按钮 */}
+                    {secondaryActions.length > 0 && (
+                        <div className="flex items-center space-x-3 mr-4">
+                            {secondaryActions.map((action) => (
+                                <button
+                                    key={action.label}
+                                    onClick={action.onClick}
+                                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors text-sm"
+                                >
+                                    {action.icon && <span className="mr-1.5">{action.icon}</span>}
+                                    {action.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {/* 通知按钮 */}
                     <div className="relative">
                         <button 
@@ -194,7 +230,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                             </div>
                         )}
                     </div>
-                    
+
                     {/* 服务状态按钮 */}
                     <div className="relative">
                         <button 
@@ -245,7 +281,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                             </div>
                         )}
                     </div>
-                    
+
                     {/* 用户菜单 */}
                     <div className="relative">
                         <button 
@@ -299,46 +335,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 </div>
             </div>
 
-            {/* 功能区 - 独立样式 */}
-            {(searchComponent || filterComponent || primaryActions.length > 0 || secondaryActions.length > 0) && (
-                <div className="px-6 py-2">
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-100" style={{
-                        padding: '0.75rem 1rem',
-                    }}>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 flex-1 h-10">
-                                {searchComponent}
-                                {filterComponent}
-                            </div>
-                            <div className="flex items-center">
-                                <div className="flex items-center space-x-3">
-                                    {secondaryActions.map((action) => (
-                                        <button
-                                            key={action.label}
-                                            onClick={action.onClick}
-                                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors text-sm"
-                                        >
-                                            {action.icon && <span className="mr-1.5">{action.icon}</span>}
-                                            {action.label}
-                                        </button>
-                                    ))}
-                                </div>
-                                {primaryActions.length > 0 && (
-                                    <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-gray-200">
-                                        {primaryActions.map((action) => (
-                                            <button
-                                                key={action.label}
-                                                onClick={action.onClick}
-                                                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
-                                            >
-                                                {action.icon && <span className="mr-1.5">{action.icon}</span>}
-                                                {action.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+            {/* 搜索和筛选区域 */}
+            {(searchComponent || filterComponent) && (
+                <div className="px-6 py-2 bg-white border-t border-gray-100">
+                    <div className="flex items-center space-x-4">
+                        {searchComponent}
+                        {filterComponent}
                     </div>
                 </div>
             )}

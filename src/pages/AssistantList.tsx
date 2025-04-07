@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { List, Badge, Modal, Form, message } from 'antd';
+import { List, Modal, Form, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import PageHeader from '../components/layout/PageHeader';
 import { 
@@ -62,7 +62,7 @@ const AssistantList: React.FC = () => {
   };
 
   // 表单提交
-  const handleFormSubmit = (values: any) => {
+  const handleFormSubmit = (values: Partial<Assistant>) => {
     if (isEditModalVisible && currentAssistant) {
       // 处理编辑
       const updatedAssistants = assistants.map(assistant => 
@@ -77,10 +77,10 @@ const AssistantList: React.FC = () => {
       // 处理创建
       const newAssistant: Assistant = {
         id: `assistant-${Date.now()}`,
-        name: values.name,
-        description: values.description,
-        model: values.model,
-        status: values.status,
+        name: values.name!,
+        description: values.description!,
+        model: values.model!,
+        status: values.status || 'offline',
         createTime: new Date().toISOString().split('T')[0] + ' 00:00:00',
         capabilities: values.capabilities || [],
       };
@@ -123,7 +123,7 @@ const AssistantList: React.FC = () => {
     });
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col">
       <PageHeader 
         title="助手列表" 
         parentTitle="问答助手"
@@ -145,7 +145,10 @@ const AssistantList: React.FC = () => {
         }
       />
       
-      <div className="p-6 flex-1 overflow-auto bg-gray-50">
+      <div className="p-6 flex-1 overflow-auto bg-gray-50" style={{ 
+        marginTop: '88px',
+        height: 'calc(100vh - 88px)'
+      }}>
         <List<Assistant>
           grid={{ gutter: 12, xs: 1, sm: 1, md: 1, lg: 2, xl: 3, xxl: 4 }}
           dataSource={filteredAssistants}

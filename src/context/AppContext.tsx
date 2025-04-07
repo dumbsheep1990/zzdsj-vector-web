@@ -3,7 +3,7 @@ import { AppState } from '../utils/types';
 
 // 创建上下文的默认值
 const defaultState: AppState = {
-    activeSection: 'dashboard',
+    activeSection: 'qa-management',
     sidebarExpanded: true,
     darkMode: false,
     username: 'u7ba1u7406u5458',
