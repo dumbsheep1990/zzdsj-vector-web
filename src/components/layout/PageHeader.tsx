@@ -136,7 +136,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 <div className="flex items-center">
                     {/* 主要操作按钮 */}
                     {primaryActions.length > 0 && (
-                        <div className="flex items-center space-x-3 mr-4">
+                        <div className="flex items-center space-x-4 mr-6">
                             {primaryActions.map((action) => (
                                 <button
                                     key={action.label}
@@ -152,7 +152,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
                     {/* 次要操作按钮 */}
                     {secondaryActions.length > 0 && (
-                        <div className="flex items-center space-x-3 mr-4">
+                        <div className="flex items-center space-x-4 mr-6">
                             {secondaryActions.map((action) => (
                                 <button
                                     key={action.label}
@@ -166,166 +166,169 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         </div>
                     )}
 
-                    {/* 通知按钮 */}
-                    <div className="relative">
-                        <button 
-                            className="p-1.5 rounded-full hover:bg-indigo-100 transition-colors relative"
-                            onClick={() => {
-                                setShowNotifications(!showNotifications);
-                                if (!showNotifications) {
-                                    clearNotifications();
-                                }
-                            }}
-                        >
-                            <Bell size={18} className="text-gray-600" />
-                            {notificationCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                    {notificationCount}
-                                </span>
-                            )}
-                        </button>
-                        
-                        {/* 通知下拉框 */}
-                        {showNotifications && (
-                            <div className="absolute right-0 mt-2 w-80 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
-                                <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                                    <h3 className="font-medium text-gray-800">通知消息</h3>
-                                    <button 
-                                        className="text-gray-400 hover:text-gray-600"
-                                        onClick={() => setShowNotifications(false)}
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                                <div className="max-h-72 overflow-y-auto">
-                                    {notifications.length > 0 ? (
-                                        notifications.map((notification) => (
-                                            <div key={notification.id} className="p-3 border-b border-gray-100 hover:bg-indigo-50">
-                                                <div className="flex items-start">
-                                                    <div className="flex-shrink-0 mt-0.5">
-                                                        {notification.type === 'success' ? (
-                                                            <CheckCircle size={16} className="text-green-500" />
-                                                        ) : (
-                                                            <AlertCircle size={16} className="text-amber-500" />
-                                                        )}
-                                                    </div>
-                                                    <div className="ml-2">
-                                                        <p className="text-sm text-gray-800">{notification.message}</p>
-                                                        <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                    {/* 右侧图标按钮组 */}
+                    <div className="flex items-center space-x-4">
+                        {/* 通知按钮 */}
+                        <div className="relative">
+                            <button 
+                                className="p-1.5 rounded-full hover:bg-indigo-100 transition-colors relative"
+                                onClick={() => {
+                                    setShowNotifications(!showNotifications);
+                                    if (!showNotifications) {
+                                        clearNotifications();
+                                    }
+                                }}
+                            >
+                                <Bell size={18} className="text-gray-600" />
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                        {notificationCount}
+                                    </span>
+                                )}
+                            </button>
+                            
+                            {/* 通知下拉框 */}
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
+                                    <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                                        <h3 className="font-medium text-gray-800">通知消息</h3>
+                                        <button 
+                                            className="text-gray-400 hover:text-gray-600"
+                                            onClick={() => setShowNotifications(false)}
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                    <div className="max-h-72 overflow-y-auto">
+                                        {notifications.length > 0 ? (
+                                            notifications.map((notification) => (
+                                                <div key={notification.id} className="p-3 border-b border-gray-100 hover:bg-indigo-50">
+                                                    <div className="flex items-start">
+                                                        <div className="flex-shrink-0 mt-0.5">
+                                                            {notification.type === 'success' ? (
+                                                                <CheckCircle size={16} className="text-green-500" />
+                                                            ) : (
+                                                                <AlertCircle size={16} className="text-amber-500" />
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-2">
+                                                            <p className="text-sm text-gray-800">{notification.message}</p>
+                                                            <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            ))
+                                        ) : (
+                                            <div className="p-4 text-center text-gray-500 text-sm">
+                                                暂无通知
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="p-4 text-center text-gray-500 text-sm">
-                                            暂无通知
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
 
-                    {/* 服务状态按钮 */}
-                    <div className="relative">
-                        <button 
-                            className="p-1.5 rounded-full hover:bg-indigo-100 transition-colors"
-                            onClick={() => setShowServiceStatus(!showServiceStatus)}
-                        >
-                            <Server size={18} className="text-gray-600" />
-                        </button>
-                        
-                        {/* 服务状态下拉框 */}
-                        {showServiceStatus && (
-                            <div className="absolute right-0 mt-2 w-72 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
-                                <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                                    <h3 className="font-medium text-gray-800">服务状态</h3>
-                                    <button 
-                                        className="text-gray-400 hover:text-gray-600"
-                                        onClick={() => setShowServiceStatus(false)}
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                                <div className="max-h-72 overflow-y-auto">
-                                    <div className="p-3 border-b border-gray-100">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-800">向量数据库</span>
-                                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-3 border-b border-gray-100">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-800">文件处理服务</span>
-                                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-3 border-b border-gray-100">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-800">搜索服务</span>
-                                            <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">负载高</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-800">API 网关</span>
-                                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* 用户菜单 */}
-                    <div className="relative">
-                        <button 
-                            className="p-1.5 rounded-full hover:bg-indigo-700 transition-colors flex items-center justify-center bg-indigo-600 text-white w-8 h-8"
-                            onClick={() => setShowUserMenu(!showUserMenu)}
-                            aria-label="用户菜单"
-                        >
-                            <User size={18} className="text-white" />
-                        </button>
-                        
-                        {/* 用户菜单下拉框 */}
-                        {showUserMenu && (
-                            <div className="absolute right-0 mt-2 w-64 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
-                                <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                                    <div className="flex items-center">
-                                        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
-                                            <User size={16} className="text-white" />
-                                        </div>
-                                        <h3 className="font-medium text-gray-800">{username}</h3>
-                                    </div>
-                                    <button 
-                                        className="text-gray-400 hover:text-gray-600"
-                                        onClick={() => setShowUserMenu(false)}
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                                <div className="max-h-72 overflow-y-auto">
-                                    <div className="p-3 border-b border-gray-100 hover:bg-indigo-50">
+                        {/* 服务状态按钮 */}
+                        <div className="relative">
+                            <button 
+                                className="p-1.5 rounded-full hover:bg-indigo-100 transition-colors"
+                                onClick={() => setShowServiceStatus(!showServiceStatus)}
+                            >
+                                <Server size={18} className="text-gray-600" />
+                            </button>
+                            
+                            {/* 服务状态下拉框 */}
+                            {showServiceStatus && (
+                                <div className="absolute right-0 mt-2 w-72 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
+                                    <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                                        <h3 className="font-medium text-gray-800">服务状态</h3>
                                         <button 
-                                            className="flex items-center text-sm text-gray-800 w-full"
-                                            onClick={() => console.log('点击了设置')}
+                                            className="text-gray-400 hover:text-gray-600"
+                                            onClick={() => setShowServiceStatus(false)}
                                         >
-                                            <Settings size={16} className="mr-2 text-indigo-600" />
-                                            设置
+                                            <X size={16} />
                                         </button>
                                     </div>
-                                    <div className="p-3 hover:bg-indigo-50">
-                                        <button 
-                                            className="flex items-center text-sm text-gray-800 w-full"
-                                            onClick={() => console.log('点击了退出登录')}
-                                        >
-                                            <LogOut size={16} className="mr-2 text-indigo-600" />
-                                            退出登录
-                                        </button>
+                                    <div className="max-h-72 overflow-y-auto">
+                                        <div className="p-3 border-b border-gray-100">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-800">向量数据库</span>
+                                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-3 border-b border-gray-100">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-800">文件处理服务</span>
+                                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-3 border-b border-gray-100">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-800">搜索服务</span>
+                                                <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">负载高</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-800">API 网关</span>
+                                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+
+                        {/* 用户菜单按钮 */}
+                        <div className="relative">
+                            <button 
+                                className="p-1.5 rounded-full hover:bg-indigo-700 transition-colors flex items-center justify-center bg-indigo-600 text-white w-8 h-8"
+                                onClick={() => setShowUserMenu(!showUserMenu)}
+                                aria-label="用户菜单"
+                            >
+                                <User size={18} className="text-white" />
+                            </button>
+                            
+                            {/* 用户菜单下拉框 */}
+                            {showUserMenu && (
+                                <div className="absolute right-0 mt-2 w-64 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
+                                    <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
+                                                <User size={16} className="text-white" />
+                                            </div>
+                                            <h3 className="font-medium text-gray-800">{username}</h3>
+                                        </div>
+                                        <button 
+                                            className="text-gray-400 hover:text-gray-600"
+                                            onClick={() => setShowUserMenu(false)}
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                    <div className="max-h-72 overflow-y-auto">
+                                        <div className="p-3 border-b border-gray-100 hover:bg-indigo-50">
+                                            <button 
+                                                className="flex items-center text-sm text-gray-800 w-full"
+                                                onClick={() => console.log('点击了设置')}
+                                            >
+                                                <Settings size={16} className="mr-2 text-indigo-600" />
+                                                设置
+                                            </button>
+                                        </div>
+                                        <div className="p-3 hover:bg-indigo-50">
+                                            <button 
+                                                className="flex items-center text-sm text-gray-800 w-full"
+                                                onClick={() => console.log('点击了退出登录')}
+                                            >
+                                                <LogOut size={16} className="mr-2 text-indigo-600" />
+                                                退出登录
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

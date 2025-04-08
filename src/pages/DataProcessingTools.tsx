@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { Tabs, Input, Button, message } from 'antd';
-import { SearchOutlined, UploadOutlined } from '@ant-design/icons';
+import { Tabs, Input, Button, message, Space } from 'antd';
+import { 
+  SearchOutlined, 
+  PlusOutlined,
+  ImportOutlined 
+} from '@ant-design/icons';
 import ToolList from '../components/modules/tools/ToolList';
 import ImportToolModal from '../components/modules/tools/ImportToolModal';
+import CustomToolModal from '../components/modules/tools/CustomToolModal';
 import PageHeader from '../components/layout/PageHeader';
 import { tools } from '../utils/mockToolsData';
 import type { ToolCategory } from '../utils/mockToolsData';
+import type { CustomToolValues } from '../components/modules/tools/CustomToolModal';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
@@ -21,6 +27,7 @@ const DataProcessingTools: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isCustomModalVisible, setIsCustomModalVisible] = useState(false);
 
   // 处理收藏工具
   const handleFavorite = (id: string) => {
@@ -50,30 +57,60 @@ const DataProcessingTools: React.FC = () => {
     <div className="h-full flex flex-col overflow-hidden">
       <PageHeader
         title="数据处理工具"
-        subTitle="管理和使用各类数据处理工具"
-        extra={[
-          <Button
-            key="import"
-            type="primary"
-            icon={<UploadOutlined />}
-            onClick={() => setIsModalVisible(true)}
-          >
-            导入工具
-          </Button>
-        ]}
+        description="管理和使用各类数据处理工具"
       />
 
       <div className="flex-1 min-h-0 overflow-auto p-6">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <Search
             placeholder="搜索工具..."
             allowClear
-            enterButton={<SearchOutlined />}
+            enterButton={
+              <Button 
+                type="primary" 
+                style={{
+                  background: 'linear-gradient(135deg, #1677ff, #40a9ff)',
+                  border: 'none',
+                  boxShadow: '0 2px 6px rgba(24, 144, 255, 0.2)'
+                }}
+              >
+                <SearchOutlined />
+              </Button>
+            }
             size="large"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="max-w-md"
+            style={{ width: '400px' }}
           />
+          <Space>
+            <Button
+              type="primary"
+              icon={<ImportOutlined />}
+              onClick={() => setIsModalVisible(true)}
+              style={{
+                background: 'linear-gradient(135deg, #1677ff, #40a9ff)',
+                border: 'none',
+                height: '40px',
+                boxShadow: '0 2px 6px rgba(24, 144, 255, 0.2)'
+              }}
+            >
+              导入工具
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsCustomModalVisible(true)}
+              style={{
+                background: 'linear-gradient(135deg, #13c2c2, #36cfc9)',
+                border: 'none',
+                height: '40px',
+                boxShadow: '0 2px 6px rgba(19, 194, 194, 0.2)'
+              }}
+            >
+              自定义工具
+            </Button>
+          </Space>
         </div>
 
         <Tabs
@@ -103,6 +140,16 @@ const DataProcessingTools: React.FC = () => {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         onOk={handleImport}
+      />
+
+      <CustomToolModal
+        open={isCustomModalVisible}
+        onCancel={() => setIsCustomModalVisible(false)}
+        onOk={(values: CustomToolValues) => {
+          console.log('创建自定义工具:', values);
+          message.success('自定义工具创建成功');
+          setIsCustomModalVisible(false);
+        }}
       />
     </div>
   );

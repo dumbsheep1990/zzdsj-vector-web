@@ -12,7 +12,13 @@ import { mockAssistants } from '../utils/mockData';
 
 const AssistantList: React.FC = () => {
   // 状态管理
-  const [assistants, setAssistants] = useState<Assistant[]>(mockAssistants);
+  const [assistants, setAssistants] = useState<Assistant[]>(
+    mockAssistants.map(a => ({
+      ...a,
+      model: a.config.model,
+      status: a.status === 'training' ? 'offline' : a.status
+    }))
+  );
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentAssistant, setCurrentAssistant] = useState<Assistant | null>(null);
