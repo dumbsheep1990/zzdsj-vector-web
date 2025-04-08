@@ -137,7 +137,7 @@ const Sidebar: React.FC = () => {
         overflowX: 'hidden' as const
     };
 
-    const getIconStyle = (isActive: boolean, isChild: boolean = false, hasChildren: boolean = false) => ({
+    const getIconStyle = (isActive: boolean, isChild?: boolean, hasChildren?: boolean) => ({
         display: 'flex',
         justifyContent: 'center',
         color: isActive ? '#2563eb' : isChild ? '#64748b' : '#4b5563',
@@ -166,7 +166,7 @@ const Sidebar: React.FC = () => {
         } : {})
     });
 
-    const getNavItemStyle = (isActive: boolean, isChild: boolean = false, hasChildren: boolean = false) => ({
+    const getNavItemStyle = (isActive: boolean, isChild?: boolean, hasChildren?: boolean) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: sidebarExpanded ? 'flex-start' : 'center',
