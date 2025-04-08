@@ -1,0 +1,314 @@
+.frosted-glass-card {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.frosted-glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 30%,
+        transparent 70%
+    );
+    transform: rotate(30deg);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.frosted-glass-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.frosted-glass-subcard {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.frosted-glass-subcard:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.frosted-glass-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.stat-card {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
+}
+
+.practice-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+}
+
+.practice-card .frosted-glass-tag {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: rgba(139, 92, 246, 0.9);
+    padding: 0.35rem 1rem;
+    border-radius: 8px;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.practice-card .frosted-glass-tag:hover {
+    background: rgba(139, 92, 246, 0.15);
+    transform: translateY(-1px);
+}
+
+.doc-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(52, 211, 153, 0.05) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+}
+
+.doc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.stat-card h3,
+.stat-card .text-white {
+    color: rgba(59, 130, 246, 0.9) !important;
+}
+
+.practice-card h3,
+.practice-card .text-white {
+    color: rgba(139, 92, 246, 0.9) !important;
+}
+
+.doc-card h3,
+.doc-card .text-white {
+    color: rgba(16, 185, 129, 0.9) !important;
+}
+
+.text-gray-400 {
+    color: rgba(107, 114, 128, 0.8) !important;
+}
+
+.stat-card .text-blue-500 {
+    color: rgba(59, 130, 246, 0.9) !important;
+}
+
+.practice-card .text-blue-500 {
+    color: rgba(139, 92, 246, 0.9) !important;
+}
+
+.doc-card .text-blue-500 {
+    color: rgba(16, 185, 129, 0.9) !important;
+}
+
+.frosted-glass-card .flex {
+    align-items: center;
+}
+
+.frosted-glass-subcard .text-sm {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.frosted-glass-subcard .text-xl {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* 添加页面背景渐变 */
+.dashboard-container {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    min-height: 100%;
+    position: relative;
+}
+
+/* 助手统计卡片 */
+.stat-card.assistant-stats {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%);
+}
+
+.stat-card.assistant-stats .frosted-glass-subcard {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.stat-card.assistant-stats .text-blue-500 {
+    color: rgba(59, 130, 246, 0.9) !important;
+}
+
+/* 调用统计卡片 */
+.stat-card.call-stats {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.05) 100%);
+}
+
+.stat-card.call-stats .frosted-glass-subcard {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.stat-card.call-stats .text-blue-500 {
+    color: rgba(99, 102, 241, 0.9) !important;
+}
+
+/* 模型统计卡片 */
+.stat-card.model-stats {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(67, 56, 202, 0.05) 100%);
+}
+
+.stat-card.model-stats .frosted-glass-subcard {
+    background: rgba(79, 70, 229, 0.05);
+    border: 1px solid rgba(79, 70, 229, 0.1);
+}
+
+.stat-card.model-stats .text-blue-500 {
+    color: rgba(79, 70, 229, 0.9) !important;
+}
+
+/* 优化建议卡片 */
+.practice-card.optimization {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
+}
+
+.practice-card.optimization .frosted-glass-tag {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    color: rgba(139, 92, 246, 0.9);
+}
+
+/* 使用建议卡片 */
+.practice-card.usage {
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+}
+
+.practice-card.usage .frosted-glass-tag {
+    background: rgba(167, 139, 250, 0.05);
+    border: 1px solid rgba(167, 139, 250, 0.1);
+    color: rgba(167, 139, 250, 0.9);
+}
+
+/* API文档卡片 */
+.doc-card.api-docs {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+}
+
+.doc-card.api-docs h3 {
+    color: rgba(16, 185, 129, 0.9) !important;
+}
+
+.doc-card.api-docs .text-blue-500 {
+    color: rgba(16, 185, 129, 0.9) !important;
+}
+
+.doc-card.api-docs .text-gray-400 {
+    color: rgba(16, 185, 129, 0.7) !important;
+}
+
+/* 使用指南卡片 */
+.doc-card.user-guide {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.05) 100%);
+}
+
+.doc-card.user-guide h3 {
+    color: rgba(99, 102, 241, 0.9) !important;
+}
+
+.doc-card.user-guide .text-blue-500 {
+    color: rgba(99, 102, 241, 0.9) !important;
+}
+
+.doc-card.user-guide .text-gray-400 {
+    color: rgba(99, 102, 241, 0.7) !important;
+}
+
+/* 开发文档卡片 */
+.doc-card.dev-docs {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
+}
+
+.doc-card.dev-docs h3 {
+    color: rgba(139, 92, 246, 0.9) !important;
+}
+
+.doc-card.dev-docs .text-blue-500 {
+    color: rgba(139, 92, 246, 0.9) !important;
+}
+
+.doc-card.dev-docs .text-gray-400 {
+    color: rgba(139, 92, 246, 0.7) !important;
+}
+
+/* FAQ卡片 */
+.doc-card.faq {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(234, 88, 12, 0.05) 100%);
+}
+
+.doc-card.faq h3 {
+    color: rgba(245, 158, 11, 0.9) !important;
+}
+
+.doc-card.faq .text-blue-500 {
+    color: rgba(245, 158, 11, 0.9) !important;
+}
+
+.doc-card.faq .text-gray-400 {
+    color: rgba(245, 158, 11, 0.7) !important;
+}
+
+/* 文档卡片通用悬停效果 */
+.doc-card:hover {
+    transform: translateY(-2px);
+}
+
+.doc-card.api-docs:hover {
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+}
+
+.doc-card.user-guide:hover {
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+}
+
+.doc-card.dev-docs:hover {
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+}
+
+.doc-card.faq:hover {
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+}
+
+/* 子卡片通用悬停效果 */
+.frosted-glass-subcard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 文字样式 */
+.frosted-glass-card h3 {
+    font-weight: 600;
+    font-size: 1.125rem;
+} 

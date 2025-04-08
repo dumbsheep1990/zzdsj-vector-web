@@ -1,24 +1,25 @@
 import React from 'react';
-import { Card, Row, Col, Statistic, Typography, Space, Tag, Button } from 'antd';
+import { Row, Col, Button, Typography } from 'antd';
 import { 
   User, 
-  MessageSquare, 
-  Database, 
   Activity, 
+  MessageSquare, 
   Clock, 
-  TrendingUp,
+  Database, 
+  TrendingUp, 
+  Lightbulb, 
+  Book, 
+  ChevronRight,
+  BarChart2,
+  Code,
   BookOpen,
   FileText,
-  Code,
-  HelpCircle,
-  BarChart2,
-  Book,
-  Lightbulb,
-  ChevronRight
+  HelpCircle
 } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
+import './Dashboard.css';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const Dashboard: React.FC = () => {
   // 模拟数据
@@ -93,7 +94,7 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="dashboard-container">
       <PageHeader 
         title="统计看板" 
         description="系统运行状态和关键指标概览"
@@ -113,98 +114,92 @@ const Dashboard: React.FC = () => {
           <Row gutter={[16, 16]}>
             {/* 助手统计 */}
             <Col span={8}>
-              <Card 
-                title="助手统计" 
-                className="h-full bg-gradient-to-br from-blue-100/90 to-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                headStyle={{ 
-                  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-                  padding: '16px 24px'
-                }}
-                bodyStyle={{ padding: '24px' }}
-              >
+              <div className="frosted-glass-card stat-card assistant-stats">
+                <div className="flex items-center mb-4">
+                  <User size={24} className="text-blue-500 mr-3" />
+                  <h3>助手统计</h3>
+                </div>
                 <Row gutter={[16, 16]}>
                   <Col span={12}>
-                    <Statistic
-                      title="总助手数"
-                      value={stats.assistants.total}
-                      prefix={<User className="text-blue-500" />}
-                      className="hover:bg-blue-50 p-3 rounded-lg transition-colors"
-                    />
+                    <div className="frosted-glass-subcard">
+                      <div className="text-gray-400 text-sm">总助手数</div>
+                      <div className="flex items-center text-xl font-semibold mt-2">
+                        <User size={20} className="text-blue-500 mr-2" />
+                        {stats.assistants.total}
+                      </div>
+                    </div>
                   </Col>
                   <Col span={12}>
-                    <Statistic
-                      title="活跃助手"
-                      value={stats.assistants.active}
-                      prefix={<Activity className="text-green-500" />}
-                      className="hover:bg-blue-50 p-3 rounded-lg transition-colors"
-                    />
+                    <div className="frosted-glass-subcard">
+                      <div className="text-gray-400 text-sm">活跃助手</div>
+                      <div className="flex items-center text-xl font-semibold mt-2">
+                        <Activity size={20} className="text-blue-500 mr-2" />
+                        {stats.assistants.active}
+                      </div>
+                    </div>
                   </Col>
                 </Row>
-              </Card>
+              </div>
             </Col>
 
             {/* 调用统计 */}
             <Col span={8}>
-              <Card 
-                title="调用统计" 
-                className="h-full bg-gradient-to-br from-purple-100/90 to-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                headStyle={{ 
-                  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-                  padding: '16px 24px'
-                }}
-                bodyStyle={{ padding: '24px' }}
-              >
+              <div className="frosted-glass-card stat-card call-stats">
+                <div className="flex items-center mb-4">
+                  <MessageSquare size={24} className="text-blue-500 mr-3" />
+                  <h3>调用统计</h3>
+                </div>
                 <Row gutter={[16, 16]}>
                   <Col span={12}>
-                    <Statistic
-                      title="总调用次数"
-                      value={stats.calls.total}
-                      prefix={<MessageSquare className="text-purple-500" />}
-                      className="hover:bg-purple-50 p-3 rounded-lg transition-colors"
-                    />
+                    <div className="frosted-glass-subcard">
+                      <div className="text-gray-400 text-sm">总调用次数</div>
+                      <div className="flex items-center text-xl font-semibold mt-2">
+                        <MessageSquare size={20} className="text-blue-500 mr-2" />
+                        {stats.calls.total}
+                      </div>
+                    </div>
                   </Col>
                   <Col span={12}>
-                    <Statistic
-                      title="今日调用"
-                      value={stats.calls.today}
-                      prefix={<Clock className="text-orange-500" />}
-                      className="hover:bg-purple-50 p-3 rounded-lg transition-colors"
-                    />
+                    <div className="frosted-glass-subcard">
+                      <div className="text-gray-400 text-sm">今日调用</div>
+                      <div className="flex items-center text-xl font-semibold mt-2">
+                        <Clock size={20} className="text-blue-500 mr-2" />
+                        {stats.calls.today}
+                      </div>
+                    </div>
                   </Col>
                 </Row>
-              </Card>
+              </div>
             </Col>
 
             {/* 模型统计 */}
             <Col span={8}>
-              <Card 
-                title="模型统计" 
-                className="h-full bg-gradient-to-br from-red-100/90 to-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                headStyle={{ 
-                  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-                  padding: '16px 24px'
-                }}
-                bodyStyle={{ padding: '24px' }}
-              >
+              <div className="frosted-glass-card stat-card model-stats">
+                <div className="flex items-center mb-4">
+                  <Database size={24} className="text-blue-500 mr-3" />
+                  <h3>模型统计</h3>
+                </div>
                 <Row gutter={[16, 16]}>
                   <Col span={12}>
-                    <Statistic
-                      title="模型数量"
-                      value={stats.models.total}
-                      prefix={<Database className="text-red-500" />}
-                      className="hover:bg-red-50 p-3 rounded-lg transition-colors"
-                    />
+                    <div className="frosted-glass-subcard">
+                      <div className="text-gray-400 text-sm">模型数量</div>
+                      <div className="flex items-center text-xl font-semibold mt-2">
+                        <Database size={20} className="text-blue-500 mr-2" />
+                        {stats.models.total}
+                      </div>
+                    </div>
                   </Col>
                   <Col span={12}>
-                    <Statistic
-                      title="Token使用量"
-                      value={stats.models.tokensUsed}
-                      prefix={<TrendingUp className="text-yellow-500" />}
-                      className="hover:bg-red-50 p-3 rounded-lg transition-colors"
-                    />
+                    <div className="frosted-glass-subcard">
+                      <div className="text-gray-400 text-sm">Token使用量</div>
+                      <div className="flex items-center text-xl font-semibold mt-2">
+                        <TrendingUp size={20} className="text-blue-500 mr-2" />
+                        {stats.models.tokensUsed}
+                      </div>
+                    </div>
                   </Col>
                 </Row>
-              </Card>
+              </div>
             </Col>
           </Row>
         </div>
@@ -222,29 +217,18 @@ const Dashboard: React.FC = () => {
           <Row gutter={[16, 16]}>
             {bestPractices.map((practice, index) => (
               <Col span={12} key={index}>
-                <Card 
-                  className="h-full bg-gradient-to-br from-indigo-100/90 to-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                  bodyStyle={{ padding: '20px' }}
-                >
-                  <Space direction="vertical" size="middle" className="w-full">
-                    <div className="flex items-center">
-                      <Lightbulb className="w-5 h-5 text-indigo-500" />
-                      <Title level={5} className="mb-0 ml-2 text-gray-800">
-                        {practice.title}
-                      </Title>
-                    </div>
-                    <Text type="secondary" className="block text-gray-600">
-                      {practice.description}
-                    </Text>
-                    <div className="flex flex-wrap gap-2">
-                      {practice.items.map((item, idx) => (
-                        <Tag key={idx} color="blue" className="m-0">
-                          {item}
-                        </Tag>
-                      ))}
-                    </div>
-                  </Space>
-                </Card>
+                <div className={`frosted-glass-card practice-card ${index === 0 ? 'optimization' : 'usage'}`}>
+                  <div className="flex items-center mb-4">
+                    <Lightbulb size={24} className="text-blue-500 mr-3" />
+                    <h3>{practice.title}</h3>
+                  </div>
+                  <div className="text-gray-400 mb-4">{practice.description}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {practice.items.map((item, idx) => (
+                      <span key={idx} className="frosted-glass-tag">{item}</span>
+                    ))}
+                  </div>
+                </div>
               </Col>
             ))}
           </Row>
@@ -269,37 +253,42 @@ const Dashboard: React.FC = () => {
             </Button>
           </div>
           <Row gutter={[16, 16]}>
-            {docs.map((doc, index) => (
-              <Col span={6} key={index}>
-                <Card 
-                  className={`h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group transform hover:-translate-y-1
-                    ${index % 4 === 0 ? 'bg-gradient-to-br from-blue-100/90 to-white' : 
-                      index % 4 === 1 ? 'bg-gradient-to-br from-green-100/90 to-white' :
-                      index % 4 === 2 ? 'bg-gradient-to-br from-purple-100/90 to-white' :
-                      'bg-gradient-to-br from-orange-100/90 to-white'}`}
-                  onClick={() => window.open(doc.link, '_blank')}
-                  bodyStyle={{ padding: '20px' }}
-                >
-                  <Space direction="vertical" size="middle" className="w-full">
-                    <div className="flex items-center">
-                      <div className={`p-2 rounded-lg transition-colors
-                        ${index % 4 === 0 ? 'bg-blue-100 group-hover:bg-blue-200' : 
-                          index % 4 === 1 ? 'bg-green-100 group-hover:bg-green-200' :
-                          index % 4 === 2 ? 'bg-purple-100 group-hover:bg-purple-200' :
-                          'bg-orange-100 group-hover:bg-orange-200'}`}>
-                        {doc.icon}
-                      </div>
-                      <Title level={5} className="mb-0 ml-3 group-hover:text-blue-500 transition-colors">
-                        {doc.title}
-                      </Title>
-                    </div>
-                    <Text type="secondary" className="block text-gray-500 group-hover:text-gray-700 transition-colors">
-                      {doc.description}
-                    </Text>
-                  </Space>
-                </Card>
-              </Col>
-            ))}
+            <Col span={6}>
+              <div className="frosted-glass-card doc-card api-docs">
+                <div className="flex items-center mb-4">
+                  <Code size={24} className="text-blue-500 mr-3" />
+                  <h3>API 接口文档</h3>
+                </div>
+                <div className="text-gray-400">详细的 API 接口说明和使用方法</div>
+              </div>
+            </Col>
+            <Col span={6}>
+              <div className="frosted-glass-card doc-card user-guide">
+                <div className="flex items-center mb-4">
+                  <BookOpen size={24} className="text-blue-500 mr-3" />
+                  <h3>使用指南</h3>
+                </div>
+                <div className="text-gray-400">系统功能使用说明和最佳实践</div>
+              </div>
+            </Col>
+            <Col span={6}>
+              <div className="frosted-glass-card doc-card dev-docs">
+                <div className="flex items-center mb-4">
+                  <FileText size={24} className="text-blue-500 mr-3" />
+                  <h3>开发文档</h3>
+                </div>
+                <div className="text-gray-400">系统架构和开发规范说明</div>
+              </div>
+            </Col>
+            <Col span={6}>
+              <div className="frosted-glass-card doc-card faq">
+                <div className="flex items-center mb-4">
+                  <HelpCircle size={24} className="text-blue-500 mr-3" />
+                  <h3>常见问题</h3>
+                </div>
+                <div className="text-gray-400">常见问题解答和故障排除</div>
+              </div>
+            </Col>
           </Row>
         </div>
       </div>

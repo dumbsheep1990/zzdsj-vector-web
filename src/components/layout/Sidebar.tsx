@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
     ChevronDown, 
-    ChevronRight, 
     Database, 
     FileText, 
     Grid, 
@@ -28,9 +27,12 @@ interface NavigationItem {
 }
 
 const Sidebar: React.FC = () => {
-    const { state, setActiveSection, toggleSidebar } = useAppContext();
+    const { state, setActiveSection } = useAppContext();
     const { activeSection, sidebarExpanded } = state;
     const [expandedItems, setExpandedItems] = useState<string[]>(['qa-management', 'knowledge-base']);
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+    const [hoveredSubItem, setHoveredSubItem] = useState<string | null>(null);
+    const hoverTimeoutRef = useRef<number | null>(null);
 
     const toggleExpanded = (itemId: string) => {
         if (expandedItems.includes(itemId)) {
@@ -40,7 +42,28 @@ const Sidebar: React.FC = () => {
         }
     };
 
-    // 根据图标类型返回对应的图标组件
+    const handleMouseEnter = (itemId: string) => {
+        if (hoverTimeoutRef.current) {
+            window.clearTimeout(hoverTimeoutRef.current);
+        }
+        setHoveredItem(itemId);
+    };
+
+    const handleMouseLeave = () => {
+        hoverTimeoutRef.current = window.setTimeout(() => {
+            setHoveredItem(null);
+            setHoveredSubItem(null);
+        }, 200);
+    };
+
+    const handleSubItemMouseEnter = (itemId: string) => {
+        setHoveredSubItem(itemId);
+    };
+
+    const handleSubItemMouseLeave = () => {
+        setHoveredSubItem(null);
+    };
+
     const getIconByType = (iconType: string, size: number = 18) => {
         switch (iconType) {
             case 'Database':
@@ -86,13 +109,15 @@ const Sidebar: React.FC = () => {
         flexDirection: 'column' as const,
         transition: 'all 0.3s ease',
         height: '100vh',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative' as const
     };
 
     const logoContainerStyle = {
         height: '56px',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         padding: '0 1rem',
         borderBottom: '1px solid #e5e7eb',
         position: 'relative' as const
@@ -100,20 +125,9 @@ const Sidebar: React.FC = () => {
 
     const logoStyle = {
         display: 'flex',
-        alignItems: 'center'
-    };
-
-    const toggleButtonStyle = {
-        position: 'absolute' as const,
-        right: '0.75rem',
-        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '0.25rem',
-        color: '#64748b',
-        cursor: 'pointer',
-        background: 'transparent',
-        border: 'none'
+        width: '100%'
     };
 
     const navStyle = {
@@ -123,15 +137,45 @@ const Sidebar: React.FC = () => {
         overflowX: 'hidden' as const
     };
 
-    const getNavItemStyle = (isActive: boolean, isChild: boolean = false) => ({
+    const getIconStyle = (isActive: boolean, isChild: boolean = false, hasChildren: boolean = false) => ({
+        display: 'flex',
+        justifyContent: 'center',
+        color: isActive ? '#2563eb' : isChild ? '#64748b' : '#4b5563',
+        ...(isActive && !sidebarExpanded ? {
+            background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+            padding: '9px',
+            borderRadius: '10px',
+            boxShadow: '0 3px 8px rgba(37, 99, 235, 0.15)',
+            transform: 'scale(1.12)',
+            transition: 'all 0.25s ease',
+            border: '2px solid rgba(37, 99, 235, 0.2)'
+        } : {}),
+        ...(isActive && hasChildren && !isChild ? {
+            position: 'relative' as const,
+            '&::after': {
+                content: '""',
+                position: 'absolute' as const,
+                right: '-4px',
+                top: '-4px',
+                width: '8px',
+                height: '8px',
+                background: '#2563eb',
+                borderRadius: '50%',
+                border: '2px solid white'
+            }
+        } : {})
+    });
+
+    const getNavItemStyle = (isActive: boolean, isChild: boolean = false, hasChildren: boolean = false) => ({
         display: 'flex',
         alignItems: 'center',
+        justifyContent: sidebarExpanded ? 'flex-start' : 'center',
         width: '100%',
         height: isChild ? '36px' : '44px',
         padding: '0 1rem',
         paddingLeft: isChild ? '3.25rem' : '1rem',
         background: isActive 
-            ? 'linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%)'
+            ? (sidebarExpanded ? 'linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%)' : 'transparent')
             : 'transparent',
         color: isActive ? '#2563eb' : '#4b5563',
         cursor: 'pointer',
@@ -140,20 +184,32 @@ const Sidebar: React.FC = () => {
         position: 'relative' as const,
         zIndex: 1,
         marginLeft: isChild ? '0.5rem' : '0',
-        boxSizing: 'border-box' as const
+        boxSizing: 'border-box' as const,
+        ...(isActive && !sidebarExpanded ? {
+            transform: 'scale(1.05)',
+            transition: 'all 0.2s ease'
+        } : {}),
+        ...(isActive && hasChildren && !isChild ? {
+            '&::before': {
+                content: '""',
+                position: 'absolute' as const,
+                left: '0',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '4px',
+                height: '24px',
+                background: '#2563eb',
+                borderRadius: '0 4px 4px 0'
+            }
+        } : {})
     });
 
     const iconContainerStyle = {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: sidebarExpanded ? 'space-between' : 'center',
         width: '100%'
     };
-
-    const getIconStyle = (isActive: boolean, isChild: boolean = false) => ({
-        display: 'flex',
-        color: isActive ? '#2563eb' : isChild ? '#64748b' : '#4b5563'
-    });
 
     const verticalLineStyle = {
         position: 'absolute' as const,
@@ -199,29 +255,130 @@ const Sidebar: React.FC = () => {
         color: '#64748b'
     };
 
-    const renderNavItem = (item: NavigationItem, isChild: boolean = false) => {
-        const isActive = activeSection === item.id;
-        const isExpanded = expandedItems.includes(item.id);
-        const hasChildren = item.children && item.children.length > 0;
+    const popupMenuStyle = {
+        position: 'fixed' as const,
+        left: '64px',
+        top: '0',
+        minWidth: '160px',
+        maxWidth: '180px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1)',
+        padding: '0.5rem 0',
+        zIndex: 1000,
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        display: 'block',
+        backdropFilter: 'blur(8px)',
+        background: 'rgba(31, 41, 55, 0.85)'
+    };
 
-        const currentStyle = getNavItemStyle(isActive, isChild);
-        const hoverStyle = !isActive ? {
-            background: isChild ? 'rgba(241, 245, 249, 0.7)' : 'linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%)',
-            color: '#2563eb'
-        } : {};
+    const popupMenuItemStyle = {
+        padding: '0.5rem 1rem',
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'pointer',
+        color: '#e5e7eb',
+        fontSize: '13px',
+        transition: 'all 0.2s ease',
+        fontWeight: 500,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+    };
+
+    const popupMenuItemHoverStyle = {
+        background: 'rgba(255, 255, 255, 0.1)',
+        color: '#ffffff',
+        transform: 'translateX(2px)'
+    };
+
+    const popupSubMenuItemStyle = {
+        ...popupMenuItemStyle,
+        paddingLeft: '1.75rem',
+        fontSize: '12px',
+        fontWeight: 400,
+        color: '#9ca3af'
+    };
+
+    const renderPopupMenu = (item: NavigationItem, index: number) => {
+        if (!hoveredItem || hoveredItem !== item.id || sidebarExpanded) return null;
+
+        const menuTop = 56 + (index * 44);
 
         return (
-            <li key={item.id}>
+            <div 
+                style={{
+                    ...popupMenuStyle,
+                    top: `${menuTop}px`
+                }}
+                onMouseEnter={() => {
+                    if (hoverTimeoutRef.current) {
+                        window.clearTimeout(hoverTimeoutRef.current);
+                    }
+                }}
+                onMouseLeave={handleMouseLeave}
+            >
+                <div 
+                    style={{
+                        ...popupMenuItemStyle,
+                        fontWeight: 600,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        paddingBottom: '0.5rem',
+                        marginBottom: '0.25rem',
+                        color: '#ffffff',
+                        fontSize: '13px'
+                    }}
+                >
+                    {item.label}
+                </div>
+                {item.children?.map(child => (
+                    <div
+                        key={child.id}
+                        style={{
+                            ...popupSubMenuItemStyle,
+                            ...(activeSection === child.id || hoveredSubItem === child.id ? popupMenuItemHoverStyle : {})
+                        }}
+                        onMouseEnter={() => handleSubItemMouseEnter(child.id)}
+                        onMouseLeave={handleSubItemMouseLeave}
+                        onClick={() => {
+                            setActiveSection(child.id);
+                            setHoveredItem(null);
+                            setHoveredSubItem(null);
+                        }}
+                    >
+                        {child.label}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    const renderNavItem = (item: NavigationItem, isChild: boolean = false, index: number = 0) => {
+        const isActive = activeSection === item.id || (item.children?.some(child => child.id === activeSection) && !isChild);
+        const isExpanded = expandedItems.includes(item.id);
+        const hasChildren = Boolean(item.children && item.children.length > 0);
+
+        const currentStyle = {
+            ...getNavItemStyle(isActive, isChild, hasChildren),
+            ...(hoveredItem === item.id && !isActive ? {
+                background: isChild ? 'rgba(241, 245, 249, 0.7)' : 'transparent',
+                color: '#2563eb',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute' as const,
+                    inset: '0',
+                    background: 'radial-gradient(circle at center, rgba(37, 99, 235, 0.1) 0%, transparent 70%)',
+                    borderRadius: '8px',
+                    zIndex: -1
+                }
+            } : {})
+        };
+
+        return (
+            <li key={item.id} style={{ position: 'relative' }}>
                 <button
                     style={currentStyle}
-                    onMouseEnter={(e) => {
-                        const target = e.currentTarget;
-                        Object.assign(target.style, hoverStyle);
-                    }}
-                    onMouseLeave={(e) => {
-                        const target = e.currentTarget;
-                        Object.assign(target.style, currentStyle);
-                    }}
+                    onMouseEnter={() => handleMouseEnter(item.id)}
+                    onMouseLeave={handleMouseLeave}
                     onClick={() => {
                         if (hasChildren) {
                             toggleExpanded(item.id);
@@ -232,7 +389,7 @@ const Sidebar: React.FC = () => {
                 >
                     <span style={iconContainerStyle}>
                         <span style={{ display: 'flex', alignItems: 'center' }}>
-                            <span style={getIconStyle(isActive, isChild)}>
+                            <span style={getIconStyle(isActive, isChild, hasChildren)}>
                                 {getIconByType(item.iconType, isChild ? 16 : 18)}
                             </span>
                             {sidebarExpanded && (
@@ -258,6 +415,7 @@ const Sidebar: React.FC = () => {
                         )}
                     </span>
                 </button>
+                {!sidebarExpanded && hasChildren && renderPopupMenu(item, index)}
                 {hasChildren && isExpanded && sidebarExpanded && (
                     <div style={{ position: 'relative' }}>
                         <div style={verticalLineStyle} />
@@ -267,7 +425,9 @@ const Sidebar: React.FC = () => {
                             padding: 0,
                             position: 'relative'
                         }}>
-                            {(item.children || []).map((child: NavigationItem) => renderNavItem(child, true))}
+                            {(item.children || []).map((child: NavigationItem, childIndex: number) => 
+                                renderNavItem(child, true, childIndex)
+                            )}
                         </ul>
                     </div>
                 )}
@@ -292,30 +452,18 @@ const Sidebar: React.FC = () => {
                         </span>
                     )}
                 </div>
-                <button
-                    style={toggleButtonStyle}
-                    onClick={toggleSidebar}
-                >
-                    <ChevronRight
-                        size={18}
-                        style={{ 
-                            transform: sidebarExpanded ? 'none' : 'rotate(180deg)',
-                            transition: 'transform 0.3s ease'
-                        }}
-                    />
-                </button>
             </div>
 
             {/* 导航区域 */}
             <nav style={navStyle}>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                    {navigationItems.map(item => renderNavItem(item))}
+                    {navigationItems.map((item, index) => renderNavItem(item, false, index))}
                 </ul>
             </nav>
 
             {/* 底部用户信息 */}
             <div style={footerStyle}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarExpanded ? 'flex-start' : 'center' }}>
                     <div style={userAvatarStyle}>
                         {state.username?.slice(0, 2) || '管理'}
                     </div>

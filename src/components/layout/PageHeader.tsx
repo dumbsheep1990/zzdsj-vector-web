@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Bell, Server, User, Settings, X, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
+import { ChevronRight, Bell, Server, User, Settings, X, CheckCircle, AlertCircle, LogOut, Menu } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext';
 
 interface ActionButton {
     icon: React.ReactNode;
@@ -28,6 +29,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     searchComponent,
     username = '管理员',
 }) => {
+    const { toggleSidebar, state } = useAppContext();
+    const { sidebarExpanded } = state;
     const [showNotifications, setShowNotifications] = useState(false);
     const [notificationCount, setNotificationCount] = useState(3);
     const [showServiceStatus, setShowServiceStatus] = useState(false);
@@ -105,6 +108,22 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 justifyContent: 'space-between'
             }}>
                 <div className="flex items-center">
+                    {/* 折叠按钮 */}
+                    <button
+                        onClick={toggleSidebar}
+                        className="flex items-center justify-center w-8 h-8 mr-4 rounded-md hover:bg-blue-100 transition-colors"
+                        title={sidebarExpanded ? '收起侧边栏' : '展开侧边栏'}
+                    >
+                        <Menu 
+                            size={20} 
+                            color="#64748b"
+                            style={{
+                                transform: sidebarExpanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                                transition: 'transform 0.3s ease'
+                            }}
+                        />
+                    </button>
+
                     {parentTitle && (
                         <>
                             <span style={{ fontSize: '15px', color: '#64748b', fontWeight: 500 }}>{parentTitle}</span>
