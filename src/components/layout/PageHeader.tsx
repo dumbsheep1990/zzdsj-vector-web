@@ -95,13 +95,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     }, [showNotifications, showServiceStatus, showUserMenu]);
     
     return (
-        <div className="fixed top-0 right-0 z-50 bg-white" style={{ 
-            width: 'calc(100% - 240px)', // 减去侧边栏宽度
-            marginLeft: '240px', // 与侧边栏宽度相同
-            borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)'
-        }}>
-            {/* 标题栏 - 与侧边栏完全对齐 */}
+        <div className="bg-white border-b border-gray-100">
+            {/* 标题栏 */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50" style={{
                 height: '56px',
                 display: 'flex',
@@ -138,7 +133,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 </div>
 
                 {/* 右侧功能区：操作按钮、通知、服务状态、用户菜单 */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center">
                     {/* 主要操作按钮 */}
                     {primaryActions.length > 0 && (
                         <div className="flex items-center space-x-3 mr-4">

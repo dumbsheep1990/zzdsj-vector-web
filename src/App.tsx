@@ -24,7 +24,9 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
                 flex: 1,
                 minWidth: 0,
                 height: '100vh',
-                overflow: 'auto',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
                 backgroundColor: '#f9fafb'
             }}>
                 {children}

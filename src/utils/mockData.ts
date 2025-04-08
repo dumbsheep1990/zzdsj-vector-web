@@ -28,6 +28,7 @@ export interface Assistant {
     temperature: number;
     maxTokens: number;
   };
+  capabilities: string[];
 }
 
 export const mockAssistants: Assistant[] = [
@@ -41,6 +42,7 @@ export const mockAssistants: Assistant[] = [
     updateTime: '2024-03-10 15:30:00',
     questionCount: 128,
     documentCount: 15,
+    capabilities: ['产品文档', '用户手册', 'FAQ'],
     config: {
       model: 'gpt-4',
       temperature: 0.7,
@@ -57,6 +59,7 @@ export const mockAssistants: Assistant[] = [
     updateTime: '2024-03-12 14:20:00',
     questionCount: 256,
     documentCount: 30,
+    capabilities: ['技术文档', 'API文档', '故障排除'],
     config: {
       model: 'gpt-3.5-turbo',
       temperature: 0.5,
@@ -73,6 +76,7 @@ export const mockAssistants: Assistant[] = [
     updateTime: '2024-03-15 16:45:00',
     questionCount: 64,
     documentCount: 8,
+    capabilities: ['入职培训', '公司制度', '工作流程'],
     config: {
       model: 'gpt-4',
       temperature: 0.3,
@@ -89,6 +93,7 @@ export const mockAssistants: Assistant[] = [
     updateTime: '2024-03-14 17:30:00',
     questionCount: 96,
     documentCount: 12,
+    capabilities: ['销售技巧', '产品知识', '客户服务'],
     config: {
       model: 'gpt-3.5-turbo',
       temperature: 0.6,
@@ -105,6 +110,7 @@ export const mockAssistants: Assistant[] = [
     updateTime: '2024-03-13 11:20:00',
     questionCount: 320,
     documentCount: 25,
+    capabilities: ['客户支持', '问题解答', '服务指南'],
     config: {
       model: 'gpt-4',
       temperature: 0.4,

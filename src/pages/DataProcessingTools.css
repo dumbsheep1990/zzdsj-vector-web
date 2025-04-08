@@ -84,3 +84,37 @@
     padding: 8px 6px;
   }
 }
+
+.ant-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ant-tabs-content {
+  height: 100%;
+  flex: 1;
+}
+
+.ant-tabs-content-holder {
+  height: 100%;
+  overflow: hidden;
+}
+
+.ant-tabs-tabpane {
+  height: 100%;
+  overflow: hidden;
+}
+
+.ant-tabs-nav {
+  margin-bottom: 0 !important;
+  padding: 0 24px;
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 确保内容区域可以滚动 */
+.ant-tabs-content > .ant-tabs-tabpane {
+  display: flex;
+  flex-direction: column;
+}

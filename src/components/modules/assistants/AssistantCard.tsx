@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Assistant } from './types';
 import AssistantSettingsModal from './AssistantSettingsModal';
+import AssistantStatsModal from './AssistantStatsModal';
 
 const { Text } = Typography;
 
@@ -38,12 +39,13 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
 }) => {
   const navigate = useNavigate(); 
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [statsVisible, setStatsVisible] = useState(false);
   
   const cardStyle = { 
     width: "100%",
     borderRadius: "16px",
     overflow: "hidden",
-    height: '640px', 
+    height: '520px',
     boxShadow: '0 6px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.12)', 
     border: '1px solid rgba(220, 230, 240, 0.8)', 
     transition: 'all 0.3s ease', 
@@ -188,11 +190,16 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                 onClick: (e) => e.domEvent.stopPropagation(),
                 items: [
                   {
+                    key: 'stats',
+                    icon: <BarChartOutlined />,
+                    label: '统计',
+                    onClick: () => setStatsVisible(true)
+                  },
+                  {
                     key: 'api',
                     icon: <ApiOutlined />,
                     label: 'API',
                     onClick: () => {
-                      // Copy API to clipboard
                       navigator.clipboard.writeText(`/api/v1/assistants/${assistant.id}`);
                       message.success('API地址已复制到剪贴板');
                     }
@@ -434,148 +441,6 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
           </Col>
         </Row>
 
-        {/* 用户统计 */}
-        {assistant.usageStats && (
-          <>
-            <Divider style={{ margin: '12px 0 8px', borderColor: 'rgba(0, 0, 0, 0.06)' }} />
-            <Row>
-              <Col span={24}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: '8px'
-                }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    background: 'linear-gradient(135deg, rgba(91, 143, 249, 0.08), rgba(146, 170, 255, 0.08))',
-                    padding: '4px 8px',
-                    borderRadius: '8px'
-                  }}>
-                    <BarChartOutlined style={{ color: '#5B8FF9', marginRight: '4px', fontSize: '12px' }}/>
-                    <Text style={{ 
-                      background: 'linear-gradient(90deg, #5B8FF9, #92AAFF)', 
-                      WebkitBackgroundClip: 'text', 
-                      WebkitTextFillColor: 'transparent',
-                      fontSize: '12px',
-                      fontWeight: 500
-                    }}>
-                      用户统计
-                    </Text>
-                  </div>
-                </div>
-
-                <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: '8px' 
-                }}>
-                  <div style={{ 
-                    flex: '1 0 calc(33.333% - 8px)',
-                    minWidth: '90px', 
-                    background: 'linear-gradient(145deg, #ffffff, #fafafa)',
-                    borderRadius: '10px', 
-                    padding: '8px 10px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                    border: '1px solid rgba(0, 0, 0, 0.03)'
-                  }}>
-                    <div style={{ 
-                      color: '#8c8c8c', 
-                      fontSize: '10px', 
-                      marginBottom: '2px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}>
-                      <MessageOutlined style={{ marginRight: '2px', fontSize: '9px' }} />
-                      对话次数
-                    </div>
-                    <div style={{ 
-                      fontSize: '13px', 
-                      fontWeight: '600',
-                      background: 'linear-gradient(90deg, #1890ff, #69c0ff)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent'
-                    }}>
-                      {assistant.usageStats.totalChats.toLocaleString()}
-                    </div>
-                  </div>
-                  <div style={{ 
-                    flex: '1 0 calc(33.333% - 8px)',
-                    minWidth: '90px', 
-                    background: 'linear-gradient(145deg, #ffffff, #fafafa)',
-                    borderRadius: '10px', 
-                    padding: '8px 10px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                    border: '1px solid rgba(0, 0, 0, 0.03)'
-                  }}>
-                    <div style={{ 
-                      color: '#8c8c8c', 
-                      fontSize: '10px', 
-                      marginBottom: '2px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}>
-                      <ApiOutlined style={{ marginRight: '2px', fontSize: '9px' }} />
-                      Token消耗
-                    </div>
-                    <div style={{ 
-                      fontSize: '13px', 
-                      fontWeight: '600',
-                      background: 'linear-gradient(90deg, #722ed1, #b37feb)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent'
-                    }}>
-                      {assistant.usageStats.tokenUsage 
-                        ? (assistant.usageStats.tokenUsage > 1000000 
-                          ? `${(assistant.usageStats.tokenUsage / 1000000).toFixed(1)}M` 
-                          : `${(assistant.usageStats.tokenUsage / 1000).toFixed(0)}K`)
-                        : '0'}
-                    </div>
-                  </div>
-                  <div style={{ 
-                    flex: '1 0 calc(33.333% - 8px)',
-                    minWidth: '90px', 
-                    background: 'linear-gradient(145deg, #ffffff, #fafafa)',
-                    borderRadius: '10px', 
-                    padding: '8px 10px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                    border: '1px solid rgba(0, 0, 0, 0.03)'
-                  }}>
-                    <div style={{ 
-                      color: '#8c8c8c', 
-                      fontSize: '10px', 
-                      marginBottom: '2px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}>
-                      <BookOutlined style={{ marginRight: '2px', fontSize: '9px' }} />
-                      API调用
-                    </div>
-                    <div style={{ 
-                      fontSize: '13px', 
-                      fontWeight: '600',
-                      background: 'linear-gradient(90deg, #13c2c2, #5cdbd3)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent'
-                    }}>
-                      {assistant.usageStats.apiCalls?.toLocaleString() || '0'}
-                    </div>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </>
-        )}
-
         {/* 知识库信息 */}
         <Divider style={{ margin: '12px 0 8px', borderColor: 'rgba(0, 0, 0, 0.06)' }} />
         <Row>
@@ -773,6 +638,13 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
         assistant={assistant}
         onClose={() => setSettingsVisible(false)}
         onSave={handleSettingsSave}
+      />
+
+      {/* 统计信息模态框 */}
+      <AssistantStatsModal
+        visible={statsVisible}
+        assistant={assistant}
+        onClose={() => setStatsVisible(false)}
       />
     </Card>
   );

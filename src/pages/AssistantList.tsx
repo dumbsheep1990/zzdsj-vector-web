@@ -123,32 +123,31 @@ const AssistantList: React.FC = () => {
     });
 
   return (
-    <div className="flex-1 flex flex-col">
-      <PageHeader 
-        title="助手列表" 
-        parentTitle="问答助手"
-        description={`共 ${assistants.length} 个助手`}
-        primaryActions={[
-          {
-            icon: <PlusOutlined />,
-            label: '新建助手',
-            onClick: handleCreate
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="shrink-0">
+        <PageHeader 
+          title="助手列表" 
+          parentTitle="问答助手"
+          description={`共 ${assistants.length} 个助手`}
+          primaryActions={[
+            {
+              icon: <PlusOutlined />,
+              label: '新建助手',
+              onClick: handleCreate
+            }
+          ]}
+          filterComponent={
+            <AssistantFilter 
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+            />
           }
-        ]}
-        filterComponent={
-          <AssistantFilter 
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-            sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
-          />
-        }
-      />
+        />
+      </div>
       
-      <div className="p-6 flex-1 overflow-auto bg-gray-50" style={{ 
-        marginTop: '88px',
-        height: 'calc(100vh - 88px)'
-      }}>
+      <div className="flex-1 min-h-0 overflow-auto bg-gray-50 p-6">
         <List<Assistant>
           grid={{ gutter: 12, xs: 1, sm: 1, md: 1, lg: 2, xl: 3, xxl: 4 }}
           dataSource={filteredAssistants}

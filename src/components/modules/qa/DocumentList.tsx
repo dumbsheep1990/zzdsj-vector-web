@@ -121,7 +121,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ assistantId, onSelec
       </div>
 
       {/* 文档列表 */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 min-h-0 overflow-auto">
         <List
           dataSource={paginatedDocuments}
           renderItem={doc => (
@@ -208,7 +208,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ assistantId, onSelec
             total: filteredDocuments.length,
             onChange: setCurrentPage,
             size: 'small',
-            className: 'px-4'
+            className: 'px-4 py-2 bg-white border-t border-gray-100'
           }}
         />
       </div>

@@ -39,7 +39,7 @@ const QAManagement: React.FC = () => {
   const menuItems = mockAssistants.map(assistant => ({
     key: assistant.id,
     label: (
-      <div className="py-6 px-4">
+      <div className="py-4 px-4 hover:bg-blue-50 transition-colors duration-200 rounded-lg">
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-2">
             <span className="font-medium text-base truncate mr-2">{assistant.name}</span>
@@ -77,14 +77,14 @@ const QAManagement: React.FC = () => {
         key: `${assistant.id}-questions`,
         icon: <QuestionCircleOutlined />,
         label: (
-          <div className="py-3 px-2">问答管理</div>
+          <div className="py-2 px-2">问答管理</div>
         )
       },
       {
         key: `${assistant.id}-settings`,
         icon: <SettingOutlined />,
         label: (
-          <div className="py-3 px-2">参数设置</div>
+          <div className="py-2 px-2">参数设置</div>
         )
       }
     ]
@@ -105,7 +105,7 @@ const QAManagement: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden">
       <div className="shrink-0">
         <PageHeader 
           title="问答管理" 
@@ -123,40 +123,19 @@ const QAManagement: React.FC = () => {
         />
       </div>
       
-      <div className="flex-1 min-h-0" style={{ marginTop: '88px' }}>
+      <div className="flex-1 min-h-0 overflow-hidden">
         <div className="h-full flex">
           {/* 左侧助手列表 */}
-          <div className="w-80 border-r border-gray-100 h-full overflow-y-auto bg-white">
-            {/* 统计信息区域 */}
-            <div className="p-4 border-b border-gray-100 bg-gray-50">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-blue-600">{mockQAStats.totalAssistants}</div>
-                  <div className="text-xs text-gray-500">助手总数</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-green-600">{mockQAStats.onlineAssistants}</div>
-                  <div className="text-xs text-gray-500">在线助手</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-orange-600">{mockQAStats.totalQuestions}</div>
-                  <div className="text-xs text-gray-500">问题总数</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-semibold text-purple-600">{mockQAStats.totalDocuments}</div>
-                  <div className="text-xs text-gray-500">文档总数</div>
-                </div>
-              </div>
-            </div>
+          <div className="w-80 border-r border-gray-100 h-full overflow-hidden flex flex-col">
             <Menu
               mode="inline"
               selectedKeys={[selectedAssistantId ? `${selectedAssistantId}-${activeTab}` : '']}
               openKeys={selectedAssistantId ? [selectedAssistantId] : []}
               items={menuItems}
               onSelect={handleMenuSelect}
-              className="border-0"
+              className="border-0 flex-1 overflow-auto"
               style={{ 
-                padding: '12px 0',
+                padding: '12px 0'
               }}
               rootClassName="qa-assistant-menu"
             />
@@ -185,17 +164,19 @@ const QAManagement: React.FC = () => {
           </div>
 
           {/* 右侧详情区 */}
-          <div className="flex-1 bg-gray-50 h-full overflow-y-auto p-6">
-            {selectedQuestionId ? (
-              <DocumentDetail 
-                questionId={selectedQuestionId}
-                assistantId={selectedAssistantId!}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-400">
-                <span>请选择要查看的问题</span>
-              </div>
-            )}
+          <div className="flex-1 h-full overflow-hidden flex flex-col">
+            <div className="flex-1 min-h-0 overflow-auto bg-gray-50 p-6">
+              {selectedQuestionId ? (
+                <DocumentDetail 
+                  questionId={selectedQuestionId}
+                  assistantId={selectedAssistantId!}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400">
+                  <span>请选择要查看的问题</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -203,27 +184,61 @@ const QAManagement: React.FC = () => {
   );
 };
 
-// 在文件末尾添加全局样式
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  .qa-assistant-menu .ant-menu-submenu-title {
+// 添加全局样式
+const styles = `
+.qa-assistant-menu {
+  .ant-menu-item {
+    margin: 0 !important;
+    padding: 0 !important;
     height: auto !important;
     line-height: 1.5 !important;
-    padding: 0 !important;
+    border-radius: 8px;
+    margin: 4px 8px !important;
+  }
+
+  .ant-menu-item-selected {
+    background-color: #e6f4ff !important;
+    color: #1677ff !important;
+  }
+
+  .ant-menu-item:hover {
+    background-color: #f5f5f5 !important;
+  }
+
+  .ant-menu-submenu-title {
     margin: 0 !important;
-  }
-  .qa-assistant-menu .ant-menu-submenu-arrow {
-    right: 16px !important;
-    top: 28px !important;
-  }
-  .qa-assistant-menu .ant-menu-item {
-    margin: 0 !important;
     padding: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
   }
-  .qa-assistant-menu .ant-menu-sub {
-    background: #f5f5f5 !important;
+
+  .ant-menu-submenu-selected > .ant-menu-submenu-title {
+    color: #1677ff !important;
   }
+
+  .ant-menu-submenu-arrow {
+    right: 8px !important;
+  }
+
+  .ant-menu-submenu {
+    margin: 4px 8px !important;
+  }
+
+  .ant-menu-submenu .ant-menu-item {
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+  }
+
+  .ant-menu {
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+}
 `;
+
+// 创建样式元素
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
 export default QAManagement;
