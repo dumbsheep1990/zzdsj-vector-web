@@ -30,7 +30,7 @@ interface NavigationItem {
 const Sidebar: React.FC = () => {
     const { state, setActiveSection, toggleSidebar } = useAppContext();
     const { activeSection, sidebarExpanded } = state;
-    const [expandedItems, setExpandedItems] = useState<string[]>(['qa-management', 'knowledge-base', 'tool-plaza']);
+    const [expandedItems, setExpandedItems] = useState<string[]>(['qa-management', 'knowledge-base']);
 
     const toggleExpanded = (itemId: string) => {
         if (expandedItems.includes(itemId)) {

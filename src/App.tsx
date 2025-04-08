@@ -9,6 +9,7 @@ import AssistantList from './pages/AssistantList';
 import AssistantChat from './pages/AssistantChat';
 import DataProcessingTools from './pages/DataProcessingTools';
 import QAManagement from './pages/QAManagement';
+import Dashboard from './pages/Dashboard';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -41,6 +42,8 @@ const AppContent: FC = () => {
 
     const renderContent = () => {
         switch (activeSection) {
+            case 'dashboard':
+                return <Dashboard />;
             case 'knowledge-base':
                 return <KnowledgeBase />;
             case 'vectors':
@@ -58,7 +61,7 @@ const AppContent: FC = () => {
             case 'settings':
                 return <div className="flex-1 p-6"><h1 className="text-2xl font-semibold">系统设置（开发中）</h1></div>;
             default:
-                return <KnowledgeBase />;
+                return <Dashboard />;
         }
     };
 

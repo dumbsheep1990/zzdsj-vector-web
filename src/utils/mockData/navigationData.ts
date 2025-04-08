@@ -3,6 +3,11 @@ import { NavItem } from "../types";
 // 导航菜单数据
 export const navigationItems: NavItem[] = [
   {
+    id: 'dashboard',
+    label: '统计看板',
+    iconType: 'BarChart2'
+  },
+  {
     id: 'qa-assistant',
     label: '问答助手',
     iconType: 'HelpCircle',

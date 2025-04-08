@@ -3,10 +3,10 @@ import { AppState } from '../utils/types';
 
 // 创建上下文的默认值
 const defaultState: AppState = {
-    activeSection: 'qa-management',
+    activeSection: 'dashboard',
     sidebarExpanded: true,
     darkMode: false,
-    username: 'u7ba1u7406u5458',
+    username: '管理员',
 };
 
 // 创建上下文类型
@@ -44,7 +44,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         </AppContext.Provider>
     );
 };
-
 export const useAppContext = () => {
     const context = useContext(AppContext);
     if (context === undefined) {

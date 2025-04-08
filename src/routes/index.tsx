@@ -8,11 +8,13 @@ import Vectors from '../pages/Vectors';
 import Metadata from '../pages/Metadata';
 import Models from '../pages/Models';
 import Settings from '../pages/Settings';
+import Dashboard from '../pages/Dashboard';
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/qa-assistant/assistant-list" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/qa-assistant" element={<Navigate to="/qa-assistant/assistant-list" replace />} />
       <Route path="/qa-assistant/assistant-list" element={<AssistantList />} />
       <Route path="/qa-assistant/qa-management" element={<QAManagement />} />
