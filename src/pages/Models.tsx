@@ -1,114 +1,76 @@
-import React, { useState } from 'react';
-import { Plus, Filter, BarChart2, RefreshCw, Download, Upload } from 'lucide-react';
-import PageHeader from '../components/layout/PageHeader';
-import SearchInput from '../components/common/SearchInput';
-import ModelsHeader from '../components/modules/models/ModelsHeader';
-import ModelsList from '../components/modules/models/ModelsList';
-import DetailPanel from '../components/layout/DetailPanel';
-import { modelsData } from '../utils/mockData';
-import { ModelItem } from '../utils/types';
+import React, { useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { Menu } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ModelServices from '../components/modules/models/ModelServices';
+import ModelConfig from '../components/modules/models/ModelConfig';
+import ConfigExport from '../components/modules/models/ConfigExport';
 
 const Models: React.FC = () => {
-    const [selectedItem, setSelectedItem] = useState<ModelItem | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const { state } = useAppContext();
+    const { state, setActiveSection, setActiveSubSection } = useAppContext();
+    const { activeSubSection } = state;
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const searchComponent = (
-        <SearchInput
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="搜索模型..."
-            className="w-80"
-        />
-    );
+    useEffect(() => {
+        // 确保当前活动栏目是 models
+        setActiveSection('models');
+        
+        // 从 URL 中获取当前子页面
+        const pathSegments = location.pathname.split('/');
+        const currentPage = pathSegments[pathSegments.length - 1];
+        
+        console.log('Current page:', currentPage);
+        console.log('Current activeSubSection:', activeSubSection);
+        
+        // 如果 URL 中有子页面，更新状态
+        if (currentPage && ['model-services', 'model-config', 'config-export'].includes(currentPage)) {
+            setActiveSubSection(currentPage);
+        } else if (!currentPage || currentPage === 'models') {
+            // 如果是根路径或 models，默认跳转到 model-services
+            setActiveSubSection('model-services');
+            navigate('/models/model-services', { replace: true });
+        }
+    }, [location.pathname, setActiveSection, setActiveSubSection, navigate]);
 
-    const filterComponent = (
-        <div className="flex gap-4">
-            <button className="px-4 py-2 rounded-md bg-blue-50 text-blue-600">
-                全部
-            </button>
-            <button className="px-4 py-2 rounded-md text-gray-600">
-                已部署
-            </button>
-            <button className="px-4 py-2 rounded-md text-gray-600">
-                未部署
-            </button>
-            <button className="px-4 py-2 rounded-md text-gray-600">
-                训练中
-            </button>
-        </div>
-    );
+    const handleMenuClick = (e: { key: string }) => {
+        const { key } = e;
+        console.log('Menu clicked:', key);
+        setActiveSubSection(key);
+        navigate(`/models/${key}`, { replace: true });
+    };
+
+    const renderContent = () => {
+        console.log('Rendering content for:', activeSubSection);
+        switch (activeSubSection) {
+            case 'model-services':
+                return <ModelServices />;
+            case 'model-config':
+                return <ModelConfig />;
+            case 'config-export':
+                return <ConfigExport />;
+            default:
+                return <ModelServices />;
+        }
+    };
 
     return (
-        <div className="flex-1 flex flex-col bg-gray-50">
-            <PageHeader
-                title="模型管理"
-                description="管理和维护模型，支持模型训练、部署和监控"
-                primaryActions={[
-                    {
-                        icon: <Plus size={20} />,
-                        label: '新建模型',
-                        onClick: () => console.log('新建模型')
-                    },
-                    {
-                        icon: <Upload size={20} />,
-                        label: '导入模型',
-                        onClick: () => console.log('导入模型')
-                    }
-                ]}
-                secondaryActions={[
-                    {
-                        icon: <Filter size={20} />,
-                        label: '筛选',
-                        onClick: () => console.log('筛选')
-                    },
-                    {
-                        icon: <BarChart2 size={20} />,
-                        label: '性能监控',
-                        onClick: () => console.log('性能监控')
-                    },
-                    {
-                        icon: <RefreshCw size={20} />,
-                        label: '更新',
-                        onClick: () => console.log('更新模型')
-                    },
-                    {
-                        icon: <Download size={20} />,
-                        label: '导出',
-                        onClick: () => console.log('导出模型')
-                    }
-                ]}
-                searchComponent={searchComponent}
-                filterComponent={filterComponent}
-                username={state.username}
-            />
-
-            <div className="flex-1 p-6">
-                <div className="flex-1 flex overflow-hidden h-[calc(100vh-12rem)]">
-                    <div style={{ width: selectedItem ? 'calc(50% - 0.75rem)' : '100%' }} className="overflow-auto transition-all duration-300 bg-white rounded-lg shadow-sm p-6">
-                        <ModelsHeader models={modelsData} />
-
-                        <ModelsList
-                            models={modelsData}
-                            selectedItem={selectedItem}
-                            setSelectedItem={setSelectedItem}
-                        />
-                    </div>
-
-                    {selectedItem && (
-                        <div style={{ width: 'calc(50% - 0.75rem)', marginLeft: '1.5rem' }} className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300">
-                            <DetailPanel
-                                selectedItem={selectedItem}
-                                setSelectedItem={setSelectedItem}
-                                activeSection="models"
-                            />
-                        </div>
-                    )}
-                </div>
+        <div className="flex flex-col h-full">
+            <Menu
+                mode="horizontal"
+                selectedKeys={[activeSubSection]}
+                onClick={handleMenuClick}
+                className="mb-4"
+            >
+                <Menu.Item key="model-services">模型服务</Menu.Item>
+                <Menu.Item key="model-config">模型配置</Menu.Item>
+                <Menu.Item key="config-export">配置导出</Menu.Item>
+            </Menu>
+            <div className="flex-1">
+                {renderContent()}
             </div>
         </div>
     );
 };
 
-export default Models;
+export default Models; 

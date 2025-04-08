@@ -12,36 +12,6 @@ import {
 } from '@ant-design/icons';
 import { mockAssistants } from '../utils/mockData';
 
-// 测试数据
-const mockQuestions: Question[] = [
-  {
-    id: '1',
-    title: '如何配置数据库连接？',
-    content: '我需要配置MySQL数据库连接，请问具体的步骤是什么？',
-    status: 'active',
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-15T10:30:00Z',
-    tags: ['数据库', '配置']
-  },
-  {
-    id: '2',
-    title: 'API接口调用失败',
-    content: '调用第三方API时返回500错误，请问如何排查？',
-    status: 'active',
-    createdAt: '2024-01-16T14:20:00Z',
-    updatedAt: '2024-01-16T14:20:00Z',
-    tags: ['API', '错误处理']
-  },
-  {
-    id: '3',
-    title: '性能优化建议',
-    content: '系统响应较慢，有哪些优化建议？',
-    status: 'active',
-    createdAt: '2024-01-17T09:15:00Z',
-    updatedAt: '2024-01-17T09:15:00Z',
-    tags: ['性能', '优化']
-  }
-];
 
 // 类型定义
 interface Assistant {

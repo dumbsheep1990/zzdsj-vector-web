@@ -4,6 +4,7 @@ import { AppState } from '../utils/types';
 // 创建上下文的默认值
 const defaultState: AppState = {
     activeSection: 'dashboard',
+    activeSubSection: 'model-services',
     sidebarExpanded: true,
     darkMode: false,
     username: '管理员',
@@ -13,6 +14,7 @@ const defaultState: AppState = {
 interface AppContextType {
     state: AppState;
     setActiveSection: (section: string) => void;
+    setActiveSubSection: (section: string) => void;
     toggleSidebar: () => void;
     toggleDarkMode: () => void;
 }
@@ -25,7 +27,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     // 更新当前活动栏目
     const setActiveSection = (section: string) => {
+        console.log('Setting activeSection to:', section);
         setState(prev => ({ ...prev, activeSection: section }));
+    };
+
+    // 更新当前活动子栏目
+    const setActiveSubSection = (section: string) => {
+        console.log('Setting activeSubSection to:', section);
+        setState(prev => ({ ...prev, activeSubSection: section }));
     };
 
     // 切换侧边栏展开状态
@@ -39,11 +48,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     return (
-        <AppContext.Provider value={{ state, setActiveSection, toggleSidebar, toggleDarkMode }}>
+        <AppContext.Provider value={{ state, setActiveSection, setActiveSubSection, toggleSidebar, toggleDarkMode }}>
             {children}
         </AppContext.Provider>
     );
 };
+
 export const useAppContext = () => {
     const context = useContext(AppContext);
     if (context === undefined) {

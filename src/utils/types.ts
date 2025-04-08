@@ -134,6 +134,7 @@ export interface KnowledgeBaseItem {
 // 应用全局状态
 export interface AppState {
     activeSection: string;
+    activeSubSection: string;
     sidebarExpanded: boolean;
     darkMode: boolean;
     username: string;

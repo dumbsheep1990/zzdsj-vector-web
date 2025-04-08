@@ -24,7 +24,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/knowledge-base/files" element={<KnowledgeBase />} />
       <Route path="/knowledge-base/vectors" element={<Vectors />} />
       <Route path="/knowledge-base/metadata" element={<Metadata />} />
-      <Route path="/models" element={<Models />} />
+      <Route path="/models/*" element={<Models />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/document/:documentId" element={<DocumentManagement />} />
     </Routes>
