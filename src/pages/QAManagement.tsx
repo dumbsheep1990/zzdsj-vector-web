@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Menu, Empty, Tooltip, Tag } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Menu, Empty, Tooltip, Tag, message, Spin, Radio, Button } from 'antd';
 import PageHeader from '../components/layout/PageHeader';
 import { QuestionList } from '../components/modules/qa/QuestionList';
 import { DocumentDetail } from '../components/modules/qa/DocumentDetail';
@@ -8,18 +8,121 @@ import {
   QuestionCircleOutlined, 
   SettingOutlined,
   ApiOutlined,
-  DatabaseOutlined
+  DatabaseOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import { mockQAStats, mockAssistants } from '../utils/mockData';
 
+// 测试数据
+const mockQuestions: Question[] = [
+  {
+    id: '1',
+    title: '如何配置数据库连接？',
+    content: '我需要配置MySQL数据库连接，请问具体的步骤是什么？',
+    status: 'active',
+    createdAt: '2024-01-15T10:30:00Z',
+    updatedAt: '2024-01-15T10:30:00Z',
+    tags: ['数据库', '配置']
+  },
+  {
+    id: '2',
+    title: 'API接口调用失败',
+    content: '调用第三方API时返回500错误，请问如何排查？',
+    status: 'active',
+    createdAt: '2024-01-16T14:20:00Z',
+    updatedAt: '2024-01-16T14:20:00Z',
+    tags: ['API', '错误处理']
+  },
+  {
+    id: '3',
+    title: '性能优化建议',
+    content: '系统响应较慢，有哪些优化建议？',
+    status: 'active',
+    createdAt: '2024-01-17T09:15:00Z',
+    updatedAt: '2024-01-17T09:15:00Z',
+    tags: ['性能', '优化']
+  }
+];
+
+// 类型定义
+interface Assistant {
+  id: string;
+  name: string;
+  description: string;
+  status: 'online' | 'offline' | 'training';
+  questionCount: number;
+  documentCount: number;
+  config: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+  };
+  type: 'qa' | 'chat' | 'custom';
+  createTime: string;
+  updateTime: string;
+  capabilities: string[];
+}
+
+interface Question {
+  id: string;
+  title: string;
+  content: string;
+  status: 'active' | 'archived';
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+}
+
+// 状态管理
+interface QAState {
+  assistants: Assistant[];
+  selectedAssistant: Assistant | null;
+  selectedQuestion: Question | null;
+  activeTab: string;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: QAState = {
+  assistants: [],
+  selectedAssistant: null,
+  selectedQuestion: null,
+  activeTab: 'questions',
+  loading: false,
+  error: null
+};
+
 const QAManagement: React.FC = () => {
   // 状态管理
-  const [selectedAssistantId, setSelectedAssistantId] = useState<string | null>(null);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('questions');
+  const [state, setState] = useState<QAState>(initialState);
+  const { assistants, selectedAssistant, selectedQuestion, activeTab, loading, error } = state;
 
-  // 获取当前选中的助手信息
-  const currentAssistant = mockAssistants.find(a => a.id === selectedAssistantId);
+  // 初始化加载助手列表
+  useEffect(() => {
+    const loadAssistants = async () => {
+      setState(prev => ({ ...prev, loading: true }));
+      try {
+        // TODO: 替换为实际的API调用
+        const data = mockAssistants;
+        setState(prev => ({
+          ...prev,
+          assistants: data,
+          loading: false
+        }));
+      } catch {
+        setState(prev => ({
+          ...prev,
+          error: '加载助手列表失败',
+          loading: false
+        }));
+        message.error('加载助手列表失败');
+      }
+    };
+
+    loadAssistants();
+  }, []);
 
   // 获取助手状态标签颜色
   const getStatusColor = (status: string) => {
@@ -35,74 +138,133 @@ const QAManagement: React.FC = () => {
     }
   };
 
+  // 处理助手选择
+  const handleAssistantSelect = (assistantId: string) => {
+    const assistant = assistants.find(a => a.id === assistantId);
+    setState(prev => ({
+      ...prev,
+      selectedAssistant: assistant || null,
+      selectedQuestion: null,
+      activeTab: 'questions'
+    }));
+  };
+
+  // 处理问题选择
+  const handleQuestionSelect = (questionId: string) => {
+    const question = mockQuestions.find(q => q.id === questionId);
+    if (question) {
+      setState(prev => ({
+        ...prev,
+        selectedQuestion: question
+      }));
+    }
+  };
+
+  // 处理标签切换
+  const handleTabChange = (tab: string) => {
+    setState(prev => ({
+      ...prev,
+      activeTab: tab
+    }));
+  };
+
+  // 渲染内容区域
+  const renderContent = () => {
+    if (!selectedAssistant) return null;
+
+    switch (activeTab) {
+      case 'questions':
+        return (
+          <QuestionList 
+            assistantId={selectedAssistant.id}
+            onSelectQuestion={handleQuestionSelect}
+          />
+        );
+      case 'documents':
+        return (
+          <DocumentDetail 
+            assistantId={selectedAssistant.id}
+            questionId={selectedQuestion?.id || ''}
+          />
+        );
+      case 'settings':
+        return (
+          <QASettings 
+            assistantId={selectedAssistant.id}
+            assistant={selectedAssistant}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   // 生成菜单项
-  const menuItems = mockAssistants.map(assistant => ({
+  const menuItems = assistants.map(assistant => ({
     key: assistant.id,
     label: (
-      <div className="py-4 px-4 hover:bg-blue-50 transition-colors duration-200 rounded-lg">
+      <div className="py-4 px-4 transition-all duration-300 rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-lg hover:scale-[1.02] group">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-medium text-base truncate mr-2">{assistant.name}</span>
-            <Tag color={getStatusColor(assistant.status)} className="shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <span className="text-blue-600 font-medium text-sm group-hover:text-blue-700">
+                  {assistant.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <span className="font-medium text-base truncate group-hover:text-blue-600">{assistant.name}</span>
+            </div>
+            <Tag 
+              color={getStatusColor(assistant.status)} 
+              className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
+            >
               {assistant.status === 'online' ? '在线' : 
                assistant.status === 'training' ? '训练中' : '离线'}
             </Tag>
           </div>
-          <div className="text-sm text-gray-500 mb-3 line-clamp-2">{assistant.description}</div>
-          <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="text-sm text-gray-600 mb-4 line-clamp-2 pl-10 group-hover:text-gray-700">{assistant.description}</div>
+          <div className="flex items-center gap-4 text-xs text-gray-500 pl-10">
             <Tooltip title="问题数量">
-              <span className="flex items-center whitespace-nowrap">
-                <QuestionCircleOutlined className="mr-1" />
+              <span className="flex items-center whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                <QuestionCircleOutlined className="mr-1 text-blue-500" />
                 {assistant.questionCount} 个问题
               </span>
             </Tooltip>
             <Tooltip title="文档数量">
-              <span className="flex items-center whitespace-nowrap">
-                <DatabaseOutlined className="mr-1" />
+              <span className="flex items-center whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full group-hover:bg-green-50 group-hover:text-green-600 transition-colors">
+                <DatabaseOutlined className="mr-1 text-green-500" />
                 {assistant.documentCount} 个文档
-              </span>
-            </Tooltip>
-            <Tooltip title="模型">
-              <span className="flex items-center whitespace-nowrap overflow-hidden text-ellipsis">
-                <ApiOutlined className="mr-1" />
-                {assistant.config.model}
               </span>
             </Tooltip>
           </div>
         </div>
       </div>
-    ),
-    children: [
-      {
-        key: `${assistant.id}-questions`,
-        icon: <QuestionCircleOutlined />,
-        label: (
-          <div className="py-2 px-2">问答管理</div>
-        )
-      },
-      {
-        key: `${assistant.id}-settings`,
-        icon: <SettingOutlined />,
-        label: (
-          <div className="py-2 px-2">参数设置</div>
-        )
-      }
-    ]
+    )
   }));
 
   // 处理菜单选择
   const handleMenuSelect = ({ key }: { key: string }) => {
-    if (key.includes('-')) {
-      // 子菜单项
-      const [assistantId, tab] = key.split('-');
-      setSelectedAssistantId(assistantId);
-      setActiveTab(tab);
-    } else {
-      // 主菜单项（助手）
-      setSelectedAssistantId(key);
-      setActiveTab('questions');
-    }
+    handleAssistantSelect(key);
   };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={error}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -112,11 +274,10 @@ const QAManagement: React.FC = () => {
           parentTitle="问答助手"
           description="管理助手的问答信息"
           filterComponent={
-            selectedAssistantId && (
+            selectedAssistant && (
               <div className="text-sm text-gray-500">
-                {currentAssistant?.name} - 
-                共 {mockQAStats.totalQuestions} 个问题，
-                {mockQAStats.activeQuestions} 个活跃
+                {selectedAssistant.name} - 
+                共 {selectedAssistant.questionCount} 个问题
               </div>
             )
           }
@@ -126,57 +287,52 @@ const QAManagement: React.FC = () => {
       <div className="flex-1 min-h-0 overflow-hidden">
         <div className="h-full flex">
           {/* 左侧助手列表 */}
-          <div className="w-80 border-r border-gray-100 h-full overflow-hidden flex flex-col">
+          <div className="w-[360px] border-r border-gray-100 h-full overflow-hidden">
             <Menu
               mode="inline"
-              selectedKeys={[selectedAssistantId ? `${selectedAssistantId}-${activeTab}` : '']}
-              openKeys={selectedAssistantId ? [selectedAssistantId] : []}
+              selectedKeys={[selectedAssistant ? selectedAssistant.id : '']}
               items={menuItems}
               onSelect={handleMenuSelect}
-              className="border-0 flex-1 overflow-auto"
+              className="h-full border-0"
               style={{ 
-                padding: '12px 0'
+                padding: '12px 16px'
               }}
               rootClassName="qa-assistant-menu"
             />
           </div>
 
-          {/* 中间内容区 */}
-          <div className="w-96 border-r border-gray-100 h-full flex flex-col overflow-hidden">
-            {!selectedAssistantId ? (
+          {/* 中间问题列表 */}
+          <div className="flex-1 border-r border-gray-100 h-full flex flex-col overflow-hidden">
+            {!selectedAssistant ? (
               <div className="h-full flex items-center justify-center">
-                <Empty
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description="请选择一个助手"
-                />
+                <Empty description="请选择一个助手查看问题列表" />
               </div>
-            ) : activeTab === 'questions' ? (
-              <QuestionList 
-                assistantId={selectedAssistantId}
-                onSelectQuestion={setSelectedQuestionId}
-              />
             ) : (
-              <QASettings 
-                assistantId={selectedAssistantId}
-                assistant={currentAssistant}
-              />
-            )}
-          </div>
-
-          {/* 右侧详情区 */}
-          <div className="flex-1 h-full overflow-hidden flex flex-col">
-            <div className="flex-1 min-h-0 overflow-auto bg-gray-50 p-6">
-              {selectedQuestionId ? (
-                <DocumentDetail 
-                  questionId={selectedQuestionId}
-                  assistantId={selectedAssistantId!}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center text-gray-400">
-                  <span>请选择要查看的问题</span>
+              <>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                  <div className="flex items-center gap-4">
+                    <Radio.Group 
+                      value={activeTab} 
+                      onChange={e => handleTabChange(e.target.value)}
+                      className="flex bg-gray-50 p-1 rounded-lg"
+                    >
+                      <Radio.Button value="questions" className="rounded-md">问题列表</Radio.Button>
+                      <Radio.Button value="documents" className="rounded-md">文档管理</Radio.Button>
+                      <Radio.Button value="settings" className="rounded-md">助手设置</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button type="primary" icon={<PlusOutlined />}>新增问题</Button>
+                  </div>
                 </div>
-              )}
-            </div>
+                <div className="flex-1 overflow-hidden">
+                  {/* 内容区域 */}
+                  <div className="h-full overflow-auto p-6">
+                    {renderContent()}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -192,46 +348,71 @@ const styles = `
     padding: 0 !important;
     height: auto !important;
     line-height: 1.5 !important;
-    border-radius: 8px;
-    margin: 4px 8px !important;
-  }
-
-  .ant-menu-item-selected {
-    background-color: #e6f4ff !important;
-    color: #1677ff !important;
-  }
-
-  .ant-menu-item:hover {
-    background-color: #f5f5f5 !important;
-  }
-
-  .ant-menu-submenu-title {
-    margin: 0 !important;
-    padding: 0 !important;
-    height: auto !important;
-    line-height: 1.5 !important;
-  }
-
-  .ant-menu-submenu-selected > .ant-menu-submenu-title {
-    color: #1677ff !important;
-  }
-
-  .ant-menu-submenu-arrow {
-    right: 8px !important;
-  }
-
-  .ant-menu-submenu {
-    margin: 4px 8px !important;
-  }
-
-  .ant-menu-submenu .ant-menu-item {
-    margin-left: 8px !important;
-    margin-right: 8px !important;
+    border-radius: 12px;
+    margin: 6px 0 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .ant-menu {
     height: 100% !important;
     overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f3f4f6;
+  }
+
+  .ant-menu::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .ant-menu::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 2px;
+  }
+
+  .ant-menu::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 2px;
+  }
+}
+
+.qa-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.qa-detail {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.qa-tag {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.qa-loading {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 `;
