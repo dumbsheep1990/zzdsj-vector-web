@@ -82,51 +82,118 @@ export const mockDocuments: QADocument[] = [
     }
 ];
 
-// 测试数据：问题列表
-export const mockQuestions: QAQuestion[] = [
+export interface DocumentInfo {
+    title: string;
+    page: number;
+    segment: string;
+    segmentId: string;
+    similarity: number;
+    relevanceScore: number;
+}
+
+export interface Answer {
+    id: string;
+    content: string;
+    source: string;
+    confidence: number;
+    rank: number;
+    feedback: 'positive' | 'negative' | null;
+    isManual: boolean;
+    createTime: string;
+    documentInfo: DocumentInfo;
+}
+
+export interface Question {
+    id: string;
+    question: string;
+    answers: Answer[];
+    status: 'active' | 'inactive';
+    documentId?: string;
+    segmentId?: string;
+    createTime: string;
+    updateTime: string;
+    tags: string[];
+}
+
+export const mockAnswers: Answer[] = [
     {
-        id: 'q1',
-        question: '如何安装和初始化系统？',
-        documentId: 'doc1',
-        segmentId: 'seg1',
-        answerType: 'original',
-        createTime: '2024-03-25 11:00:00',
-        updateTime: '2024-03-25 11:00:00',
-        tags: ['安装', '初始化'],
-        status: 'active'
+        id: '1',
+        content: '向量数据库是一种专门用于存储和检索向量数据的数据库系统。它能够高效地进行相似度搜索，支持海量高维向量的存储和快速检索。',
+        source: '向量数据库介绍.pdf',
+        confidence: 0.95,
+        rank: 1,
+        feedback: null,
+        isManual: false,
+        createTime: '2024-03-15T10:00:00Z',
+        documentInfo: {
+            title: '向量数据库介绍.pdf',
+            page: 1,
+            segment: '第一章 基础概念',
+            segmentId: 'seg_001',
+            similarity: 0.95,
+            relevanceScore: 0.92
+        }
     },
     {
-        id: 'q2',
-        question: '系统支持哪些数据格式？',
-        documentId: 'doc2',
-        segmentId: 'seg5',
-        answerType: 'summary',
-        createTime: '2024-03-24 16:30:00',
-        updateTime: '2024-03-24 16:30:00',
-        tags: ['数据格式', '兼容性'],
-        status: 'active'
+        id: '2',
+        content: '向量数据库的主要应用场景包括：图像检索、文本语义搜索、推荐系统、人脸识别等领域。它通过将数据转换为高维向量，实现基于语义的相似度匹配。',
+        source: '向量数据库介绍.pdf',
+        confidence: 0.88,
+        rank: 2,
+        feedback: 'positive',
+        isManual: false,
+        createTime: '2024-03-15T10:01:00Z',
+        documentInfo: {
+            title: '向量数据库介绍.pdf',
+            page: 2,
+            segment: '第一章 应用场景',
+            segmentId: 'seg_002',
+            similarity: 0.88,
+            relevanceScore: 0.85
+        }
     },
     {
-        id: 'q3',
-        question: '如何处理常见的错误码？',
-        documentId: 'doc3',
-        segmentId: 'seg2',
-        answerType: 'original',
-        createTime: '2024-03-23 10:20:00',
-        updateTime: '2024-03-23 10:20:00',
-        tags: ['错误处理', '故障排除'],
-        status: 'active'
+        id: '3',
+        content: '向量数据库使用特殊的索引结构（如HNSW、IVF等）来加速向量检索过程，能够在毫秒级别内完成海量数据的相似度搜索。',
+        source: '向量数据库技术原理.pdf',
+        confidence: 0.82,
+        rank: 3,
+        feedback: null,
+        isManual: false,
+        createTime: '2024-03-15T10:02:00Z',
+        documentInfo: {
+            title: '向量数据库技术原理.pdf',
+            page: 15,
+            segment: '第三章 索引结构',
+            segmentId: 'seg_003',
+            similarity: 0.82,
+            relevanceScore: 0.79
+        }
+    }
+];
+
+export const mockQuestions: Question[] = [
+    {
+        id: '1',
+        question: '什么是向量数据库？',
+        answers: mockAnswers,
+        status: 'active',
+        documentId: 'doc_001',
+        segmentId: 'seg_001',
+        createTime: '2024-03-15T09:00:00Z',
+        updateTime: '2024-03-15T10:00:00Z',
+        tags: ['基础概念', '数据库']
     },
     {
-        id: 'q4',
-        question: '系统的最低硬件要求是什么？',
-        documentId: 'doc1',
-        segmentId: 'seg3',
-        answerType: 'summary',
-        createTime: '2024-03-22 15:45:00',
-        updateTime: '2024-03-22 15:45:00',
-        tags: ['硬件要求', '系统要求'],
-        status: 'active'
+        id: '2',
+        question: '向量数据库有哪些优势？',
+        answers: mockAnswers.slice(1),
+        status: 'active',
+        documentId: 'doc_002',
+        segmentId: 'seg_002',
+        createTime: '2024-03-15T09:30:00Z',
+        updateTime: '2024-03-15T10:30:00Z',
+        tags: ['性能', '特性']
     }
 ];
 
@@ -160,11 +227,13 @@ export const mockSegments: QASegment[] = [
 
 // 测试数据：统计信息
 export const mockQAStats = {
-    totalDocuments: 4,
-    totalQuestions: 75,
-    totalSegments: 35,
-    processingDocuments: 1,
-    activeQuestions: 72,
-    averageQuestionsPerDoc: 18.75,
-    topTags: ['技术文档', 'FAQ', '用户指南', '错误处理']
+    totalAssistants: 5,
+    onlineAssistants: 3,
+    totalDocuments: 90,
+    totalQuestions: 864,
+    totalSegments: 450,
+    processingDocuments: 8,
+    activeQuestions: 720,
+    averageQuestionsPerDoc: 9.6,
+    topTags: ['产品', '技术', '培训', '流程', '政策']
 }; 

@@ -9,6 +9,7 @@ import Metadata from '../pages/Metadata';
 import Models from '../pages/Models';
 import Settings from '../pages/Settings';
 import Dashboard from '../pages/Dashboard';
+import DocumentManagement from '../pages/DocumentManagement';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/knowledge-base/metadata" element={<Metadata />} />
       <Route path="/models" element={<Models />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/document/:documentId" element={<DocumentManagement />} />
     </Routes>
   );
 };

@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Empty, Tooltip, Tag, message, Spin, Radio, Button, Input } from 'antd';
+import { Menu, Empty, Tooltip, Tag, message, Spin, Button, Input } from 'antd';
 import PageHeader from '../components/layout/PageHeader';
 import { QuestionList } from '../components/modules/qa/QuestionList';
-import { DocumentDetail } from '../components/modules/qa/DocumentDetail';
 import { QASettings } from '../components/modules/qa/QASettings';
+import AddQuestionModal from '../components/modules/qa/AddQuestionModal';
 import { 
   QuestionCircleOutlined, 
-  SettingOutlined,
-  ApiOutlined,
   DatabaseOutlined,
   PlusOutlined,
-  DeleteOutlined,
-  EditOutlined,
   SearchOutlined
 } from '@ant-design/icons';
-import { mockQAStats, mockAssistants } from '../utils/mockData';
+import { mockAssistants } from '../utils/mockData';
 
 // 测试数据
 const mockQuestions: Question[] = [
@@ -80,7 +76,7 @@ interface Question {
 interface QAState {
   assistants: Assistant[];
   selectedAssistant: Assistant | null;
-  selectedQuestion: Question | null;
+  selectedQuestion: string | null;
   activeTab: string;
   loading: boolean;
   error: string | null;
@@ -96,28 +92,25 @@ const initialState: QAState = {
 };
 
 const QAManagement: React.FC = () => {
-  // 状态管理
-  const [state, setState] = useState<QAState>(initialState);
-  const { assistants, selectedAssistant, selectedQuestion, activeTab, loading, error } = state;
+  const [assistants, setAssistants] = useState<Assistant[]>(mockAssistants);
+  const [selectedAssistant, setSelectedAssistant] = useState<Assistant | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'questions' | 'settings'>('questions');
+  const [loading, setLoading] = useState(false);
+  const [isAddQuestionModalVisible, setIsAddQuestionModalVisible] = useState(false);
 
   // 初始化加载助手列表
   useEffect(() => {
     const loadAssistants = async () => {
-      setState(prev => ({ ...prev, loading: true }));
+      setLoading(true);
       try {
         // TODO: 替换为实际的API调用
         const data = mockAssistants;
-        setState(prev => ({
-          ...prev,
-          assistants: data,
-          loading: false
-        }));
+        setAssistants(data);
+        setSelectedAssistant(data[0]);
+        setLoading(false);
       } catch {
-        setState(prev => ({
-          ...prev,
-          error: '加载助手列表失败',
-          loading: false
-        }));
+        setLoading(false);
         message.error('加载助手列表失败');
       }
     };
@@ -142,31 +135,30 @@ const QAManagement: React.FC = () => {
   // 处理助手选择
   const handleAssistantSelect = (assistantId: string) => {
     const assistant = assistants.find(a => a.id === assistantId);
-    setState(prev => ({
-      ...prev,
-      selectedAssistant: assistant || null,
-      selectedQuestion: null,
-      activeTab: 'questions'
-    }));
+    setSelectedAssistant(assistant || null);
   };
 
   // 处理问题选择
   const handleQuestionSelect = (questionId: string) => {
-    const question = mockQuestions.find(q => q.id === questionId);
-    if (question) {
-      setState(prev => ({
-        ...prev,
-        selectedQuestion: question
-      }));
-    }
+    setSelectedQuestion(questionId);
+    setActiveTab('settings');
   };
 
   // 处理标签切换
   const handleTabChange = (tab: string) => {
-    setState(prev => ({
-      ...prev,
-      activeTab: tab
-    }));
+    setActiveTab(tab as 'questions' | 'settings');
+  };
+
+  // 处理新增问题
+  const handleAddQuestion = (values: {
+    question: string;
+    answer: string;
+    mode: 'manual' | 'smart';
+  }) => {
+    // TODO: 调用API添加问题
+    console.log('New question:', values);
+    message.success('问题添加成功');
+    setIsAddQuestionModalVisible(false);
   };
 
   // 渲染内容区域
@@ -181,18 +173,11 @@ const QAManagement: React.FC = () => {
             onSelectQuestion={handleQuestionSelect}
           />
         );
-      case 'documents':
-        return (
-          <DocumentDetail 
-            assistantId={selectedAssistant.id}
-            questionId={selectedQuestion?.id || ''}
-          />
-        );
       case 'settings':
         return (
           <QASettings 
             assistantId={selectedAssistant.id}
-            assistant={selectedAssistant}
+            selectedQuestion={selectedQuestion}
           />
         );
       default:
@@ -288,17 +273,6 @@ if (loading) {
   );
 }
 
-if (error) {
-  return (
-    <div className="h-full flex items-center justify-center">
-      <Empty
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-        description={error}
-      />
-    </div>
-  );
-}
-
 return (
   <div className="flex flex-col h-full overflow-hidden">
     <div className="shrink-0">
@@ -344,26 +318,15 @@ return (
             <>
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                 <div className="flex items-center gap-4">
-                  <div className="flex gap-3">
-                    <button 
-                      className={`flex items-center gap-2 text-[15px] px-5 py-2 rounded-lg border border-gray-200 shadow-sm hover:border-blue-400 hover:text-blue-500 transition-all ${
-                        activeTab === 'questions' ? 'text-blue-500 border-blue-500 shadow-md' : 'text-gray-600'
-                      }`}
-                      onClick={() => handleTabChange('questions')}
-                    >
-                      <QuestionCircleOutlined />
-                      问题列表
-                    </button>
-                    <button 
-                      className={`flex items-center gap-2 text-[15px] px-5 py-2 rounded-lg border border-gray-200 shadow-sm hover:border-blue-400 hover:text-blue-500 transition-all ${
-                        activeTab === 'documents' ? 'text-blue-500 border-blue-500 shadow-md' : 'text-gray-600'
-                      }`}
-                      onClick={() => handleTabChange('documents')}
-                    >
-                      <DatabaseOutlined />
-                      文档管理
-                    </button>
-                  </div>
+                  <button 
+                    className={`flex items-center gap-2 text-[15px] px-5 py-2 rounded-lg border border-gray-200 shadow-sm hover:border-blue-400 hover:text-blue-500 transition-all ${
+                      activeTab === 'questions' ? 'text-blue-500 border-blue-500 shadow-md' : 'text-gray-600'
+                    }`}
+                    onClick={() => handleTabChange('questions')}
+                  >
+                    <QuestionCircleOutlined />
+                    问题列表
+                  </button>
                 </div>
                 <div className="flex items-center gap-3">
                   <Input
@@ -376,6 +339,7 @@ return (
                     type="primary" 
                     icon={<PlusOutlined />}
                     className="bg-blue-500 hover:bg-blue-600 border-none shadow-sm hover:shadow-md transition-all"
+                    onClick={() => setIsAddQuestionModalVisible(true)}
                   >
                     新增问题
                   </Button>
@@ -392,6 +356,13 @@ return (
         </div>
       </div>
     </div>
+
+    {/* 新增问题弹窗 */}
+    <AddQuestionModal
+      open={isAddQuestionModalVisible}
+      onCancel={() => setIsAddQuestionModalVisible(false)}
+      onOk={handleAddQuestion}
+    />
   </div>
 );
 };
