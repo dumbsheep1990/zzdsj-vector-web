@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Empty, Tooltip, Tag, message, Spin, Radio, Button } from 'antd';
+import { Menu, Empty, Tooltip, Tag, message, Spin, Radio, Button, Input } from 'antd';
 import PageHeader from '../components/layout/PageHeader';
 import { QuestionList } from '../components/modules/qa/QuestionList';
 import { DocumentDetail } from '../components/modules/qa/DocumentDetail';
@@ -11,7 +11,8 @@ import {
   DatabaseOutlined,
   PlusOutlined,
   DeleteOutlined,
-  EditOutlined
+  EditOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
 import { mockQAStats, mockAssistants } from '../utils/mockData';
 
@@ -203,141 +204,196 @@ const QAManagement: React.FC = () => {
   const menuItems = assistants.map(assistant => ({
     key: assistant.id,
     label: (
-      <div className="py-4 px-4 transition-all duration-300 rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-lg hover:scale-[1.02] group">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <span className="text-blue-600 font-medium text-sm group-hover:text-blue-700">
-                  {assistant.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className="font-medium text-base truncate group-hover:text-blue-600">{assistant.name}</span>
+      <div className={`py-4 px-4 transition-all duration-300 rounded-xl border ${
+        selectedAssistant?.id === assistant.id 
+          ? 'border-blue-500 bg-blue-50/50 shadow-sm' 
+          : 'border-gray-100 hover:border-blue-200 hover:shadow-lg hover:scale-[1.02]'
+      } group`}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+              selectedAssistant?.id === assistant.id 
+                ? 'bg-blue-100/80' 
+                : 'bg-blue-100 group-hover:bg-blue-200'
+            }`}>
+              <span className={`font-medium text-sm ${
+                selectedAssistant?.id === assistant.id 
+                  ? 'text-blue-700' 
+                  : 'text-blue-600 group-hover:text-blue-700'
+              }`}>
+                {assistant.name.charAt(0).toUpperCase()}
+              </span>
             </div>
-            <Tag 
-              color={getStatusColor(assistant.status)} 
-              className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
-            >
-              {assistant.status === 'online' ? '在线' : 
-               assistant.status === 'training' ? '训练中' : '离线'}
-            </Tag>
+            <span className={`font-medium text-base truncate ${
+              selectedAssistant?.id === assistant.id 
+                ? 'text-blue-700' 
+                : 'group-hover:text-blue-600'
+            }`}>
+              {assistant.name}
+            </span>
           </div>
-          <div className="text-sm text-gray-600 mb-4 line-clamp-2 pl-10 group-hover:text-gray-700">{assistant.description}</div>
-          <div className="flex items-center gap-4 text-xs text-gray-500 pl-10">
-            <Tooltip title="问题数量">
-              <span className="flex items-center whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                <QuestionCircleOutlined className="mr-1 text-blue-500" />
-                {assistant.questionCount} 个问题
-              </span>
-            </Tooltip>
-            <Tooltip title="文档数量">
-              <span className="flex items-center whitespace-nowrap bg-gray-50 px-2 py-1 rounded-full group-hover:bg-green-50 group-hover:text-green-600 transition-colors">
-                <DatabaseOutlined className="mr-1 text-green-500" />
-                {assistant.documentCount} 个文档
-              </span>
-            </Tooltip>
-          </div>
+          <Tag 
+            color={getStatusColor(assistant.status)} 
+            className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
+          >
+            {assistant.status === 'online' ? '在线' : 
+             assistant.status === 'training' ? '训练中' : '离线'}
+          </Tag>
         </div>
-      </div>
-    )
-  }));
-
-  // 处理菜单选择
-  const handleMenuSelect = ({ key }: { key: string }) => {
-    handleAssistantSelect(key);
-  };
-
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={error}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="shrink-0">
-        <PageHeader 
-          title="问答管理" 
-          parentTitle="问答助手"
-          description="管理助手的问答信息"
-          filterComponent={
-            selectedAssistant && (
-              <div className="text-sm text-gray-500">
-                {selectedAssistant.name} - 
-                共 {selectedAssistant.questionCount} 个问题
-              </div>
-            )
-          }
-        />
-      </div>
-      
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <div className="h-full flex">
-          {/* 左侧助手列表 */}
-          <div className="w-[360px] border-r border-gray-100 h-full overflow-hidden">
-            <Menu
-              mode="inline"
-              selectedKeys={[selectedAssistant ? selectedAssistant.id : '']}
-              items={menuItems}
-              onSelect={handleMenuSelect}
-              className="h-full border-0"
-              style={{ 
-                padding: '12px 16px'
-              }}
-              rootClassName="qa-assistant-menu"
-            />
-          </div>
-
-          {/* 中间问题列表 */}
-          <div className="flex-1 border-r border-gray-100 h-full flex flex-col overflow-hidden">
-            {!selectedAssistant ? (
-              <div className="h-full flex items-center justify-center">
-                <Empty description="请选择一个助手查看问题列表" />
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <Radio.Group 
-                      value={activeTab} 
-                      onChange={e => handleTabChange(e.target.value)}
-                      className="flex bg-gray-50 p-1 rounded-lg"
-                    >
-                      <Radio.Button value="questions" className="rounded-md">问题列表</Radio.Button>
-                      <Radio.Button value="documents" className="rounded-md">文档管理</Radio.Button>
-                      <Radio.Button value="settings" className="rounded-md">助手设置</Radio.Button>
-                    </Radio.Group>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button type="primary" icon={<PlusOutlined />}>新增问题</Button>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  {/* 内容区域 */}
-                  <div className="h-full overflow-auto p-6">
-                    {renderContent()}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+        <div className={`text-sm mb-4 line-clamp-2 pl-10 ${
+          selectedAssistant?.id === assistant.id 
+            ? 'text-gray-700' 
+            : 'text-gray-600 group-hover:text-gray-700'
+        }`}>
+          {assistant.description}
+        </div>
+        <div className="flex items-center gap-4 text-xs text-gray-500 pl-10">
+          <Tooltip title="问题数量">
+            <span className={`flex items-center whitespace-nowrap px-2 py-1 rounded-full ${
+              selectedAssistant?.id === assistant.id 
+                ? 'bg-blue-50 text-blue-600' 
+                : 'bg-gray-50 group-hover:bg-blue-50 group-hover:text-blue-600'
+            } transition-colors`}>
+              <QuestionCircleOutlined className="mr-1 text-blue-500" />
+              {assistant.questionCount} 个问题
+            </span>
+          </Tooltip>
+          <Tooltip title="文档数量">
+            <span className={`flex items-center whitespace-nowrap px-2 py-1 rounded-full ${
+              selectedAssistant?.id === assistant.id 
+                ? 'bg-green-50 text-green-600' 
+                : 'bg-gray-50 group-hover:bg-green-50 group-hover:text-green-600'
+            } transition-colors`}>
+              <DatabaseOutlined className="mr-1 text-green-500" />
+              {assistant.documentCount} 个文档
+            </span>
+          </Tooltip>
         </div>
       </div>
     </div>
+  )
+}));
+
+// 处理菜单选择
+const handleMenuSelect = ({ key }: { key: string }) => {
+  handleAssistantSelect(key);
+};
+
+if (loading) {
+  return (
+    <div className="h-full flex items-center justify-center">
+      <Spin size="large" />
+    </div>
   );
+}
+
+if (error) {
+  return (
+    <div className="h-full flex items-center justify-center">
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={error}
+      />
+    </div>
+  );
+}
+
+return (
+  <div className="flex flex-col h-full overflow-hidden">
+    <div className="shrink-0">
+      <PageHeader 
+        title="问答管理" 
+        parentTitle="问答助手"
+        description="管理助手的问答信息"
+        filterComponent={
+          selectedAssistant && (
+            <div className="text-sm text-gray-500">
+              {selectedAssistant.name} - 
+              共 {selectedAssistant.questionCount} 个问题
+            </div>
+          )
+        }
+      />
+    </div>
+    
+    <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="h-full flex">
+        {/* 左侧助手列表 */}
+        <div className="w-[360px] border-r border-gray-100 h-full overflow-hidden">
+          <Menu
+            mode="inline"
+            selectedKeys={[selectedAssistant ? selectedAssistant.id : '']}
+            items={menuItems}
+            onSelect={handleMenuSelect}
+            className="h-full border-0"
+            style={{ 
+              padding: '12px 16px'
+            }}
+            rootClassName="qa-assistant-menu"
+          />
+        </div>
+
+        {/* 中间问题列表 */}
+        <div className="flex-1 border-r border-gray-100 h-full flex flex-col overflow-hidden">
+          {!selectedAssistant ? (
+            <div className="h-full flex items-center justify-center">
+              <Empty description="请选择一个助手查看问题列表" />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-3">
+                    <button 
+                      className={`flex items-center gap-2 text-[15px] px-5 py-2 rounded-lg border border-gray-200 shadow-sm hover:border-blue-400 hover:text-blue-500 transition-all ${
+                        activeTab === 'questions' ? 'text-blue-500 border-blue-500 shadow-md' : 'text-gray-600'
+                      }`}
+                      onClick={() => handleTabChange('questions')}
+                    >
+                      <QuestionCircleOutlined />
+                      问题列表
+                    </button>
+                    <button 
+                      className={`flex items-center gap-2 text-[15px] px-5 py-2 rounded-lg border border-gray-200 shadow-sm hover:border-blue-400 hover:text-blue-500 transition-all ${
+                        activeTab === 'documents' ? 'text-blue-500 border-blue-500 shadow-md' : 'text-gray-600'
+                      }`}
+                      onClick={() => handleTabChange('documents')}
+                    >
+                      <DatabaseOutlined />
+                      文档管理
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Input
+                    placeholder="搜索问题..."
+                    prefix={<SearchOutlined className="text-gray-400" />}
+                    className="w-64"
+                    allowClear
+                  />
+                  <Button 
+                    type="primary" 
+                    icon={<PlusOutlined />}
+                    className="bg-blue-500 hover:bg-blue-600 border-none shadow-sm hover:shadow-md transition-all"
+                  >
+                    新增问题
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                {/* 内容区域 */}
+                <div className="h-full overflow-auto p-6">
+                  {renderContent()}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+);
 };
 
 // 添加全局样式

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { List, Button, Input, Modal, Tag, Tooltip, message, Pagination } from 'antd';
+import { List, Button, Modal, Tag, Tooltip, message, Pagination } from 'antd';
 import { 
   QuestionCircleOutlined,
-  SearchOutlined,
-  PlusOutlined,
+  LinkOutlined,
   DeleteOutlined,
   EditOutlined,
-  LinkOutlined
 } from '@ant-design/icons';
 import { mockQuestions, mockDocuments, QAQuestion } from '../../../utils/mockData';
 
@@ -15,9 +13,8 @@ interface QuestionListProps {
   onSelectQuestion: (questionId: string) => void;
 }
 
-export const QuestionList: React.FC<QuestionListProps> = ({ assistantId, onSelectQuestion }) => {
+export const QuestionList: React.FC<QuestionListProps> = ({ onSelectQuestion }) => {
   const [questions, setQuestions] = useState<QAQuestion[]>(mockQuestions);
-  const [searchText, setSearchText] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<QAQuestion | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,17 +41,6 @@ export const QuestionList: React.FC<QuestionListProps> = ({ assistantId, onSelec
     setIsModalVisible(true);
   };
 
-  // 过滤问题
-  const filteredQuestions = questions.filter(q => 
-    q.question.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  // 分页数据
-  const paginatedQuestions = filteredQuestions.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
   // 获取文档标题
   const getDocumentTitle = (documentId: string | null) => {
     if (!documentId) return null;
@@ -64,30 +50,10 @@ export const QuestionList: React.FC<QuestionListProps> = ({ assistantId, onSelec
 
   return (
     <div className="flex flex-col h-full">
-      {/* 搜索和添加区域 */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder="搜索问题..."
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={searchText}
-            onChange={e => setSearchText(e.target.value)}
-            className="flex-1"
-          />
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalVisible(true)}
-          >
-            添加
-          </Button>
-        </div>
-      </div>
-
       {/* 问题列表 */}
       <div className="flex-1 overflow-auto">
         <List
-          dataSource={paginatedQuestions}
+          dataSource={questions}
           renderItem={question => (
             <List.Item
               key={question.id}
@@ -181,7 +147,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({ assistantId, onSelec
         <Pagination
           current={currentPage}
           pageSize={pageSize}
-          total={filteredQuestions.length}
+          total={questions.length}
           onChange={setCurrentPage}
           size="small"
           showSizeChanger={false}
