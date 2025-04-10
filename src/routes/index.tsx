@@ -10,6 +10,7 @@ import Models from '../pages/Models';
 import Settings from '../pages/Settings';
 import Dashboard from '../pages/Dashboard';
 import DocumentManagement from '../pages/DocumentManagement';
+import DataIntegration from '../pages/DataIntegration';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/models" element={<Models />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/document/:documentId" element={<DocumentManagement />} />
+      <Route path="/tool-plaza/data-integration" element={<DataIntegration />} />
     </Routes>
   );
 };

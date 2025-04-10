@@ -67,6 +67,11 @@ export const navigationItems: NavItem[] = [
         iconType: 'BarChart2'
       },
       {
+        id: 'data-integration',
+        label: '数据集成',
+        iconType: 'Layers'
+      },
+      {
         id: 'ocr-recognition',
         label: 'OCR识别',
         iconType: 'Search'
