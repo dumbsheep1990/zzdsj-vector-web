@@ -68,8 +68,16 @@ const AppContent: FC = () => {
     return (
         <Routes>
             <Route path="/" element={<MainLayout>{renderContent()}</MainLayout>} />
-            <Route path="/chat/:assistantId" element={<AssistantChat />} />
+            <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+            <Route path="/knowledge-base" element={<MainLayout><KnowledgeBase /></MainLayout>} />
+            <Route path="/vectors" element={<MainLayout><Vectors /></MainLayout>} />
+            <Route path="/metadata" element={<MainLayout><Metadata /></MainLayout>} />
+            <Route path="/models/*" element={<MainLayout><Models /></MainLayout>} />
+            <Route path="/assistant-list" element={<MainLayout><AssistantList /></MainLayout>} />
             <Route path="/qa-management" element={<MainLayout><QAManagement /></MainLayout>} />
+            <Route path="/data-processing-tools" element={<MainLayout><DataProcessingTools /></MainLayout>} />
+            <Route path="/settings" element={<MainLayout><div className="flex-1 p-6"><h1 className="text-2xl font-semibold">系统设置（开发中）</h1></div></MainLayout>} />
+            <Route path="/chat/:assistantId" element={<AssistantChat />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );

@@ -58,6 +58,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
       width={800}
       okText="保存"
       cancelText="取消"
+      okButtonProps={{ style: { backgroundColor: '#1890ff', borderColor: '#1890ff' } }}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',

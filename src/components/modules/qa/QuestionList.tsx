@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { List, Button, Modal, Tag, Tooltip, message, Pagination, Collapse, Input, Progress } from 'antd';
+import { List, Button, Modal, Tag, Tooltip, message, Pagination, Collapse, Progress } from 'antd';
 import { 
   QuestionCircleOutlined,
   EditOutlined,
@@ -8,11 +8,15 @@ import {
   DislikeOutlined,
   OrderedListOutlined,
   FileTextOutlined,
-  PartitionOutlined,
-  FolderOutlined
+  PartitionOutlined
 } from '@ant-design/icons';
 import { mockQuestions, type Question, type Answer } from '../../../utils/mockData/qaData';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const QuillEditor = ReactQuill as any;
 
 interface QuestionListProps {
   assistantId: string;
@@ -21,11 +25,9 @@ interface QuestionListProps {
 }
 
 export const QuestionList: React.FC<QuestionListProps> = ({ 
-  assistantId, 
   onSelectQuestion,
-  onDocumentManage 
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   
   // 转换 mockQuestions 数据结构以匹配 Question 接口
   const initialQuestions: Question[] = mockQuestions.map(q => ({
@@ -362,13 +364,23 @@ export const QuestionList: React.FC<QuestionListProps> = ({
         }}
         okText="保存"
         cancelText="取消"
+        okButtonProps={{ style: { backgroundColor: '#1890ff', borderColor: '#1890ff' } }}
+        width={800}
       >
-        <Input.TextArea
-          rows={6}
+        <QuillEditor
+          theme="snow"
           value={newAnswerContent}
-          onChange={e => setNewAnswerContent(e.target.value)}
-          placeholder="请输入答案内容..."
-          className="mb-4"
+          onChange={setNewAnswerContent}
+          style={{ height: '200px', marginBottom: '50px' }}
+          modules={{
+            toolbar: [
+              [{ 'header': [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+              ['link', 'image'],
+              ['clean']
+            ]
+          }}
         />
       </Modal>
     </div>

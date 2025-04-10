@@ -21,11 +21,6 @@ export const navigationItems: NavItem[] = [
         id: 'qa-management',
         label: '问答管理',
         iconType: 'MessageCircle'
-      },
-      {
-        id: 'datasets',
-        label: '数据集',
-        iconType: 'Database'
       }
     ]
   },
@@ -38,6 +33,11 @@ export const navigationItems: NavItem[] = [
         id: 'knowledge-base',
         label: '知识库',
         iconType: 'Library'
+      },
+      {
+        id: 'datasets',
+        label: '数据集',
+        iconType: 'Database'
       },
       {
         id: 'vectors',
@@ -54,7 +54,24 @@ export const navigationItems: NavItem[] = [
   {
     id: 'models',
     label: '模型管理',
-    iconType: 'Code'
+    iconType: 'Code',
+    children: [
+      {
+        id: 'model-services',
+        label: '模型服务',
+        iconType: 'Database'
+      },
+      {
+        id: 'model-config',
+        label: '模型配置',
+        iconType: 'Settings'
+      },
+      {
+        id: 'config-export',
+        label: '配置导出',
+        iconType: 'FileText'
+      }
+    ]
   },
   {
     id: 'tool-plaza',

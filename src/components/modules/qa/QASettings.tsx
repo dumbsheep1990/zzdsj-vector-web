@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Switch, Button, Card, Space, Radio, message, Tag, Divider } from 'antd';
+import { Form, Switch, Button, Card, Space, Radio, message, Tag } from 'antd';
 import { QuestionCircleOutlined, FileTextOutlined, DatabaseOutlined, PartitionOutlined } from '@ant-design/icons';
 
 interface QASettingsFormValues {
@@ -152,7 +152,11 @@ export const QASettings: React.FC<QASettingsProps> = ({
               </Form.Item>
 
               <Form.Item className="mb-0">
-                <Button type="primary" htmlType="submit">
+                <Button 
+                  type="primary" 
+                  htmlType="submit"
+                  style={{ backgroundColor: '#1890ff', borderColor: '#1890ff' }}
+                >
                   保存设置
                 </Button>
               </Form.Item>
