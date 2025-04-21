@@ -52,24 +52,24 @@ export const navigationItems: NavItem[] = [
     ]
   },
   {
-    id: 'models',
-    label: '模型管理',
-    iconType: 'Code',
+    id: 'knowledge-graph',
+    label: '知识图谱',
+    iconType: 'Network',
     children: [
       {
-        id: 'model-services',
-        label: '模型服务',
+        id: 'graph-database',
+        label: '图谱数据库',
         iconType: 'Database'
       },
       {
-        id: 'model-config',
-        label: '模型配置',
-        iconType: 'Settings'
+        id: 'graph-preview',
+        label: '图谱数据预览',
+        iconType: 'Eye'
       },
       {
-        id: 'config-export',
-        label: '配置导出',
-        iconType: 'FileText'
+        id: 'graph-qa',
+        label: '图谱检索问答',
+        iconType: 'Search'
       }
     ]
   },
@@ -103,6 +103,18 @@ export const navigationItems: NavItem[] = [
   {
     id: 'settings',
     label: '系统设置',
-    iconType: 'Settings'
+    iconType: 'Settings',
+    children: [
+      {
+        id: 'basic-settings',
+        label: '基础设置',
+        iconType: 'Tool'
+      },
+      {
+        id: 'model-settings',
+        label: '模型设置',
+        iconType: 'Box'
+      }
+    ]
   }
 ];
