@@ -13,6 +13,7 @@ import BasicSettings from './pages/BasicSettings';
 import ModelSettings from './pages/ModelSettings';
 import GraphDatabase from './pages/GraphDatabase';
 import GraphPreview from './pages/GraphPreview';
+import MCPCenter from './pages/MCPCenter';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -67,6 +68,8 @@ const AppContent: FC = () => {
                 return <GraphDatabase />;
             case 'graph-preview':
                 return <GraphPreview />;
+            case 'mcp-center':
+                return <MCPCenter />;
             default:
                 return <Dashboard />;
         }
@@ -86,6 +89,7 @@ const AppContent: FC = () => {
             <Route path="/settings/model" element={<MainLayout><ModelSettings /></MainLayout>} />
             <Route path="/knowledge-graph/database" element={<MainLayout><GraphDatabase /></MainLayout>} />
             <Route path="/knowledge-graph/preview" element={<MainLayout><GraphPreview /></MainLayout>} />
+            <Route path="/tool-plaza/mcp" element={<MainLayout><MCPCenter /></MainLayout>} />
             <Route path="/chat/:assistantId" element={<AssistantChat />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

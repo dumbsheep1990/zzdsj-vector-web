@@ -80,22 +80,22 @@ export const navigationItems: NavItem[] = [
     children: [
       {
         id: 'data-processing-tools',
-        label: '数据处理',
+        label: '基础工具',
         iconType: 'BarChart2'
       },
       {
         id: 'data-integration',
-        label: '数据集成',
+        label: 'Agent工具',
         iconType: 'Layers'
       },
       {
-        id: 'ocr-recognition',
-        label: 'OCR识别',
+        id: 'mcp-center',
+        label: 'MCP集成',
         iconType: 'Search'
       },
       {
-        id: 'format-conversion',
-        label: '格式转换',
+        id: 'tool-factory',
+        label: '工具工厂',
         iconType: 'FileType'
       }
     ]
