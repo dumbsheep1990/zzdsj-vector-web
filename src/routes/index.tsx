@@ -10,6 +10,8 @@ import Settings from '../pages/Settings';
 import Dashboard from '../pages/Dashboard';
 import DocumentManagement from '../pages/DocumentManagement';
 import DataIntegration from '../pages/DataIntegration';
+import AgentTools from '../pages/AgentTools';
+import ToolFactory from '../pages/ToolFactory';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -27,6 +29,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/settings" element={<Settings />} />
       <Route path="/document/:documentId" element={<DocumentManagement />} />
       <Route path="/tool-plaza/data-integration" element={<DataIntegration />} />
+      <Route path="/tool-plaza/agent-tools" element={<AgentTools />} />
+      <Route path="/tool-plaza/tool-factory" element={<ToolFactory />} />
     </Routes>
   );
 };

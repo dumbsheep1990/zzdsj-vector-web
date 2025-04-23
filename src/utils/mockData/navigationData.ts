@@ -80,17 +80,17 @@ export const navigationItems: NavItem[] = [
     children: [
       {
         id: 'data-processing-tools',
-        label: '基础工具',
+        label: 'API工具',
         iconType: 'BarChart2'
       },
       {
-        id: 'data-integration',
+        id: 'agent-tools',
         label: 'Agent工具',
         iconType: 'Layers'
       },
       {
         id: 'mcp-center',
-        label: 'MCP集成',
+        label: 'MCP工具',
         iconType: 'Search'
       },
       {

@@ -7,6 +7,7 @@ import Metadata from './pages/Metadata';
 import AssistantList from './pages/AssistantList';
 import AssistantChat from './pages/AssistantChat';
 import DataProcessingTools from './pages/DataProcessingTools';
+import AgentTools from './pages/AgentTools';
 import QAManagement from './pages/QAManagement';
 import Dashboard from './pages/Dashboard';
 import BasicSettings from './pages/BasicSettings';
@@ -14,6 +15,7 @@ import ModelSettings from './pages/ModelSettings';
 import GraphDatabase from './pages/GraphDatabase';
 import GraphPreview from './pages/GraphPreview';
 import MCPCenter from './pages/MCPCenter';
+import ToolFactory from './pages/ToolFactory';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -60,6 +62,8 @@ const AppContent: FC = () => {
                 return <QAManagement />;
             case 'data-processing-tools':
                 return <DataProcessingTools />;
+            case 'agent-tools':
+                return <AgentTools />;
             case 'basic-settings':
                 return <BasicSettings />;
             case 'model-settings':
@@ -70,6 +74,8 @@ const AppContent: FC = () => {
                 return <GraphPreview />;
             case 'mcp-center':
                 return <MCPCenter />;
+            case 'tool-factory':
+                return <ToolFactory />;
             default:
                 return <Dashboard />;
         }
@@ -85,11 +91,13 @@ const AppContent: FC = () => {
             <Route path="/assistant-list" element={<MainLayout><AssistantList /></MainLayout>} />
             <Route path="/qa-management" element={<MainLayout><QAManagement /></MainLayout>} />
             <Route path="/data-processing-tools" element={<MainLayout><DataProcessingTools /></MainLayout>} />
+            <Route path="/agent-tools" element={<MainLayout><AgentTools /></MainLayout>} />
             <Route path="/settings/basic" element={<MainLayout><BasicSettings /></MainLayout>} />
             <Route path="/settings/model" element={<MainLayout><ModelSettings /></MainLayout>} />
             <Route path="/knowledge-graph/database" element={<MainLayout><GraphDatabase /></MainLayout>} />
             <Route path="/knowledge-graph/preview" element={<MainLayout><GraphPreview /></MainLayout>} />
             <Route path="/tool-plaza/mcp" element={<MainLayout><MCPCenter /></MainLayout>} />
+            <Route path="/tool-plaza/tool-factory" element={<MainLayout><ToolFactory /></MainLayout>} />
             <Route path="/chat/:assistantId" element={<AssistantChat />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
