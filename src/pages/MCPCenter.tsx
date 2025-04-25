@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Card, Row, Col, Input, Button, Tag, Typography } from 'antd';
-import { PlusOutlined, SearchOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, InfoCircleOutlined, ToolOutlined, SettingOutlined } from '@ant-design/icons';
 import PageHeader from '../components/layout/PageHeader';
+import AddMCPModal from '../components/mcp/AddMCPModal';
+import MCPServiceDrawer from '../components/mcp/MCPServiceDrawer';
 
 const { Search } = Input;
 
@@ -15,7 +17,8 @@ const mcpServices = [
     type: '地图服务',
     usageCount: 1024,
     version: '1.0.0',
-    tags: ['地图', '导航', '位置服务']
+    tags: ['地图', '导航', '位置服务'],
+    toolsCount: 12
   },
   {
     id: 'everart',
@@ -25,7 +28,8 @@ const mcpServices = [
     type: '内容生成',
     usageCount: 768,
     version: '2.1.0',
-    tags: ['AI', '图像生成', '艺术']
+    tags: ['AI', '图像生成', '艺术'],
+    toolsCount: 8
   },
   {
     id: 'notion',
@@ -35,7 +39,8 @@ const mcpServices = [
     type: '内容生成',
     usageCount: 512,
     version: '1.5.0',
-    tags: ['笔记', '协作', '知识管理']
+    tags: ['笔记', '协作', '知识管理'],
+    toolsCount: 6
   },
   {
     id: 'github',
@@ -45,7 +50,8 @@ const mcpServices = [
     type: '源码管理',
     usageCount: 2048,
     version: '3.0.0',
-    tags: ['代码', '版本控制', '协作']
+    tags: ['代码', '版本控制', '协作'],
+    toolsCount: 15
   },
   {
     id: 'firecrawl',
@@ -55,7 +61,8 @@ const mcpServices = [
     type: '网页搜索',
     usageCount: 256,
     version: '1.2.0',
-    tags: ['爬虫', '数据采集', '解析']
+    tags: ['爬虫', '数据采集', '解析'],
+    toolsCount: 5
   },
   {
     id: 'perplexity',
@@ -65,7 +72,8 @@ const mcpServices = [
     type: '网页搜索',
     usageCount: 384,
     version: '1.8.0',
-    tags: ['搜索', '问答', '知识库']
+    tags: ['搜索', '问答', '知识库'],
+    toolsCount: 7
   },
   {
     id: 'quickchart',
@@ -75,7 +83,8 @@ const mcpServices = [
     type: '内容生成',
     usageCount: 640,
     version: '1.3.0',
-    tags: ['图表', '可视化', '数据分析']
+    tags: ['图表', '可视化', '数据分析'],
+    toolsCount: 9
   },
   {
     id: 'flomo',
@@ -85,7 +94,8 @@ const mcpServices = [
     type: '内容生成',
     usageCount: 896,
     version: '2.0.0',
-    tags: ['笔记', '知识管理', 'AI']
+    tags: ['笔记', '知识管理', 'AI'],
+    toolsCount: 4
   }
 ];
 
@@ -151,6 +161,8 @@ const getTypeStyle = (type: string) => {
 
 const MCPCenter: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const getCurrentServices = () => {
     return mcpServices.filter(service => {
@@ -158,6 +170,27 @@ const MCPCenter: React.FC = () => {
         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     });
+  };
+
+  const handleAddService = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleModalOk = () => {
+    // TODO: 处理表单提交
+    setIsModalOpen(false);
+  };
+
+  const handleDrawerOpen = () => {
+    setIsDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setIsDrawerOpen(false);
   };
 
   return (
@@ -191,18 +224,32 @@ const MCPCenter: React.FC = () => {
             className="max-w-md"
             style={{ width: '400px' }}
           />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            style={{
-              background: 'linear-gradient(135deg, #52c41a, #73d13d)',
-              border: 'none',
-              height: '40px',
-              boxShadow: '0 2px 6px rgba(82, 196, 26, 0.2)'
-            }}
-          >
-            添加服务
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="primary"
+              icon={<SettingOutlined />}
+              onClick={handleDrawerOpen}
+              style={{
+                background: '#1890ff',
+                border: 'none',
+                height: '40px'
+              }}
+            >
+              服务管理
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleAddService}
+              style={{
+                background: '#1890ff',
+                border: 'none',
+                height: '40px'
+              }}
+            >
+              添加服务
+            </Button>
+          </div>
         </div>
 
         <Row gutter={[16, 16]}>
@@ -263,30 +310,51 @@ const MCPCenter: React.FC = () => {
                         {service.type}
                       </Tag>
                     </div>
-                    <Button
-                      type="primary"
-                      icon={<PlayCircleOutlined />}
-                      style={{
-                        background: typeStyle.buttonBg,
-                        borderColor: typeStyle.buttonBg,
-                        borderRadius: '6px',
-                        padding: '4px 8px',
-                        height: 'auto',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.background = typeStyle.buttonHoverBg;
-                        e.currentTarget.style.borderColor = typeStyle.buttonHoverBg;
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.background = typeStyle.buttonBg;
-                        e.currentTarget.style.borderColor = typeStyle.buttonBg;
-                      }}
-                    >
-                      使用
-                    </Button>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      background: 'transparent',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      border: `1px solid ${typeStyle.buttonBg}`
+                    }}>
+                      <Button
+                        type="text"
+                        icon={<InfoCircleOutlined />}
+                        style={{
+                          color: '#1f1f1f',
+                          padding: '0 8px',
+                          height: 'auto',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '13px',
+                          background: 'transparent',
+                          border: 'none'
+                        }}
+                      >
+                        详情
+                      </Button>
+                      <Button
+                        type="primary"
+                        icon={<ToolOutlined />}
+                        style={{
+                          color: '#fff',
+                          padding: '0 8px',
+                          height: 'auto',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '13px',
+                          background: typeStyle.buttonBg,
+                          border: 'none',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        {service.toolsCount}
+                      </Button>
+                    </div>
                   </div>
 
                   <Typography.Paragraph
@@ -329,6 +397,17 @@ const MCPCenter: React.FC = () => {
           })}
         </Row>
       </div>
+
+      <AddMCPModal
+        open={isModalOpen}
+        onCancel={handleModalCancel}
+        onOk={handleModalOk}
+      />
+
+      <MCPServiceDrawer
+        open={isDrawerOpen}
+        onClose={handleDrawerClose}
+      />
     </div>
   );
 };
