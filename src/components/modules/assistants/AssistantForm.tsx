@@ -1,16 +1,18 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Select, Button, Space } from 'antd';
+import { Form, Input, Select, Button, Space, FormInstance } from 'antd';
 import { Assistant } from './types';
+import { AssistantType } from './AssistantTypeSelector';
 
 const { TextArea } = Input;
 const { Option } = Select;
 
 interface AssistantFormProps {
-  form: any;
+  form: FormInstance;
   isEdit: boolean;
-  onFinish: (values: any) => void;
+  onFinish: (values: Partial<Assistant>) => void;
   onCancel: () => void;
   initialValues?: Assistant;
+  assistantType?: AssistantType | null;
 }
 
 const AssistantForm: React.FC<AssistantFormProps> = ({ 
@@ -18,7 +20,8 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
   isEdit, 
   onFinish, 
   onCancel, 
-  initialValues 
+  initialValues,
+  assistantType = 'regular'
 }) => {
   useEffect(() => {
     if (initialValues && isEdit) {
@@ -27,10 +30,94 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
         description: initialValues.description,
         model: initialValues.model,
         capabilities: initialValues.capabilities,
-        status: initialValues.status
+        status: initialValues.status,
+        type: initialValues.type || 'regular'
+      });
+    } else if (assistantType) {
+      // Set default capabilities based on assistant type
+      let defaultCapabilities: string[] = [];
+      
+      switch(assistantType) {
+        case 'knowledge':
+          defaultCapabilities = ['知识检索', '问答系统'];
+          break;
+        case 'planning':
+          defaultCapabilities = ['任务规划', '工具调用', '多步执行'];
+          break;
+        case 'regular':
+        default:
+          defaultCapabilities = ['内容生成', '文本分析'];
+          break;
+      }
+      
+      form.setFieldsValue({
+        capabilities: defaultCapabilities,
+        type: assistantType
       });
     }
-  }, [form, initialValues, isEdit]);
+  }, [form, initialValues, isEdit, assistantType]);
+
+  // 基于助手类型获取模型选项
+  const getModelOptions = () => {
+    switch(assistantType) {
+      case 'knowledge':
+        return [
+          { value: 'GPT-4', label: 'GPT-4' },
+          { value: '文心一言', label: '文心一言' },
+          { value: '讯飞星火', label: '讯飞星火' },
+          { value: '通义千问', label: '通义千问' },
+        ];
+      case 'planning':
+        return [
+          { value: 'GPT-4', label: 'GPT-4' },
+          { value: 'Claude-3', label: 'Claude-3' },
+        ];
+      case 'regular':
+      default:
+        return [
+          { value: 'GPT-4', label: 'GPT-4' },
+          { value: 'GPT-3.5', label: 'GPT-3.5' },
+          { value: '文心一言', label: '文心一言' },
+          { value: '讯飞星火', label: '讯飞星火' },
+          { value: '通义千问', label: '通义千问' },
+        ];
+    }
+  };
+
+  // 基于助手类型获取能力选项
+  const getCapabilityOptions = () => {
+    const baseOptions = [
+      { value: '文本分析', label: '文本分析' },
+      { value: '内容生成', label: '内容生成' },
+    ];
+
+    switch(assistantType) {
+      case 'knowledge':
+        return [
+          ...baseOptions,
+          { value: '知识检索', label: '知识检索' },
+          { value: '问答系统', label: '问答系统' },
+          { value: '数据处理', label: '数据处理' },
+        ];
+      case 'planning':
+        return [
+          ...baseOptions,
+          { value: '任务规划', label: '任务规划' },
+          { value: '工具调用', label: '工具调用' },
+          { value: '多步执行', label: '多步执行' },
+          { value: '代码执行', label: '代码执行' },
+        ];
+      case 'regular':
+      default:
+        return [
+          ...baseOptions,
+          { value: '数据处理', label: '数据处理' },
+          { value: '代码辅助', label: '代码辅助' },
+          { value: '多模态', label: '多模态' },
+          { value: '问答系统', label: '问答系统' },
+        ];
+    }
+  };
 
   return (
     <Form
@@ -39,9 +126,17 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
       onFinish={onFinish}
       initialValues={{
         status: 'online',
-        capabilities: []
+        capabilities: [],
+        type: assistantType
       }}
     >
+      <Form.Item
+        name="type"
+        hidden
+      >
+        <Input />
+      </Form.Item>
+
       <Form.Item
         name="name"
         label="助手名称"
@@ -67,11 +162,9 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
         rules={[{ required: true, message: '请选择基础模型' }]}
       >
         <Select placeholder="请选择基础模型">
-          <Option value="GPT-4">GPT-4</Option>
-          <Option value="GPT-3.5">GPT-3.5</Option>
-          <Option value="文心一言">文心一言</Option>
-          <Option value="讯飞星火">讯飞星火</Option>
-          <Option value="通义千问">通义千问</Option>
+          {getModelOptions().map(option => (
+            <Option key={option.value} value={option.value}>{option.label}</Option>
+          ))}
         </Select>
       </Form.Item>
 
@@ -84,12 +177,11 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
           placeholder="请选择助手能力"
           optionLabelProp="label"
         >
-          <Option value="文本分析" label="文本分析">文本分析</Option>
-          <Option value="内容生成" label="内容生成">内容生成</Option>
-          <Option value="数据处理" label="数据处理">数据处理</Option>
-          <Option value="代码辅助" label="代码辅助">代码辅助</Option>
-          <Option value="多模态" label="多模态">多模态</Option>
-          <Option value="问答系统" label="问答系统">问答系统</Option>
+          {getCapabilityOptions().map(option => (
+            <Option key={option.value} value={option.value} label={option.label}>
+              {option.label}
+            </Option>
+          ))}
         </Select>
       </Form.Item>
 

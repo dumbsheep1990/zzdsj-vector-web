@@ -8,7 +8,17 @@ import {
   AssistantForm, 
   ModifiedAssistant as Assistant
 } from '../components/modules/assistants';
+import AssistantTypeSelector, { AssistantType } from '../components/modules/assistants/AssistantTypeSelector';
 import { mockAssistants } from '../utils/mockData';
+
+// Helper function to map old types to AssistantType
+const mapOldTypeToAssistantType = (oldType: 'qa' | 'chat' | 'custom'): AssistantType => {
+  switch (oldType) {
+    case 'qa': return 'knowledge';
+    case 'chat': return 'regular';
+    case 'custom': return 'planning';
+  }
+};
 
 const AssistantList: React.FC = () => {
   // 状态管理
@@ -16,11 +26,14 @@ const AssistantList: React.FC = () => {
     mockAssistants.map(a => ({
       ...a,
       model: a.config.model,
-      status: a.status === 'training' ? 'offline' : a.status
+      status: a.status === 'training' ? 'offline' : a.status,
+      type: mapOldTypeToAssistantType(a.type) // Map the type here
     }))
   );
+  const [isTypeSelectModalVisible, setIsTypeSelectModalVisible] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [selectedAssistantType, setSelectedAssistantType] = useState<AssistantType | null>(null);
   const [currentAssistant, setCurrentAssistant] = useState<Assistant | null>(null);
   const [form] = Form.useForm();
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
@@ -62,8 +75,15 @@ const AssistantList: React.FC = () => {
     });
   };
 
-  // 创建助手
+  // 打开类型选择模态框
   const handleCreate = () => {
+    setIsTypeSelectModalVisible(true);
+  };
+
+  // 处理类型选择
+  const handleTypeSelect = (type: AssistantType) => {
+    setSelectedAssistantType(type);
+    setIsTypeSelectModalVisible(false);
     setIsCreateModalVisible(true);
   };
 
@@ -89,18 +109,22 @@ const AssistantList: React.FC = () => {
         status: values.status || 'offline',
         createTime: new Date().toISOString().split('T')[0] + ' 00:00:00',
         capabilities: values.capabilities || [],
+        type: selectedAssistantType || 'regular', // 添加助手类型
       };
       setAssistants([...assistants, newAssistant]);
       message.success('助手已创建');
       setIsCreateModalVisible(false);
+      setSelectedAssistantType(null);
     }
     form.resetFields();
   };
 
   // 关闭模态框
   const handleFormCancel = () => {
+    setIsTypeSelectModalVisible(false);
     setIsCreateModalVisible(false);
     setIsEditModalVisible(false);
+    setSelectedAssistantType(null);
     form.resetFields();
   };
 
@@ -127,6 +151,16 @@ const AssistantList: React.FC = () => {
         return (a.id || '').localeCompare(b.id || '');
       }
     });
+
+  // 获取类型标题和表单标题
+  const getAssistantTypeTitle = (type: AssistantType | null) => {
+    switch (type) {
+      case 'regular': return '普通问答助手';
+      case 'knowledge': return '知识问答助手';
+      case 'planning': return '自主规划助手';
+      default: return '新建助手';
+    }
+  };
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -170,9 +204,22 @@ const AssistantList: React.FC = () => {
         />
       </div>
 
+      {/* 助手类型选择模态框 */}
+      <Modal
+        title="选择助手类型"
+        open={isTypeSelectModalVisible}
+        onCancel={handleFormCancel}
+        footer={null}
+        width={800}
+        centered
+        bodyStyle={{ padding: '24px 32px 32px' }}
+      >
+        <AssistantTypeSelector onTypeSelect={handleTypeSelect} />
+      </Modal>
+
       {/* 创建助手模态框 */}
       <Modal
-        title="新建助手"
+        title={`新建${getAssistantTypeTitle(selectedAssistantType)}`}
         open={isCreateModalVisible}
         onCancel={handleFormCancel}
         footer={null}
@@ -181,6 +228,7 @@ const AssistantList: React.FC = () => {
         <AssistantForm
           form={form}
           isEdit={false}
+          assistantType={selectedAssistantType}
           onFinish={handleFormSubmit}
           onCancel={handleFormCancel}
         />

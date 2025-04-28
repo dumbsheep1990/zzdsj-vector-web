@@ -17,6 +17,8 @@ export interface ModelInfo {
   name: string;
 }
 
+import { AssistantType } from './AssistantTypeSelector';
+
 export interface Assistant {
   id: string;
   name: string;
@@ -29,4 +31,6 @@ export interface Assistant {
   capabilities: string[];
   knowledgeBases?: KnowledgeBase[];
   usageStats?: UsageStats;
+  config?: Record<string, unknown>;
+  type?: AssistantType; // Add the type property
 }
