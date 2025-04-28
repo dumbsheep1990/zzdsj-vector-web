@@ -6,7 +6,7 @@ import Datasets from '../pages/Datasets';
 import KnowledgeBase from '../pages/KnowledgeBase';
 import Vectors from '../pages/Vectors';
 import Metadata from '../pages/Metadata';
-// import Settings from '../pages/Settings';
+import Settings from '../pages/Settings';
 import Dashboard from '../pages/Dashboard';
 import DocumentManagement from '../pages/DocumentManagement';
 import DataIntegration from '../pages/DataIntegration';
