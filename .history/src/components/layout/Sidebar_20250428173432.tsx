@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
     ChevronDown, 
     Database, 
@@ -35,62 +34,36 @@ const Sidebar: React.FC = () => {
     const [hoveredSubItem, setHoveredSubItem] = useState<string | null>(null);
     const hoverTimeoutRef = useRef<number | null>(null);
     const isInitialMount = useRef(true);
-    const navigate = useNavigate();
-
-    const sectionRoutes: { [key: string]: string } = {
-        'dashboard': '/dashboard',
-        'assistant-list': '/qa-assistant/assistant-list',
-        'qa-management': '/qa-assistant/qa-management',
-        'knowledge-base': '/knowledge-base/files',
-        'vectors': '/knowledge-base/vectors',
-        'metadata': '/knowledge-base/metadata',
-        'graph-database': '/knowledge-graph/database',
-        'graph-preview': '/knowledge-graph/preview',
-        'graph-qa': '/knowledge-graph/graph-qa',
-        'basic-settings': '/settings/basic',
-        'model-settings': '/settings/model',
-        'agent-tools': '/tool-plaza/agent-tools',
-        'tool-factory': '/tool-plaza/tool-factory',
-        'mcp-center': '/tool-plaza/mcp',
-        'data-processing-tools': '/tool-plaza/data-processing',
-        'application-orchestration': '/workflow/application-orchestration',
-        'task-orchestration': '/workflow/task-orchestration',
-        'autonomous-orchestration': '/workflow/autonomous-orchestration',
-    };
 
     useEffect(() => {
         if (isInitialMount.current) {
             const currentPath = window.location.pathname;
-            const matchedSectionId = Object.keys(sectionRoutes).find(
-                id => sectionRoutes[id] === currentPath || 
-                      (sectionRoutes[id] !== '/' && currentPath.startsWith(sectionRoutes[id]))
-            );
-
-            const defaultSection = 'dashboard';
+            const findMatchingSection = () => {
+                if (currentPath === '/dashboard') return 'dashboard';
+                if (currentPath.includes('/qa-assistant/assistant-list')) return 'assistant-list';
+                if (currentPath.includes('/qa-assistant/qa-management')) return 'qa-management';
+                if (currentPath.includes('/knowledge-base/files')) return 'knowledge-base';
+                if (currentPath.includes('/knowledge-base/vectors')) return 'vectors';
+                if (currentPath.includes('/knowledge-base/metadata')) return 'metadata';
+                if (currentPath.includes('/knowledge-graph/database')) return 'graph-database';
+                if (currentPath.includes('/knowledge-graph/preview')) return 'graph-preview';
+                if (currentPath.includes('/settings/basic')) return 'basic-settings';
+                if (currentPath.includes('/settings/model')) return 'model-settings';
+                if (currentPath.includes('/tool-plaza/agent-tools')) return 'agent-tools';
+                if (currentPath.includes('/tool-plaza/tool-factory')) return 'tool-factory';
+                if (currentPath.includes('/tool-plaza/mcp')) return 'mcp-center';
+                if (currentPath.includes('/tool-plaza/data-processing')) return 'data-processing-tools';
+                
+                return 'dashboard';
+            };
             
-            const sectionToSetActive = matchedSectionId || defaultSection;
-
-            let parentId: string | null = null;
-            if (matchedSectionId && matchedSectionId !== defaultSection) {
-                for (const item of navigationItems) {
-                    if (item.children?.some(child => child.id === matchedSectionId)) {
-                        parentId = item.id;
-                        break;
-                    }
-                }
+            const matchedSection = findMatchingSection();
+            if (matchedSection !== activeSection) {
+                setActiveSection(matchedSection);
             }
-
-            if (sectionToSetActive !== activeSection) {
-                setActiveSection(sectionToSetActive);
-            }
-            
-            if (parentId && !expandedItems.includes(parentId)) {
-                 setExpandedItems(prev => [...prev, parentId!]);
-            }
-
             isInitialMount.current = false;
         }
-    }, [activeSection, setActiveSection, expandedItems, sectionRoutes]);
+    }, [activeSection, setActiveSection]);
 
     const toggleExpanded = useCallback((itemId: string) => {
         setExpandedItems(prev => {
@@ -136,27 +109,19 @@ const Sidebar: React.FC = () => {
         if (hasChildren) {
             toggleExpanded(item.id);
         } else {
-            const route = sectionRoutes[item.id];
-            if (route && activeSection !== item.id) {
+            if (activeSection !== item.id) {
                 setActiveSection(item.id);
-                navigate(route);
-            } else if (route) {
-                 navigate(route);
             }
         }
-    }, [activeSection, setActiveSection, toggleExpanded, navigate, sectionRoutes]);
+    }, [activeSection, setActiveSection, toggleExpanded]);
 
     const handleSubItemClick = useCallback((itemId: string) => {
-        const route = sectionRoutes[itemId];
-        if (route && activeSection !== itemId) {
+        if (activeSection !== itemId) {
             setActiveSection(itemId);
-            navigate(route);
-        } else if (route) {
-            navigate(route);
         }
         setHoveredItem(null);
         setHoveredSubItem(null);
-    }, [activeSection, setActiveSection, navigate, sectionRoutes]);
+    }, [activeSection, setActiveSection]);
 
     const getIconByType = (iconType: string, size: number = 18) => {
         switch (iconType) {
@@ -231,7 +196,7 @@ const Sidebar: React.FC = () => {
         overflowX: 'hidden' as const
     };
 
-    const getIconStyle = (isActive: boolean, isChild: boolean = false, hasChildren: boolean = false) => ({
+    const getIconStyle = (isActive: boolean, isChild: boolean | undefined, hasChildren: boolean | undefined) => ({
         display: 'flex',
         justifyContent: 'center',
         color: isActive ? '#2563eb' : isChild ? '#64748b' : '#4b5563',
@@ -260,7 +225,7 @@ const Sidebar: React.FC = () => {
         } : {})
     });
 
-    const getNavItemStyle = (isActive: boolean, isChild: boolean = false, hasChildren: boolean = false) => ({
+    const getNavItemStyle = (isActive: boolean, isChild: boolean | undefined, hasChildren: boolean | undefined) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: sidebarExpanded ? 'flex-start' : 'center',
@@ -444,13 +409,16 @@ const Sidebar: React.FC = () => {
     }, [activeSection, hoveredItem, hoveredSubItem, sidebarExpanded, handleMouseLeave, handleSubItemMouseEnter, handleSubItemMouseLeave, handleSubItemClick]);
 
     const renderNavItem = useCallback((item: NavigationItem, isChild: boolean = false, index: number = 0) => {
-        const isParentActive = item.children?.some(child => child.id === activeSection) ?? false;
-        const isActive = activeSection === item.id || (isParentActive && !isChild);
+        const isActive = activeSection === item.id || (item.children?.some(child => child.id === activeSection) && !isChild);
         const isExpanded = expandedItems.includes(item.id);
         const hasChildren = Boolean(item.children && item.children.length > 0);
 
+        // Use type assertions to satisfy TypeScript
+        const isChildBool = isChild as boolean;
+        const hasChildrenBool = hasChildren as boolean;
+
         const currentStyle = {
-            ...getNavItemStyle(isActive, isChild, hasChildren),
+            ...getNavItemStyle(isActive, isChildBool, hasChildrenBool),
             ...(hoveredItem === item.id && !isActive ? {
                 background: isChild ? 'rgba(241, 245, 249, 0.7)' : 'transparent',
                 color: '#2563eb',
@@ -481,11 +449,11 @@ const Sidebar: React.FC = () => {
                 >
                     <span style={iconContainerStyle}>
                         <span style={{ display: 'flex', alignItems: 'center' }}>
-                            <span style={getIconStyle(isActive, isChild, hasChildren)}>
+                            <span style={getIconStyle(isActive, isChildBool, hasChildrenBool)}>
                                 {getIconByType(item.iconType, isChild ? 16 : 18)}
                             </span>
                             {sidebarExpanded && (
-                                <span style={{
+                                <span style={{ 
                                     marginLeft: '0.75rem',
                                     fontSize: isChild ? '14px' : '15px',
                                     color: isActive ? '#2563eb' : '#4b5563',
@@ -511,13 +479,13 @@ const Sidebar: React.FC = () => {
                 {hasChildren && isExpanded && sidebarExpanded && (
                     <div style={{ position: 'relative' }}>
                         <div style={verticalLineStyle} />
-                        <ul style={{
-                            listStyle: 'none',
-                            margin: '0.25rem 0 0.5rem',
+                        <ul style={{ 
+                            listStyle: 'none', 
+                            margin: '0.25rem 0 0.5rem', 
                             padding: 0,
                             position: 'relative'
                         }}>
-                            {(item.children || []).map((child: NavigationItem, childIndex: number) =>
+                            {(item.children || []).map((child: NavigationItem, childIndex: number) => 
                                 renderNavItem(child, true, childIndex)
                             )}
                         </ul>
@@ -525,10 +493,11 @@ const Sidebar: React.FC = () => {
                 )}
             </li>
         );
-    }, [activeSection, expandedItems, hoveredItem, sidebarExpanded, handleMouseEnter, handleMouseLeave, handleItemClick, handleSubItemClick, renderPopupMenu, getNavItemStyle, getIconByType, verticalLineStyle, iconContainerStyle]);
+    }, [activeSection, expandedItems, hoveredItem, sidebarExpanded, handleMouseEnter, handleMouseLeave, handleItemClick, handleSubItemClick, renderPopupMenu]);
 
     return (
         <div style={sidebarStyle}>
+            {/* Logo区域 */}
             <div style={logoContainerStyle}>
                 <div style={logoStyle}>
                     <Database color="#2563eb" size={24} />
@@ -545,12 +514,14 @@ const Sidebar: React.FC = () => {
                 </div>
             </div>
 
+            {/* 导航区域 */}
             <nav style={navStyle}>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                     {navigationItems.map((item, index) => renderNavItem(item, false, index))}
                 </ul>
             </nav>
 
+            {/* 底部用户信息 */}
             <div style={footerStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarExpanded ? 'flex-start' : 'center' }}>
                     <div style={userAvatarStyle}>

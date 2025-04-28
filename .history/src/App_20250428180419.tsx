@@ -1,14 +1,35 @@
 import React, { FC } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
-import { AppProvider } from './context/AppContext';
+import PageHeader from './components/layout/PageHeader';
+import { AppProvider, useAppContext } from './context/AppContext';
 import AppRoutes from './routes';
+import { navigationItems } from './utils/mockData';
+import { NavItem } from './utils/types';
 
-/**
- * MainLayout component that wraps the main application layout
- * with sidebar and content area
- */
+// Helper function to find item label by ID recursively
+const findLabelById = (items: NavItem[], id: string): string | null => {
+    for (const item of items) {
+        if (item.id === id) {
+            return item.label;
+        }
+        if (item.children) {
+            const foundLabel = findLabelById(item.children, id);
+            if (foundLabel) {
+                return foundLabel;
+            }
+        }
+    }
+    return null;
+};
+
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { state } = useAppContext();
+    const { activeSection } = state;
+
+    // Determine the title based on activeSection
+    const title = findLabelById(navigationItems, activeSection) || 'Dashboard';
+
     return (
         <div style={{ 
             display: 'flex',
@@ -26,6 +47,7 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
                 flexDirection: 'column',
                 backgroundColor: '#f9fafb'
             }}>
+                <PageHeader title={title} />
                 <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
                     {children}
                 </div>
@@ -34,9 +56,6 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
     );
 };
 
-/**
- * AppContent component that wraps the routes with the MainLayout
- */
 const AppContent: FC = () => {
     return (
         <MainLayout>
@@ -45,9 +64,6 @@ const AppContent: FC = () => {
     );
 };
 
-/**
- * Main App component that initializes the router and application context
- */
 const App: React.FC = () => {
     return (
         <Router>

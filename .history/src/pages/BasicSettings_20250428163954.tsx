@@ -36,13 +36,11 @@ const BasicSettings: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
-      <div className="sticky top-0 z-10">
-        <PageHeader 
-          title="基础设置"
-          parentTitle="系统设置"
-          description="配置系统的基础功能和模型参数"
-        />
-      </div>
+      <PageHeader 
+        title="基础设置"
+        parentTitle="系统设置"
+        description="配置系统的基础功能和模型参数"
+      />
       <div className="flex-1 overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
           <Card className="mb-6 shadow-sm">

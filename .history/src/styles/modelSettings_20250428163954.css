@@ -1,11 +1,3 @@
-/* Add fixed header styling */
-.sticky {
-  position: sticky;
-  top: 0;
-  z-index: 100; /* Ensure the header stays above other content */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Optional shadow for visual separation */
-}
-
 .custom-tabs .ant-tabs-nav {
   margin-bottom: 0;
 }

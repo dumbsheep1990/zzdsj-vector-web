@@ -444,8 +444,8 @@ const Sidebar: React.FC = () => {
     }, [activeSection, hoveredItem, hoveredSubItem, sidebarExpanded, handleMouseLeave, handleSubItemMouseEnter, handleSubItemMouseLeave, handleSubItemClick]);
 
     const renderNavItem = useCallback((item: NavigationItem, isChild: boolean = false, index: number = 0) => {
-        const isParentActive = item.children?.some(child => child.id === activeSection) ?? false;
-        const isActive = activeSection === item.id || (isParentActive && !isChild);
+        const isParentActive = item.children?.some(child => child.id === activeSection);
+        const isActive = activeSection === item.id || (isParentActive && !isChild); 
         const isExpanded = expandedItems.includes(item.id);
         const hasChildren = Boolean(item.children && item.children.length > 0);
 
@@ -485,7 +485,7 @@ const Sidebar: React.FC = () => {
                                 {getIconByType(item.iconType, isChild ? 16 : 18)}
                             </span>
                             {sidebarExpanded && (
-                                <span style={{
+                                <span style={{ 
                                     marginLeft: '0.75rem',
                                     fontSize: isChild ? '14px' : '15px',
                                     color: isActive ? '#2563eb' : '#4b5563',
@@ -511,13 +511,13 @@ const Sidebar: React.FC = () => {
                 {hasChildren && isExpanded && sidebarExpanded && (
                     <div style={{ position: 'relative' }}>
                         <div style={verticalLineStyle} />
-                        <ul style={{
-                            listStyle: 'none',
-                            margin: '0.25rem 0 0.5rem',
+                        <ul style={{ 
+                            listStyle: 'none', 
+                            margin: '0.25rem 0 0.5rem', 
                             padding: 0,
                             position: 'relative'
                         }}>
-                            {(item.children || []).map((child: NavigationItem, childIndex: number) =>
+                            {(item.children || []).map((child: NavigationItem, childIndex: number) => 
                                 renderNavItem(child, true, childIndex)
                             )}
                         </ul>
@@ -525,7 +525,7 @@ const Sidebar: React.FC = () => {
                 )}
             </li>
         );
-    }, [activeSection, expandedItems, hoveredItem, sidebarExpanded, handleMouseEnter, handleMouseLeave, handleItemClick, handleSubItemClick, renderPopupMenu, getNavItemStyle, getIconByType, verticalLineStyle, iconContainerStyle]);
+    }, [activeSection, expandedItems, hoveredItem, sidebarExpanded, handleMouseEnter, handleMouseLeave, handleItemClick, handleSubItemClick, renderPopupMenu, getNavItemStyle, getIconByType, verticalLineStyle]);
 
     return (
         <div style={sidebarStyle}>

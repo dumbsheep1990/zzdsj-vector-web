@@ -113,8 +113,6 @@ const ModelSettings: React.FC = () => {
   const [isModelModalVisible, setIsModelModalVisible] = useState(false);
   const [currentProvider, setCurrentProvider] = useState<ModelProvider | null>(null);
   const [configForm] = Form.useForm();
-  const [modelSelection, setModelSelection] = useState<Record<string, boolean>>({});
-  const [modelSelectionForm] = Form.useForm();
 
   // 本地模型数据
   const localModels: Model[] = [
@@ -338,13 +336,7 @@ const ModelSettings: React.FC = () => {
     }
   };
 
-  // 重置modelSelectionForm的方法，在打开对话框时调用
-  const resetModelSelection = () => {
-    modelSelectionForm.resetFields();
-    setModelSelection({});
-  };
-
-  // 模型选择对话框打开方法需要修改
+  // 打开模型选择模态框
   const showModelModal = (provider: ModelProvider, e: React.MouseEvent) => {
     e.stopPropagation(); // 防止触发折叠面板
     
@@ -358,19 +350,10 @@ const ModelSettings: React.FC = () => {
     // 这里应该请求厂商的模型列表
     message.loading('正在获取可用模型列表...', 1.5);
     
-    // 模拟异步获取模型，并重置选择
+    // 模拟异步获取模型
     setTimeout(() => {
-      resetModelSelection(); // 重置选择状态
       setIsModelModalVisible(true);
     }, 1500);
-  };
-
-  // 处理模型选择变更的方法
-  const handleModelSelectionChange = (modelId: string, checked: boolean) => {
-    setModelSelection(prev => ({
-      ...prev,
-      [modelId]: checked
-    }));
   };
 
   // 渲染本地模型列表
@@ -588,55 +571,49 @@ const ModelSettings: React.FC = () => {
         maskClosable={false}
         centered
         bodyStyle={{ padding: '16px' }}
-        afterClose={() => resetModelSelection()}
       >
         <div className="bg-gray-50 p-3 mb-4 rounded-md text-sm">
           请选择要启用的模型，系统将根据模型类型自动匹配使用场景
         </div>
-        <Form form={modelSelectionForm}>
-          <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
-            {[
-              { id: 'model-1', name: 'GLM-4-Vision', type: 'chat' },
-              { id: 'model-2', name: 'GLM-4', type: 'chat' },
-              { id: 'model-3', name: 'GLM-3-Turbo', type: 'chat' },
-              { id: 'model-4', name: 'embedding-2', type: 'embedding' },
-            ].map(model => (
-              <div key={model.id} className="flex items-center justify-between py-3 px-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
-                <div className="flex items-center">
-                  <Form.Item 
-                    name={`model-${model.id}`} 
-                    valuePropName="checked" 
-                    style={{ marginBottom: 0 }}
-                  >
-                    <input 
-                      type="checkbox" 
-                      className="mr-3" 
-                      checked={modelSelection[model.id] || false}
-                      onChange={(e) => handleModelSelectionChange(model.id, e.target.checked)}
-                    />
-                  </Form.Item>
-                  <span className="font-medium mr-3">{model.name}</span>
-                  <Tag color={model.type === 'chat' ? 'blue' : 'cyan'}>
-                    {model.type === 'chat' ? '对话模型' : '嵌入模型'}
-                  </Tag>
-                </div>
+        <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+          {[
+            { id: 'model-1', name: 'GLM-4-Vision', type: 'chat' },
+            { id: 'model-2', name: 'GLM-4', type: 'chat' },
+            { id: 'model-3', name: 'GLM-3-Turbo', type: 'chat' },
+            { id: 'model-4', name: 'embedding-2', type: 'embedding' },
+          ].map(model => (
+            <div key={model.id} className="flex items-center justify-between py-3 px-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+              <div className="flex items-center">
+                <Form.Item 
+                  name={`model-${model.id}`} 
+                  valuePropName="checked" 
+                  style={{ marginBottom: 0 }}
+                >
+                  <input 
+                    type="checkbox" 
+                    defaultChecked={['model-2', 'model-4'].includes(model.id)} 
+                    className="mr-3" 
+                  />
+                </Form.Item>
+                <span className="font-medium mr-3">{model.name}</span>
+                <Tag color={model.type === 'chat' ? 'blue' : 'cyan'}>
+                  {model.type === 'chat' ? '对话模型' : '嵌入模型'}
+                </Tag>
               </div>
-            ))}
-          </div>
-        </Form>
+            </div>
+          ))}
+        </div>
       </Modal>
     </div>
   );
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
-      <div className="sticky top-0 z-10">
-        <PageHeader 
-          title="模型设置"
-          parentTitle="系统设置"
-          description="管理和配置本地及第三方 AI 模型"
-        />
-      </div>
+      <PageHeader 
+        title="模型设置"
+        parentTitle="系统设置"
+        description="管理和配置本地及第三方 AI 模型"
+      />
       <div className="flex-1 overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
           <Card className="mb-6 shadow-md rounded-lg overflow-hidden border-0">

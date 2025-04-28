@@ -588,7 +588,7 @@ const ModelSettings: React.FC = () => {
         maskClosable={false}
         centered
         bodyStyle={{ padding: '16px' }}
-        afterClose={() => resetModelSelection()}
+        afterClose={resetModelSelection} // 关闭后重置选择状态
       >
         <div className="bg-gray-50 p-3 mb-4 rounded-md text-sm">
           请选择要启用的模型，系统将根据模型类型自动匹配使用场景

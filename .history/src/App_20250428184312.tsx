@@ -1,13 +1,9 @@
 import React, { FC } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useAppContext } from './context/AppContext';
 import AppRoutes from './routes';
 
-/**
- * MainLayout component that wraps the main application layout
- * with sidebar and content area
- */
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
         <div style={{ 
@@ -34,9 +30,6 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
     );
 };
 
-/**
- * AppContent component that wraps the routes with the MainLayout
- */
 const AppContent: FC = () => {
     return (
         <MainLayout>
@@ -45,9 +38,6 @@ const AppContent: FC = () => {
     );
 };
 
-/**
- * Main App component that initializes the router and application context
- */
 const App: React.FC = () => {
     return (
         <Router>
