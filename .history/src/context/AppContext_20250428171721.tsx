@@ -19,14 +19,8 @@ const pathToSectionMap: Record<string, string> = {
     '/knowledge-base/files': 'knowledge-base',
     '/knowledge-base/vectors': 'vectors',
     '/knowledge-base/metadata': 'metadata',
-    '/knowledge-graph/database': 'graph-database',
-    '/knowledge-graph/preview': 'graph-preview',
-    '/settings/basic': 'basic-settings',
-    '/settings/model': 'model-settings',
     '/tool-plaza/agent-tools': 'agent-tools',
     '/tool-plaza/tool-factory': 'tool-factory',
-    '/tool-plaza/mcp': 'mcp-center',
-    '/tool-plaza/data-processing': 'data-processing-tools',
 };
 
 // 部分到路径的映射
@@ -37,14 +31,8 @@ const sectionToPathMap: Record<string, string> = {
     'knowledge-base': '/knowledge-base/files',
     'vectors': '/knowledge-base/vectors',
     'metadata': '/knowledge-base/metadata',
-    'graph-database': '/knowledge-graph/database',
-    'graph-preview': '/knowledge-graph/preview',
-    'basic-settings': '/settings/basic',
-    'model-settings': '/settings/model',
     'agent-tools': '/tool-plaza/agent-tools',
     'tool-factory': '/tool-plaza/tool-factory',
-    'mcp-center': '/tool-plaza/mcp',
-    'data-processing-tools': '/tool-plaza/data-processing',
 };
 
 // 创建上下文类型

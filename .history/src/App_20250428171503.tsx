@@ -38,11 +38,11 @@ const AppContent: FC = () => {
 
 const App: React.FC = () => {
     return (
-        <Router>
-            <AppProvider>
+        <AppProvider>
+            <Router>
                 <AppContent />
-            </AppProvider>
-        </Router>
+            </Router>
+        </AppProvider>
     );
 };
 

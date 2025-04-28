@@ -1,0 +1,117 @@
+import React, { FC } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/layout/Sidebar';
+import KnowledgeBase from './pages/KnowledgeBase';
+import Vectors from './pages/Vectors';
+import Metadata from './pages/Metadata';
+import AssistantList from './pages/AssistantList';
+import AssistantChat from './pages/AssistantChat';
+import DataProcessingTools from './pages/DataProcessingTools';
+import AgentTools from './pages/AgentTools';
+import QAManagement from './pages/QAManagement';
+import Dashboard from './pages/Dashboard';
+import BasicSettings from './pages/BasicSettings';
+import ModelSettings from './pages/ModelSettings';
+import GraphDatabase from './pages/GraphDatabase';
+import GraphPreview from './pages/GraphPreview';
+import MCPCenter from './pages/MCPCenter';
+import ToolFactory from './pages/ToolFactory';
+import { AppProvider, useAppContext } from './context/AppContext';
+
+const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
+    return (
+        <div style={{ 
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            overflow: 'hidden'
+        }}>
+            <Sidebar />
+            <main style={{
+                flex: 1,
+                minWidth: 0,
+                height: '100vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: '#f9fafb'
+            }}>
+                {children}
+            </main>
+        </div>
+    );
+};
+
+const AppContent: FC = () => {
+    const { state } = useAppContext();
+    const { activeSection } = state;
+
+    const renderContent = () => {
+        switch (activeSection) {
+            case 'dashboard':
+                return <Dashboard />;
+            case 'knowledge-base':
+                return <KnowledgeBase />;
+            case 'vectors':
+                return <Vectors />;
+            case 'metadata':
+                return <Metadata />;
+            case 'assistant-list':
+                return <AssistantList />;
+            case 'qa-management':
+                return <QAManagement />;
+            case 'data-processing-tools':
+                return <DataProcessingTools />;
+            case 'agent-tools':
+                return <AgentTools />;
+            case 'basic-settings':
+                return <BasicSettings />;
+            case 'model-settings':
+                return <ModelSettings />;
+            case 'graph-database':
+                return <GraphDatabase />;
+            case 'graph-preview':
+                return <GraphPreview />;
+            case 'mcp-center':
+                return <MCPCenter />;
+            case 'tool-factory':
+                return <ToolFactory />;
+            default:
+                return <Dashboard />;
+        }
+    };
+
+    return (
+        <Routes>
+            <Route path="/" element={<MainLayout>{renderContent()}</MainLayout>} />
+            <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+            <Route path="/knowledge-base" element={<MainLayout><KnowledgeBase /></MainLayout>} />
+            <Route path="/vectors" element={<MainLayout><Vectors /></MainLayout>} />
+            <Route path="/metadata" element={<MainLayout><Metadata /></MainLayout>} />
+            <Route path="/assistant-list" element={<MainLayout><AssistantList /></MainLayout>} />
+            <Route path="/qa-management" element={<MainLayout><QAManagement /></MainLayout>} />
+            <Route path="/data-processing-tools" element={<MainLayout><DataProcessingTools /></MainLayout>} />
+            <Route path="/agent-tools" element={<MainLayout><AgentTools /></MainLayout>} />
+            <Route path="/settings/basic" element={<MainLayout><BasicSettings /></MainLayout>} />
+            <Route path="/settings/model" element={<MainLayout><ModelSettings /></MainLayout>} />
+            <Route path="/knowledge-graph/database" element={<MainLayout><GraphDatabase /></MainLayout>} />
+            <Route path="/knowledge-graph/preview" element={<MainLayout><GraphPreview /></MainLayout>} />
+            <Route path="/tool-plaza/mcp" element={<MainLayout><MCPCenter /></MainLayout>} />
+            <Route path="/tool-plaza/tool-factory" element={<MainLayout><ToolFactory /></MainLayout>} />
+            <Route path="/chat/:assistantId" element={<AssistantChat />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
+};
+
+const App: React.FC = () => {
+    return (
+        <AppProvider>
+            <Router>
+                <AppContent />
+            </Router>
+        </AppProvider>
+    );
+};
+
+export default App;

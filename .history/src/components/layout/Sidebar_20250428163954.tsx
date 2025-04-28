@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
     ChevronDown, 
     Database, 
@@ -33,33 +33,6 @@ const Sidebar: React.FC = () => {
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [hoveredSubItem, setHoveredSubItem] = useState<string | null>(null);
     const hoverTimeoutRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        const currentPath = window.location.pathname;
-        const findMatchingSection = () => {
-            if (currentPath === '/dashboard') return 'dashboard';
-            if (currentPath.includes('/qa-assistant/assistant-list')) return 'assistant-list';
-            if (currentPath.includes('/qa-assistant/qa-management')) return 'qa-management';
-            if (currentPath.includes('/knowledge-base/files')) return 'knowledge-base';
-            if (currentPath.includes('/knowledge-base/vectors')) return 'vectors';
-            if (currentPath.includes('/knowledge-base/metadata')) return 'metadata';
-            if (currentPath.includes('/knowledge-graph/database')) return 'graph-database';
-            if (currentPath.includes('/knowledge-graph/preview')) return 'graph-preview';
-            if (currentPath.includes('/settings/basic')) return 'basic-settings';
-            if (currentPath.includes('/settings/model')) return 'model-settings';
-            if (currentPath.includes('/tool-plaza/agent-tools')) return 'agent-tools';
-            if (currentPath.includes('/tool-plaza/tool-factory')) return 'tool-factory';
-            if (currentPath.includes('/tool-plaza/mcp')) return 'mcp-center';
-            if (currentPath.includes('/tool-plaza/data-processing')) return 'data-processing-tools';
-            
-            return 'dashboard';
-        };
-        
-        const matchedSection = findMatchingSection();
-        if (matchedSection !== activeSection) {
-            setActiveSection(matchedSection);
-        }
-    }, []);
 
     const toggleExpanded = (itemId: string) => {
         if (expandedItems.includes(itemId)) {

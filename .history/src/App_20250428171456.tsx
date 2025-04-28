@@ -1,7 +1,7 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useAppContext } from './context/AppContext';
 import AppRoutes from './routes';
 
 const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -38,11 +38,11 @@ const AppContent: FC = () => {
 
 const App: React.FC = () => {
     return (
-        <Router>
-            <AppProvider>
+        <AppProvider>
+            <Router>
                 <AppContent />
-            </AppProvider>
-        </Router>
+            </Router>
+        </AppProvider>
     );
 };
 

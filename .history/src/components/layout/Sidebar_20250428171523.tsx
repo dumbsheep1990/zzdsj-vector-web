@@ -43,14 +43,8 @@ const Sidebar: React.FC = () => {
             if (currentPath.includes('/knowledge-base/files')) return 'knowledge-base';
             if (currentPath.includes('/knowledge-base/vectors')) return 'vectors';
             if (currentPath.includes('/knowledge-base/metadata')) return 'metadata';
-            if (currentPath.includes('/knowledge-graph/database')) return 'graph-database';
-            if (currentPath.includes('/knowledge-graph/preview')) return 'graph-preview';
-            if (currentPath.includes('/settings/basic')) return 'basic-settings';
-            if (currentPath.includes('/settings/model')) return 'model-settings';
             if (currentPath.includes('/tool-plaza/agent-tools')) return 'agent-tools';
             if (currentPath.includes('/tool-plaza/tool-factory')) return 'tool-factory';
-            if (currentPath.includes('/tool-plaza/mcp')) return 'mcp-center';
-            if (currentPath.includes('/tool-plaza/data-processing')) return 'data-processing-tools';
             
             return 'dashboard';
         };
