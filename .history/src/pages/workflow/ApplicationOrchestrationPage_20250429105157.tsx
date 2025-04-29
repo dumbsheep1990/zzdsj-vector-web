@@ -152,12 +152,7 @@ const ApplicationOrchestrationPage: React.FC = () => {
         </div>
 
         {/* Right Panel: Testing/Chat */}
-        <ChatTestingPanel 
-          imageSupport={toggleStates.imageSupport}
-          voiceSupport={toggleStates.voiceSupport}
-          documentParsing={toggleStates.documentParsing}
-          webSearch={toggleStates.webSearch}
-        />
+        <ChatTestingPanel />
       </div>
     </>
   );
