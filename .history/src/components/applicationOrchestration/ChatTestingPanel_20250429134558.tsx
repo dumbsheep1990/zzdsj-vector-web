@@ -102,6 +102,8 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         70
       ); // Limit between 30% and 70%
       
+      console.log('Dragging, new width:', newWidth.toFixed(0) + '%');
+      
       if (onWidthChange) {
         onWidthChange(newWidth);
       }
@@ -110,12 +112,14 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     };
     
     const handleMouseUp = () => {
+      console.log('Mouse up, ending drag');
       setIsDragging(false);
       document.body.style.cursor = 'default';
       document.body.style.userSelect = 'auto';
     };
     
     if (isDragging) {
+      console.log('isDragging is true, adding event listeners');
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       
@@ -132,6 +136,7 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
 
   const handleDragStart = (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log('Drag start triggered');
     setIsDragging(true);
     addLogEntry('开始调整面板大小', 'info');
   };
@@ -157,28 +162,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     backgroundColor: '#f8fafc',
     height: '100%',
     position: 'relative',
-  };
-
-  const dragHandleStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '0',
-    top: '0',
-    bottom: '0',
-    width: '8px',
-    backgroundColor: 'transparent',
-    cursor: 'ew-resize',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  };
-
-  const dragHandleInnerStyle: React.CSSProperties = {
-    width: '4px',
-    height: '40px',
-    backgroundColor: '#cbd5e1',
-    borderRadius: '2px',
-    transition: 'background-color 0.2s',
   };
 
   const headerStyle: React.CSSProperties = {
@@ -863,20 +846,80 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     });
   };
 
+  // Create a portal for the drag handle
+  useEffect(() => {
+    // Create the drag handle element
+    const dragHandle = document.createElement('div');
+    dragHandle.id = 'panel-resize-handle';
+    
+    // Add the drag handle to the document body
+    document.body.appendChild(dragHandle);
+    
+    // Set up the event listener
+    dragHandle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      console.log('Drag start triggered from direct event');
+      setIsDragging(true);
+      addLogEntry('开始调整面板大小', 'info');
+    });
+    
+    // Style the drag handle
+    Object.assign(dragHandle.style, {
+      position: 'fixed',
+      left: '0',
+      top: '0',
+      bottom: '0',
+      width: '20px',
+      backgroundColor: 'rgba(203, 213, 225, 0.3)',
+      cursor: 'ew-resize',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '100',
+    });
+    
+    // Create the inner handle line
+    const innerLine = document.createElement('div');
+    Object.assign(innerLine.style, {
+      width: '4px',
+      height: '80px',
+      backgroundColor: '#cbd5e1',
+      borderRadius: '2px',
+      transition: 'background-color 0.2s',
+      margin: 'auto',
+    });
+    
+    dragHandle.appendChild(innerLine);
+    
+    // Store reference for positioning
+    dragHandleRef.current = dragHandle;
+    
+    // Position the drag handle
+    const rightPanel = document.getElementById('right-panel');
+    if (rightPanel) {
+      const rect = rightPanel.getBoundingClientRect();
+      dragHandle.style.left = `${rect.left}px`;
+    }
+    
+    return () => {
+      // Clean up
+      document.body.removeChild(dragHandle);
+    };
+  }, []);
+
+  // Update the handle styling when dragging status changes
+  useEffect(() => {
+    if (dragHandleRef.current) {
+      const innerLine = dragHandleRef.current.querySelector('div');
+      if (innerLine && innerLine instanceof HTMLElement) {
+        innerLine.style.backgroundColor = isDragging ? '#3b82f6' : '#cbd5e1';
+      }
+    }
+  }, [isDragging]);
+
   return (
-    <div style={rightPanelStyle}>
-      {/* Drag handle for resizing */}
-      <div 
-        ref={dragHandleRef}
-        style={dragHandleStyle}
-        onMouseDown={handleDragStart}
-        title="拖动调整宽度"
-      >
-        <div style={{
-          ...dragHandleInnerStyle,
-          backgroundColor: isDragging ? '#3b82f6' : '#cbd5e1',
-        }} />
-      </div>
+    <div id="right-panel" style={rightPanelStyle}>
+      {/* Drag handle is now added directly to document.body in useEffect */}
 
       {/* Publish modal */}
       {publishModalOpen && (

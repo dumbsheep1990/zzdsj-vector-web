@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Settings, Download, Trash2, ChevronDown, MessageSquare, Bot, User, Image, FileText, Mic, X, Paperclip, Code, Share2, Check, ArrowRight, Terminal, AlertCircle, Clock } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Send, Settings, Download, Trash2, ChevronDown, MessageSquare, Bot, User, Image, FileText, Mic, X, Paperclip, Code, Share2, Check, ArrowRight } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -11,31 +11,19 @@ interface ChatMessage {
   attachmentName?: string;
 }
 
-interface LogEntry {
-  id: string;
-  message: string;
-  type: 'info' | 'error' | 'warning';
-  timestamp: Date;
-}
-
 interface ChatTestingPanelProps {
   // Props from left panel configuration
   imageSupport: boolean;
   voiceSupport: boolean;
   documentParsing: boolean;
   webSearch: boolean;
-  // Props for resizable panel
-  panelWidth?: number;
-  onWidthChange?: (width: number) => void;
 }
 
 const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
   imageSupport = false,
   voiceSupport = false,
   documentParsing = false,
-  webSearch = false,
-  panelWidth = 60, // Default percentage of total width
-  onWidthChange
+  webSearch = false
 }) => {
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -50,135 +38,20 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
   const [publishName, setPublishName] = useState('');
   const [publishDescription, setPublishDescription] = useState('');
   const [publishSuccess, setPublishSuccess] = useState(false);
-  const [logDrawerOpen, setLogDrawerOpen] = useState(false);
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   
-  // Refs for file inputs and drag handle
+  // Refs for file inputs
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dragHandleRef = useRef<HTMLDivElement>(null);
-
-  // Generate some sample logs for demonstration
-  useEffect(() => {
-    const sampleLogs: LogEntry[] = [
-      {
-        id: '1',
-        message: '系统初始化完成',
-        type: 'info',
-        timestamp: new Date(Date.now() - 86400000),
-      },
-      {
-        id: '2',
-        message: '用户会话创建成功',
-        type: 'info',
-        timestamp: new Date(Date.now() - 3600000),
-      },
-      {
-        id: '3',
-        message: '图像处理API连接超时',
-        type: 'error',
-        timestamp: new Date(Date.now() - 1800000),
-      },
-      {
-        id: '4',
-        message: '内存使用率超过80%',
-        type: 'warning',
-        timestamp: new Date(Date.now() - 900000),
-      },
-    ];
-    
-    setLogs(sampleLogs);
-  }, []);
-
-  // Drag resize handlers
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      
-      const windowWidth = window.innerWidth;
-      const newWidth = Math.min(
-        Math.max(30, (e.clientX / windowWidth) * 100), 
-        70
-      ); // Limit between 30% and 70%
-      
-      if (onWidthChange) {
-        onWidthChange(newWidth);
-      }
-      
-      addLogEntry(`面板宽度调整至 ${newWidth.toFixed(0)}%`, 'info');
-    };
-    
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto';
-    };
-    
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      
-      // Change cursor and disable text selection while dragging
-      document.body.style.cursor = 'ew-resize';
-      document.body.style.userSelect = 'none';
-    }
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, onWidthChange]);
-
-  const handleDragStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    addLogEntry('开始调整面板大小', 'info');
-  };
-
-  // Add a new log entry
-  const addLogEntry = (message: string, type: 'info' | 'error' | 'warning' = 'info') => {
-    const newLog: LogEntry = {
-      id: `log_${Date.now()}`,
-      message,
-      type,
-      timestamp: new Date(),
-    };
-    
-    setLogs(prevLogs => [...prevLogs, newLog]);
-  };
 
   // Styles
   const rightPanelStyle: React.CSSProperties = {
-    flex: panelWidth / 40, // Convert percentage to flex ratio
+    flex: '1.5',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f1f5f9',
     height: '100%',
     position: 'relative',
-  };
-
-  const dragHandleStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '0',
-    top: '0',
-    bottom: '0',
-    width: '8px',
-    backgroundColor: 'transparent',
-    cursor: 'ew-resize',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  };
-
-  const dragHandleInnerStyle: React.CSSProperties = {
-    width: '4px',
-    height: '40px',
-    backgroundColor: '#cbd5e1',
-    borderRadius: '2px',
-    transition: 'background-color 0.2s',
   };
 
   const headerStyle: React.CSSProperties = {
@@ -197,7 +70,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     borderRadius: '8px',
     marginBottom: '16px',
     border: '1px solid #e5e7eb',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
   };
 
   const publishButtonStyle: React.CSSProperties = {
@@ -212,87 +84,21 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
   };
 
-  const debugAreaStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#1e293b',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-    color: '#f8fafc',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.2)',
-  };
-
-  const debugButtonStyle: React.CSSProperties = {
+  const publishOptionButtonStyle = (selected: boolean): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    justifyContent: 'center',
     padding: '8px 16px',
     borderRadius: '6px',
-    backgroundColor: '#475569',
-    color: 'white',
+    backgroundColor: selected ? '#3b82f6' : '#e5e7eb',
+    color: selected ? 'white' : '#64748b',
     border: 'none',
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  };
-
-  const logDrawerStyle: React.CSSProperties = {
-    position: 'fixed',
-    bottom: logDrawerOpen ? '0' : '-50vh',
-    left: '0',
-    right: '0',
-    height: '50vh',
-    backgroundColor: '#0f172a',
-    color: '#e2e8f0',
-    zIndex: 20,
-    padding: '16px',
-    paddingTop: '0',
-    transition: 'bottom 0.3s ease-in-out',
-    overflowY: 'auto',
-    borderTop: '1px solid #334155',
-    boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.2)',
-  };
-
-  const logHeaderStyle: React.CSSProperties = {
-    position: 'sticky',
-    top: '0',
-    backgroundColor: '#0f172a',
-    padding: '16px 0',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #334155',
-    marginBottom: '16px',
-    zIndex: 1,
-  };
-
-  const logEntryStyle = (type: 'info' | 'error' | 'warning'): React.CSSProperties => ({
-    padding: '10px 12px',
-    marginBottom: '8px',
-    borderLeft: `3px solid ${
-      type === 'error' ? '#ef4444' : 
-      type === 'warning' ? '#f59e0b' : 
-      '#3b82f6'
-    }`,
-    backgroundColor: '#1e293b',
-    borderRadius: '4px',
-    fontSize: '14px',
   });
-
-  const logTimeStyle: React.CSSProperties = {
-    color: '#94a3b8',
-    fontSize: '12px',
-    marginTop: '4px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-  };
 
   const publishModalOverlayStyle: React.CSSProperties = {
     position: 'absolute',
@@ -395,7 +201,44 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     padding: '12px',
     marginBottom: '16px',
     border: '1px solid #e5e7eb',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+  };
+
+  const settingsHeaderStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#334155',
+  };
+
+  const settingsContentStyle: React.CSSProperties = {
+    marginTop: '12px',
+    paddingTop: '12px',
+    borderTop: '1px solid #f1f5f9',
+  };
+
+  const optionStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '12px',
+    fontSize: '14px',
+    color: '#64748b',
+  };
+
+  const toggleStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'inline-block',
+    width: '40px',
+    height: '20px',
+  };
+
+  const toggleInputStyle: React.CSSProperties = {
+    opacity: 0,
+    width: 0,
+    height: 0,
   };
 
   const toggleSliderStyle = (isChecked: boolean): React.CSSProperties => ({
@@ -422,6 +265,23 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     borderRadius: '50%',
   });
 
+  const rangeContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  };
+
+  const rangeInputStyle: React.CSSProperties = {
+    width: '100%',
+    accentColor: '#3b82f6',
+  };
+
+  const rangeValueStyle: React.CSSProperties = {
+    fontSize: '12px',
+    color: '#94a3b8',
+    textAlign: 'right',
+  };
+
   const chatAreaStyle: React.CSSProperties = {
     flexGrow: 1,
     border: '1px solid #e5e7eb',
@@ -433,7 +293,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
   };
 
   const chatActionsStyle: React.CSSProperties = {
@@ -687,16 +546,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         ...attachment,
       };
       
-      // Add log entry for the user message
-      addLogEntry(`用户发送消息: "${content}"`, 'info');
-      
-      if (attachment?.attachmentType) {
-        addLogEntry(`用户附加了${
-          attachment.attachmentType === 'image' ? '图片' : 
-          attachment.attachmentType === 'file' ? '文件' : '语音'
-        }`, 'info');
-      }
-      
       // Simulate bot response
       const botMessage: ChatMessage = {
         id: `msg_${Date.now() + 1}`,
@@ -705,18 +554,10 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         timestamp: new Date(),
       };
       
-      // Add log entry for the bot response
-      addLogEntry('系统响应已生成', 'info');
-      
-      if (webSearch) {
-        addLogEntry('执行了联网搜索', 'info');
-      }
-      
       // Update messages
       setMessages(prevMessages => {
         const allMessages = [...prevMessages, userMessage, botMessage];
         if (allMessages.length > maxContextLength * 2) {
-          addLogEntry(`聊天历史已达到限制，删除了最早的${allMessages.length - maxContextLength * 2}条消息`, 'warning');
           return allMessages.slice(-maxContextLength * 2);
         }
         return allMessages;
@@ -743,7 +584,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
 
   const handleClearChat = () => {
     setMessages([]);
-    addLogEntry('聊天历史已清空', 'info');
   };
 
   const formatTimestamp = (date: Date) => {
@@ -777,8 +617,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     a.download = `chat_export_${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    
-    addLogEntry('对话已导出为文本文件', 'info');
   };
 
   const renderMessageAttachment = (message: ChatMessage) => {
@@ -814,12 +652,10 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     setPublishDescription('');
     setPublishSuccess(false);
     setPublishModalOpen(true);
-    addLogEntry('用户打开了发布对话框', 'info');
   };
 
   const handlePublishTypeSelect = (type: 'api' | 'assistant') => {
     setPublishType(type);
-    addLogEntry(`用户选择了发布类型: ${type === 'api' ? 'API' : '助手'}`, 'info');
   };
 
   const handlePublishConfirm = () => {
@@ -828,8 +664,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
       name: publishName,
       description: publishDescription,
     });
-    
-    addLogEntry(`发布${publishType === 'api' ? 'API' : '助手'}: ${publishName}`, 'info');
     
     // Show success message
     setPublishSuccess(true);
@@ -841,43 +675,8 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     }, 2000);
   };
 
-  const handleToggleLogDrawer = () => {
-    setLogDrawerOpen(!logDrawerOpen);
-    if (!logDrawerOpen) {
-      addLogEntry('用户打开了日志面板', 'info');
-    }
-  };
-
-  const handleClearLogs = () => {
-    setLogs([]);
-  };
-
-  const formatLogTimestamp = (date: Date) => {
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
   return (
     <div style={rightPanelStyle}>
-      {/* Drag handle for resizing */}
-      <div 
-        ref={dragHandleRef}
-        style={dragHandleStyle}
-        onMouseDown={handleDragStart}
-        title="拖动调整宽度"
-      >
-        <div style={{
-          ...dragHandleInnerStyle,
-          backgroundColor: isDragging ? '#3b82f6' : '#cbd5e1',
-        }} />
-      </div>
-
       {/* Publish modal */}
       {publishModalOpen && (
         <div style={publishModalOverlayStyle} onClick={() => !publishSuccess && setPublishModalOpen(false)}>
@@ -1014,6 +813,7 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         </div>
       )}
 
+      {/* Header section */}
       <div style={headerStyle}>
         <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b' }}>
           文本对话测试
@@ -1052,23 +852,9 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         </button>
       </div>
 
-      {/* Debug area */}
-      <div style={debugAreaStyle}>
-        <div style={{ fontSize: '14px', fontWeight: 500 }}>
-          测试与调试控制台
-        </div>
-        <button
-          style={debugButtonStyle}
-          onClick={handleToggleLogDrawer}
-        >
-          <Terminal size={16} />
-          {logDrawerOpen ? '关闭日志' : '查看日志'}
-        </button>
-      </div>
-
       {settingsExpanded && (
         <div style={settingsContainerStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: '#334155' }} onClick={() => setSettingsExpanded(!settingsExpanded)}>
+          <div style={settingsHeaderStyle} onClick={() => setSettingsExpanded(!settingsExpanded)}>
             <span>对话设置</span>
             <ChevronDown 
               size={16} 
@@ -1079,13 +865,13 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
               }} 
             />
           </div>
-          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', fontSize: '14px', color: '#64748b' }}>
+          <div style={settingsContentStyle}>
+            <div style={optionStyle}>
               <span>显示时间戳</span>
-              <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
+              <label style={toggleStyle}>
                 <input 
                   type="checkbox" 
-                  style={{ opacity: 0, width: 0, height: 0 }} 
+                  style={toggleInputStyle} 
                   checked={showTimestamps}
                   onChange={() => setShowTimestamps(!showTimestamps)}
                 />
@@ -1093,9 +879,9 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
                 <span style={sliderButtonStyle(showTimestamps)}></span>
               </label>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', fontSize: '14px', color: '#64748b' }}>
+            <div style={optionStyle}>
               <span>对话历史长度</span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={rangeContainerStyle}>
                 <input 
                   type="range" 
                   min="5" 
@@ -1103,9 +889,9 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
                   step="5"
                   value={maxContextLength}
                   onChange={(e) => setMaxContextLength(parseInt(e.target.value))}
-                  style={{ width: '100%', accentColor: '#3b82f6' }}
+                  style={rangeInputStyle}
                 />
-                <span style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'right' }}>{maxContextLength} 条消息</span>
+                <span style={rangeValueStyle}>{maxContextLength} 条消息</span>
               </div>
             </div>
             
@@ -1178,7 +964,7 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3.0 0 1 4-10z"></path>
                       </svg>
                       <span>联网搜索</span>
                     </div>
@@ -1434,93 +1220,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
             发送
           </button>
         </div>
-      </div>
-
-      {/* Log drawer */}
-      <div style={logDrawerStyle}>
-        <div style={logHeaderStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Terminal size={18} />
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>系统日志</h3>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              style={{
-                backgroundColor: '#334155',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '6px 12px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-              onClick={handleClearLogs}
-            >
-              <Trash2 size={14} />
-              清空日志
-            </button>
-            <button
-              style={{
-                backgroundColor: '#334155',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '6px 12px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-              onClick={handleToggleLogDrawer}
-            >
-              <X size={14} />
-              关闭
-            </button>
-          </div>
-        </div>
-        
-        {logs.length === 0 ? (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            height: 'calc(100% - 60px)', 
-            color: '#94a3b8',
-            flexDirection: 'column',
-            gap: '8px',
-          }}>
-            <Terminal size={24} />
-            <p>暂无日志记录</p>
-          </div>
-        ) : (
-          logs.map(log => (
-            <div key={log.id} style={logEntryStyle(log.type)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {log.type === 'error' ? (
-                  <AlertCircle size={14} color="#ef4444" />
-                ) : log.type === 'warning' ? (
-                  <AlertCircle size={14} color="#f59e0b" />
-                ) : (
-                  <div style={{ 
-                    width: '14px', 
-                    height: '14px', 
-                    borderRadius: '50%', 
-                    backgroundColor: '#3b82f6' 
-                  }}></div>
-                )}
-                <span>{log.message}</span>
-              </div>
-              <div style={logTimeStyle}>
-                <Clock size={12} />
-                <span>{formatLogTimestamp(log.timestamp)}</span>
-              </div>
-            </div>
-          ))
-        )}
       </div>
     </div>
   );

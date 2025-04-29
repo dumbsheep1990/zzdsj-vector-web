@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Settings, Download, Trash2, ChevronDown, MessageSquare, Bot, User, Image, FileText, Mic, X, Paperclip, Code, Share2, Check, ArrowRight, Terminal, AlertCircle, Clock } from 'lucide-react';
+import { Send, Settings, Download, Trash2, ChevronDown, MessageSquare, Bot, User, Image, FileText, Mic, X, Paperclip, Code, Share2, Check, ArrowRight, Terminal, AlertCircle, Clock, GripVertical } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -150,7 +150,7 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
 
   // Styles
   const rightPanelStyle: React.CSSProperties = {
-    flex: panelWidth / 40, // Convert percentage to flex ratio
+    flex: '1.5',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',

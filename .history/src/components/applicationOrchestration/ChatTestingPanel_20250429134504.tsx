@@ -102,6 +102,8 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         70
       ); // Limit between 30% and 70%
       
+      console.log('Dragging, new width:', newWidth.toFixed(0) + '%');
+      
       if (onWidthChange) {
         onWidthChange(newWidth);
       }
@@ -110,12 +112,14 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     };
     
     const handleMouseUp = () => {
+      console.log('Mouse up, ending drag');
       setIsDragging(false);
       document.body.style.cursor = 'default';
       document.body.style.userSelect = 'auto';
     };
     
     if (isDragging) {
+      console.log('isDragging is true, adding event listeners');
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       
@@ -132,6 +136,7 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
 
   const handleDragStart = (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log('Drag start triggered');
     setIsDragging(true);
     addLogEntry('开始调整面板大小', 'info');
   };
@@ -164,18 +169,18 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     left: '0',
     top: '0',
     bottom: '0',
-    width: '8px',
-    backgroundColor: 'transparent',
+    width: '20px',
+    backgroundColor: 'rgba(203, 213, 225, 0.1)',
     cursor: 'ew-resize',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 10,
+    zIndex: 20,
   };
 
   const dragHandleInnerStyle: React.CSSProperties = {
     width: '4px',
-    height: '40px',
+    height: '80px',
     backgroundColor: '#cbd5e1',
     borderRadius: '2px',
     transition: 'background-color 0.2s',
@@ -871,6 +876,7 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
         style={dragHandleStyle}
         onMouseDown={handleDragStart}
         title="拖动调整宽度"
+        data-testid="resize-handle"
       >
         <div style={{
           ...dragHandleInnerStyle,

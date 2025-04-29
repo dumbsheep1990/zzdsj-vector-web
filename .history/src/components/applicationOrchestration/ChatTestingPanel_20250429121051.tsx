@@ -24,18 +24,13 @@ interface ChatTestingPanelProps {
   voiceSupport: boolean;
   documentParsing: boolean;
   webSearch: boolean;
-  // Props for resizable panel
-  panelWidth?: number;
-  onWidthChange?: (width: number) => void;
 }
 
 const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
   imageSupport = false,
   voiceSupport = false,
   documentParsing = false,
-  webSearch = false,
-  panelWidth = 60, // Default percentage of total width
-  onWidthChange
+  webSearch = false
 }) => {
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -52,12 +47,10 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [logDrawerOpen, setLogDrawerOpen] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   
-  // Refs for file inputs and drag handle
+  // Refs for file inputs
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dragHandleRef = useRef<HTMLDivElement>(null);
 
   // Generate some sample logs for demonstration
   useEffect(() => {
@@ -91,51 +84,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
     setLogs(sampleLogs);
   }, []);
 
-  // Drag resize handlers
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      
-      const windowWidth = window.innerWidth;
-      const newWidth = Math.min(
-        Math.max(30, (e.clientX / windowWidth) * 100), 
-        70
-      ); // Limit between 30% and 70%
-      
-      if (onWidthChange) {
-        onWidthChange(newWidth);
-      }
-      
-      addLogEntry(`面板宽度调整至 ${newWidth.toFixed(0)}%`, 'info');
-    };
-    
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto';
-    };
-    
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      
-      // Change cursor and disable text selection while dragging
-      document.body.style.cursor = 'ew-resize';
-      document.body.style.userSelect = 'none';
-    }
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, onWidthChange]);
-
-  const handleDragStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    addLogEntry('开始调整面板大小', 'info');
-  };
-
   // Add a new log entry
   const addLogEntry = (message: string, type: 'info' | 'error' | 'warning' = 'info') => {
     const newLog: LogEntry = {
@@ -150,35 +98,13 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
 
   // Styles
   const rightPanelStyle: React.CSSProperties = {
-    flex: panelWidth / 40, // Convert percentage to flex ratio
+    flex: '1.5',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: '#f8fafc',
     height: '100%',
     position: 'relative',
-  };
-
-  const dragHandleStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '0',
-    top: '0',
-    bottom: '0',
-    width: '8px',
-    backgroundColor: 'transparent',
-    cursor: 'ew-resize',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  };
-
-  const dragHandleInnerStyle: React.CSSProperties = {
-    width: '4px',
-    height: '40px',
-    backgroundColor: '#cbd5e1',
-    borderRadius: '2px',
-    transition: 'background-color 0.2s',
   };
 
   const headerStyle: React.CSSProperties = {
@@ -865,19 +791,6 @@ const ChatTestingPanel: React.FC<ChatTestingPanelProps> = ({
 
   return (
     <div style={rightPanelStyle}>
-      {/* Drag handle for resizing */}
-      <div 
-        ref={dragHandleRef}
-        style={dragHandleStyle}
-        onMouseDown={handleDragStart}
-        title="拖动调整宽度"
-      >
-        <div style={{
-          ...dragHandleInnerStyle,
-          backgroundColor: isDragging ? '#3b82f6' : '#cbd5e1',
-        }} />
-      </div>
-
       {/* Publish modal */}
       {publishModalOpen && (
         <div style={publishModalOverlayStyle} onClick={() => !publishSuccess && setPublishModalOpen(false)}>
