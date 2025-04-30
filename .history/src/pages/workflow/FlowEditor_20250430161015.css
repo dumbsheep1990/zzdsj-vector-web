@@ -1,0 +1,639 @@
+.flow-editor-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  background-color: #f7fafc;
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px), radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* 顶部操作栏样式 */
+.editor-toolbar {
+  padding: 6px 12px;
+  background: #fff;
+  border-bottom: 1px solid #e6e8eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  z-index: 10;
+}
+
+.editor-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2329;
+  margin-right: 24px;
+}
+
+.editor-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbar-divider {
+  height: 20px;
+  margin: 0 6px;
+}
+
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* 美化ReactFlow组件 */
+.flow-editor-container .react-flow__pane {
+  cursor: default;
+}
+
+.react-flow__node {
+  pointer-events: auto;
+  z-index: 5;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.react-flow__node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 6;
+}
+
+.react-flow__node.selected {
+  z-index: 10;
+}
+
+.react-flow__edge {
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.react-flow__controls {
+  z-index: 6;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+  overflow: hidden;
+  padding: 6px;
+}
+
+.react-flow__controls-button {
+  border: none !important;
+  border-bottom: 1px solid #f3f3f3 !important;
+  background-color: #fff !important;
+  transition: all 0.2s ease !important;
+  margin-bottom: 4px;
+  border-radius: 4px !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #f5f5f5 !important;
+  transform: scale(1.05);
+}
+
+.react-flow__minimap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  margin: 12px;
+}
+
+/* 自定义节点样式优化，参考langflow的设计 */
+.agent-node {
+  background: linear-gradient(to bottom, #ffffff, #f9f8ff);
+  border-radius: 8px;
+  color: #333;
+  padding: 16px;
+  width: 280px;
+  height: auto;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid #e8e5ff;
+  overflow: hidden;
+}
+
+.agent-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.agent-node.selected {
+  box-shadow: 0 0 0 3px #8a5cf6, 0 8px 24px rgba(138, 92, 246, 0.25);
+  transform: scale(1.03) translateY(-4px);
+  border: 1px solid #8a5cf6;
+  z-index: 20;
+  background: linear-gradient(to bottom, #ffffff, #f0edff);
+}
+
+.tool-node {
+  background: linear-gradient(to bottom, #ffffff, #f6fdff);
+  border-radius: 8px;
+  color: #333;
+  padding: 16px;
+  width: 280px;
+  height: auto;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid #e0f2ff;
+  overflow: hidden;
+}
+
+.tool-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+}
+
+.tool-node.selected {
+  box-shadow: 0 0 0 3px #0dcaf3, 0 8px 24px rgba(13, 202, 243, 0.25);
+  transform: scale(1.03) translateY(-4px);
+  border: 1px solid #0dcaf3;
+  z-index: 20;
+  background: linear-gradient(to bottom, #ffffff, #edfaff);
+}
+
+.application-node {
+  background: linear-gradient(to bottom, #ffffff, #fff9f5);
+  border-radius: 8px;
+  color: #333;
+  padding: 16px;
+  width: 280px;
+  height: auto;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid #fff0e0;
+  overflow: hidden;
+}
+
+.application-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #f6d365, #fda085);
+}
+
+.application-node.selected {
+  box-shadow: 0 0 0 3px #ffae3a, 0 8px 24px rgba(255, 174, 58, 0.25);
+  transform: scale(1.03) translateY(-4px);
+  border: 1px solid #ffae3a;
+  z-index: 20;
+  background: linear-gradient(to bottom, #ffffff, #fff4e6);
+}
+
+.node-header {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.node-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.selected .node-icon {
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.node-type {
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.node-model {
+  color: #8a5cf6;
+  font-weight: 500;
+}
+
+.node-description {
+  font-size: 12px;
+  margin: 10px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* 新增: 节点内部区域样式 */
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
+  margin: 12px 0 6px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+/* 步骤列表样式 */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 3px 0;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  font-size: 9px;
+  font-weight: bold;
+  color: #666;
+}
+
+.step-name {
+  color: #444;
+}
+
+/* 步骤类型的颜色区分 */
+.step-item.reasoning .step-number {
+  background-color: #e9d5ff;
+  color: #8b5cf6;
+}
+
+.step-item.action .step-number {
+  background-color: #dbeafe;
+  color: #3b82f6;
+}
+
+.step-item.api_call .step-number {
+  background-color: #fef3c7;
+  color: #f59e0b;
+}
+
+.step-item.reflection .step-number {
+  background-color: #dcfce7;
+  color: #22c55e;
+}
+
+/* 工具列表样式 */
+.tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.node-tool-tag {
+  background-color: #f5f7fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #444;
+  border: 1px solid #eaeaea;
+  white-space: nowrap;
+}
+
+/* 能力列表样式 */
+.capabilities-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.capability-tag {
+  background-color: #f0f9ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #0369a1;
+  border: 1px solid #e0f2fe;
+  white-space: nowrap;
+}
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #555;
+  transition: all 0.2s ease;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.5);
+  background-color: #333;
+}
+
+.react-flow__handle-left {
+  left: -6px;
+}
+
+.react-flow__handle-right {
+  right: -6px;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.react-flow__edge-text {
+  font-size: 12px;
+  font-weight: 500;
+  fill: #666;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #8a5cf6;
+  stroke-width: 3;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 3;
+}
+
+.react-flow {
+  --rf-edge-path-color: #b1b1b7;
+  --rf-edge-path-hover-color: #555;
+  --rf-edge-selected-color: #2563eb;
+  --rf-connection-line-color: #2563eb;
+  background-color: #f8fafc;
+}
+
+/* React Flow在模态框中的调整 */
+.flow-editor-modal {
+  max-width: 1800px;
+}
+
+.flow-editor-modal .ant-modal-content {
+  overflow: hidden;
+}
+
+.flow-editor-modal .ant-modal-body {
+  padding: 0;
+  overflow: hidden;
+}
+
+.flow-editor-modal .ant-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f9fafb;
+}
+
+/* 标题栏样式 */
+.flow-editor-modal .ant-modal-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* 标题内容容器 */
+.modal-title-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* 使标题栏和默认工具栏有相同高度 */
+.flow-editor-modal .ant-modal-title > div {
+  width: 100%;
+}
+
+.flow-editor-modal .ant-modal-close {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+}
+
+.flow-editor-modal .ant-modal-close:hover {
+  background: #fff;
+  transform: scale(1.1);
+}
+
+/* 节点工具条样式增强 */
+.node-toolbar {
+  position: absolute;
+  top: -54px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.node-toolbar::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-right: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.node-toolbar .ant-btn {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.node-toolbar .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 改进节点悬浮时的动画效果 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(138, 92, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(138, 92, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(138, 92, 246, 0);
+  }
+}
+
+.react-flow__node.selected .react-flow__handle {
+  background-color: #8a5cf6;
+  animation: pulse 2s infinite;
+}
+
+/* 参数列表样式 */
+.parameters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.parameter-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  padding: 3px 6px;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+  color: #555;
+}
+
+.parameter-name {
+  font-weight: 500;
+}
+
+.parameter-type {
+  color: #8a5cf6;
+  font-size: 9px;
+  background-color: #f5f0ff;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+/* 示例列表样式 */
+.examples-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.example-item {
+  font-size: 10px;
+  padding: 4px 6px;
+  background-color: #f3f4f6;
+  border-radius: 3px;
+  color: #444;
+  border-left: 2px solid #9ca3af;
+}
+
+/* 功能列表样式 */
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.feature-item {
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  background-color: #f0fdf4;
+}
+
+.feature-item:before {
+  content: '✓';
+  display: inline-block;
+  margin-right: 4px;
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* 集成方式样式 */
+.integrations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.integration-tag {
+  background-color: #f8fafc;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+} 

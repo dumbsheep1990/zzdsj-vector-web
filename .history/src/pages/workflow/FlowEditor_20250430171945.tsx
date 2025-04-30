@@ -39,16 +39,16 @@ import {
 } from './mockData';
 
 // 导入组件
-import AgentNode from '../../components/workflow/AgentNode';
-import ToolNode from '../../components/workflow/ToolNode';
-import ApplicationNode from '../../components/workflow/ApplicationNode';
-import FlowToolbar from '../../components/workflow/FlowToolbar';
-import NodePropertiesDrawer from '../../components/workflow/NodePropertiesDrawer';
-import AgentSelectionModal from '../../components/workflow/AgentSelectionModal';
-import ToolSelectionModal from '../../components/workflow/ToolSelectionModal';
-import WorkflowSaveModal from '../../components/workflow/WorkflowSaveModal';
-import AddNodePanel from '../../components/workflow/AddNodePanel';
-import DefaultToolbar from '../../components/workflow/DefaultToolbar';
+import AgentNode from './components/AgentNode';
+import ToolNode from './components/ToolNode';
+import ApplicationNode from './components/ApplicationNode';
+import FlowToolbar from './components/FlowToolbar';
+import NodePropertiesDrawer from './components/NodePropertiesDrawer';
+import AgentSelectionModal from './components/AgentSelectionModal';
+import ToolSelectionModal from './components/ToolSelectionModal';
+import WorkflowSaveModal from './components/WorkflowSaveModal';
+import AddNodePanel from './components/AddNodePanel';
+import DefaultToolbar from './components/DefaultToolbar';
 
 // 注册自定义节点类型
 const nodeTypes: NodeTypes = {

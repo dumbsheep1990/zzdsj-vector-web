@@ -1,0 +1,1897 @@
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  ReactFlow,
+  MiniMap,
+  Background,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  Panel,
+  NodeTypes,
+  Connection,
+  Node,
+  ReactFlowProvider,
+  ReactFlowInstance,
+  Handle,
+  Position,
+  Edge
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import './FlowEditor.css';
+import { Button, Card, Input, Select, Typography, Drawer, Form, message, Modal, Table, Tag, Input as AntInput, Tooltip, Space, Divider } from 'antd';
+import { 
+  UndoOutlined, 
+  RedoOutlined, 
+  LockOutlined, 
+  UnlockOutlined, 
+  DeleteOutlined, 
+  ClearOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
+  FullscreenOutlined,
+  SaveOutlined,
+  CloseOutlined,
+  EditOutlined,
+  CopyOutlined,
+  NodeIndexOutlined,
+  DownloadOutlined,
+  UploadOutlined,
+  CloudUploadOutlined,
+  CheckOutlined,
+  SettingOutlined,
+  FileSearchOutlined,
+  InfoCircleOutlined
+} from '@ant-design/icons';
+import { getAgents } from '../../utils/workflowStorage';
+
+// 更新 Window 接口
+declare global {
+  interface Window {
+    editNode?: (nodeId: string) => void;
+    deleteNode?: (nodeId: string) => void;
+    duplicateNode?: (nodeId: string) => void;
+    connectNode?: (nodeId: string) => void;
+    showNodeInfo?: (nodeId: string) => void;
+    lockNode?: (nodeId: string) => void;
+  }
+}
+
+// Agent数据结构定义
+interface AgentConfig {
+  id: string;
+  name: string;
+  description: string;
+  type: 'agent' | 'tool' | 'application';
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+  knowledgeBase?: boolean;
+  webSearch?: boolean;
+  imageSupport?: boolean;
+  voiceSupport?: boolean;
+  // 扩展字段 - 步骤和调用过程
+  steps?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    type: 'reasoning' | 'action' | 'api_call' | 'reflection';
+  }>;
+  // 扩展字段 - 工具使用详情
+  tools?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    description?: string;
+    parameters?: Array<{
+      name: string;
+      type: string;
+      required: boolean;
+    }>;
+    usage_examples?: string[];
+  }>;
+  // 扩展字段 - 能力和限制
+  capabilities?: string[];
+  limitations?: string[];
+  // 扩展字段 - 执行顺序
+  executionOrder?: 'sequential' | 'parallel' | 'conditional';
+  // 扩展字段 - 视觉表现
+  color?: string;
+  icon?: string;
+}
+
+// 工具数据结构定义
+interface ToolConfig {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  parameters?: Array<{
+    name: string;
+    type: string;
+    required: boolean;
+  }>;
+  usage_examples?: string[];
+  icon?: string;
+}
+
+// 应用数据结构定义
+interface ApplicationConfig {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  features?: string[];
+  integrations?: string[];
+  icon?: string;
+}
+
+// 节点数据类型定义
+interface NodeData {
+  label: string;
+  type: string;
+  description?: string;
+  config?: AgentConfig | ToolConfig | ApplicationConfig;
+  nodeId?: string;
+  showToolbar?: boolean;
+}
+
+// 工作流类型定义
+interface Workflow {
+  id: string;
+  name: string;
+  description: string;
+  nodes: Node[];
+  edges: Edge[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 工作流表单值类型
+interface WorkflowFormValues {
+  name: string;
+  description: string;
+}
+
+// 组件属性
+interface FlowEditorProps {
+  workflow: Workflow | null;
+  isCreateMode: boolean;
+  onSave: (workflow: Workflow) => void;
+  onCancel: () => void;
+  renderHeaderTools?: (props: {
+    handleSave: () => void;
+    handleEdit: () => void;
+    handleExport: () => void;
+    handleImport: () => void;
+    handlePublish: () => void;
+    handleValidate: () => boolean;
+    isValid: boolean;
+    workflowName: string;
+  }) => React.ReactNode;
+  headerMode?: boolean; // 新增：是否为标题栏模式
+}
+
+// 节点工具条组件
+interface NodeToolbarProps {
+  nodeId: string;
+  nodeType?: string;
+  onEdit: (nodeId: string) => void;
+  onDelete: (nodeId: string) => void;
+  onDuplicate: (nodeId: string) => void;
+  onConnect: (nodeId: string) => void;
+  onInfo?: (nodeId: string) => void;
+  onLock?: (nodeId: string) => void;
+}
+
+const NodeToolbar: React.FC<NodeToolbarProps> = ({ 
+  nodeId, 
+  nodeType = 'agent',
+  onEdit, 
+  onDelete, 
+  onDuplicate,
+  onConnect,
+  onInfo,
+  onLock
+}) => {
+  return (
+    <div className="node-toolbar" onClick={(e) => e.stopPropagation()}>
+      <Tooltip title="编辑节点">
+        <Button 
+          size="small" 
+          type="text"
+          icon={<EditOutlined />} 
+          onClick={() => onEdit(nodeId)}
+        />
+      </Tooltip>
+      <Tooltip title="复制节点">
+        <Button 
+          size="small" 
+          type="text"
+          icon={<CopyOutlined />} 
+          onClick={() => onDuplicate(nodeId)}
+        />
+      </Tooltip>
+      <Tooltip title="连接节点">
+        <Button 
+          size="small" 
+          type="text"
+          icon={<NodeIndexOutlined />} 
+          onClick={() => onConnect(nodeId)}
+        />
+      </Tooltip>
+      {onInfo && (
+        <Tooltip title="查看详情">
+          <Button 
+            size="small" 
+            type="text"
+            icon={<InfoCircleOutlined />} 
+            onClick={() => onInfo(nodeId)}
+          />
+        </Tooltip>
+      )}
+      {onLock && (
+        <Tooltip title="锁定节点">
+          <Button 
+            size="small" 
+            type="text"
+            icon={<LockOutlined />} 
+            onClick={() => onLock(nodeId)}
+          />
+        </Tooltip>
+      )}
+      <Tooltip title="删除节点">
+        <Button 
+          size="small" 
+          danger
+          type="text"
+          icon={<DeleteOutlined />} 
+          onClick={() => onDelete(nodeId)}
+        />
+      </Tooltip>
+    </div>
+  );
+};
+
+// AgentNode组件更新
+const AgentNode = ({ data, selected }: { data: NodeData; selected: boolean }) => {
+  const agentConfig = data.config as AgentConfig | undefined;
+  
+  return (
+    <div className={`agent-node ${selected ? 'selected' : ''}`}>
+      {selected && data.showToolbar && data.nodeId && (
+        <NodeToolbar 
+          nodeId={data.nodeId}
+          nodeType="agent"
+          onEdit={(id) => window.editNode && window.editNode(id)}
+          onDelete={(id) => window.deleteNode && window.deleteNode(id)}
+          onDuplicate={(id) => window.duplicateNode && window.duplicateNode(id)}
+          onConnect={(id) => window.connectNode && window.connectNode(id)}
+          onInfo={(id) => window.showNodeInfo && window.showNodeInfo(id)}
+          onLock={(id) => window.lockNode && window.lockNode(id)}
+        />
+      )}
+      
+      <div className="node-header">
+        <div>{data.label}</div>
+        <div className="node-icon">{agentConfig?.icon || 'A'}</div>
+      </div>
+      
+      <div className="node-type">
+        {data.type}
+        {agentConfig?.model && (
+          <span className="node-model"> • {agentConfig.model}</span>
+        )}
+      </div>
+      
+      {data.description && (
+        <div className="node-description">{data.description}</div>
+      )}
+      
+      {/* 显示步骤信息 */}
+      {agentConfig?.steps && agentConfig.steps.length > 0 && (
+        <div className="node-steps">
+          <div className="section-title">流程步骤</div>
+          <div className="steps-list">
+            {agentConfig.steps.map((step, index) => (
+              <div key={step.id} className={`step-item ${step.type}`}>
+                <span className="step-number">{index + 1}</span>
+                <span className="step-name">{step.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* 显示工具信息 */}
+      {agentConfig?.tools && agentConfig.tools.length > 0 && (
+        <div className="node-tools">
+          <div className="section-title">使用工具</div>
+          <div className="tools-list">
+            {agentConfig.tools.map(tool => (
+              <span key={tool.id} className="node-tool-tag">
+                {tool.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* 显示能力信息 */}
+      {agentConfig?.capabilities && agentConfig.capabilities.length > 0 && (
+        <div className="node-capabilities">
+          <div className="section-title">能力</div>
+          <div className="capabilities-list">
+            {agentConfig.capabilities.map((capability, index) => (
+              <span key={index} className="capability-tag">
+                {capability}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="react-flow__handle-left"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="react-flow__handle-right"
+      />
+    </div>
+  );
+};
+
+// 创建应用类型示例
+const mockApplications: ApplicationConfig[] = [
+  {
+    id: 'app1',
+    name: '数据可视化仪表板',
+    type: 'application',
+    description: '展示数据分析结果的交互式仪表板',
+    features: [
+      '实时数据更新',
+      '多种图表类型',
+      '数据筛选功能',
+      '导出报告'
+    ],
+    integrations: ['API', 'CSV导入', '数据库连接'],
+    icon: '📈'
+  },
+  {
+    id: 'app2',
+    name: '文档管理系统',
+    type: 'application',
+    description: '智能文档存储和检索系统',
+    features: [
+      '全文搜索',
+      '版本控制',
+      '协作编辑',
+      '自动标签'
+    ],
+    integrations: ['云存储', '权限系统', '第三方编辑器'],
+    icon: '📄'
+  }
+];
+
+// 修复ToolNode和ApplicationNode组件中的类型问题
+const ToolNode = ({ data, selected }: { data: NodeData; selected: boolean }) => {
+  const toolConfig = data.config as ToolConfig | undefined;
+  
+  return (
+    <div className={`tool-node ${selected ? 'selected' : ''}`}>
+      {selected && data.showToolbar && data.nodeId && (
+        <NodeToolbar 
+          nodeId={data.nodeId}
+          nodeType="tool"
+          onEdit={(id) => window.editNode && window.editNode(id)}
+          onDelete={(id) => window.deleteNode && window.deleteNode(id)}
+          onDuplicate={(id) => window.duplicateNode && window.duplicateNode(id)}
+          onConnect={(id) => window.connectNode && window.connectNode(id)}
+          onInfo={(id) => window.showNodeInfo && window.showNodeInfo(id)}
+        />
+      )}
+      
+      <div className="node-header">
+        <div>{data.label}</div>
+        <div className="node-icon">{toolConfig?.icon || 'T'}</div>
+      </div>
+      
+      <div className="node-type">{data.type}</div>
+      
+      {data.description && (
+        <div className="node-description">{data.description}</div>
+      )}
+      
+      {/* 显示参数信息 */}
+      {toolConfig?.parameters && toolConfig.parameters.length > 0 && (
+        <div className="node-parameters">
+          <div className="section-title">参数</div>
+          <div className="parameters-list">
+            {toolConfig.parameters.map((param) => (
+              <div key={param.name} className="parameter-item">
+                <span className="parameter-name">{param.name}</span>
+                <span className="parameter-type">{param.type}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* 显示功能示例 */}
+      {toolConfig?.usage_examples && toolConfig.usage_examples.length > 0 && (
+        <div className="node-examples">
+          <div className="section-title">使用示例</div>
+          <div className="examples-list">
+            {toolConfig.usage_examples.map((example, index) => (
+              <div key={index} className="example-item">
+                {example}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="react-flow__handle-left"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="react-flow__handle-right"
+      />
+    </div>
+  );
+};
+
+// ApplicationNode组件更新
+const ApplicationNode = ({ data, selected }: { data: NodeData; selected: boolean }) => {
+  const appConfig = data.config as ApplicationConfig | undefined;
+  
+  return (
+    <div className={`application-node ${selected ? 'selected' : ''}`}>
+      {selected && data.showToolbar && data.nodeId && (
+        <NodeToolbar 
+          nodeId={data.nodeId}
+          nodeType="application"
+          onEdit={(id) => window.editNode && window.editNode(id)}
+          onDelete={(id) => window.deleteNode && window.deleteNode(id)}
+          onDuplicate={(id) => window.duplicateNode && window.duplicateNode(id)}
+          onConnect={(id) => window.connectNode && window.connectNode(id)}
+          onInfo={(id) => window.showNodeInfo && window.showNodeInfo(id)}
+        />
+      )}
+      
+      <div className="node-header">
+        <div>{data.label}</div>
+        <div className="node-icon">{appConfig?.icon || 'C'}</div>
+      </div>
+      
+      <div className="node-type">{data.type}</div>
+      
+      {data.description && (
+        <div className="node-description">{data.description}</div>
+      )}
+      
+      {/* 显示功能列表 */}
+      {appConfig?.features && appConfig.features.length > 0 && (
+        <div className="node-features">
+          <div className="section-title">功能列表</div>
+          <div className="features-list">
+            {appConfig.features.map((feature, index) => (
+              <div key={index} className="feature-item">
+                {feature}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* 显示集成方式 */}
+      {appConfig?.integrations && appConfig.integrations.length > 0 && (
+        <div className="node-integrations">
+          <div className="section-title">集成方式</div>
+          <div className="integrations-list">
+            {appConfig.integrations.map((integration, index) => (
+              <span key={index} className="integration-tag">
+                {integration}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="react-flow__handle-left"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="react-flow__handle-right"
+      />
+    </div>
+  );
+};
+
+// 注册自定义节点类型
+const nodeTypes: NodeTypes = {
+  agent: AgentNode,
+  tool: ToolNode,
+  application: ApplicationNode,
+};
+
+// 初始节点
+const initialNodes = [
+  {
+    id: '1',
+    type: 'agent',
+    data: { 
+      label: '智能体 1', 
+      type: 'Agent',
+      config: {
+        id: 'agent1',
+        name: '智能体 1',
+        description: '处理初始输入的智能体',
+        type: 'agent',
+        model: 'gpt-4',
+        temperature: 0.7,
+        knowledgeBase: true,
+        webSearch: false,
+        icon: '🤖'
+      }
+    },
+    position: { x: 100, y: 100 },
+  },
+  {
+    id: '2',
+    type: 'agent',
+    data: { 
+      label: '智能体 2', 
+      type: 'Agent',
+      config: {
+        id: 'agent2',
+        name: '智能体 2',
+        description: '处理后续任务的智能体',
+        type: 'agent',
+        model: 'gpt-3.5-turbo',
+        temperature: 0.5,
+        knowledgeBase: false,
+        webSearch: true,
+        icon: '🧠'
+      }
+    },
+    position: { x: 500, y: 100 },
+  },
+  {
+    id: '3',
+    type: 'application',
+    data: { 
+      label: '数据可视化仪表板', 
+      type: 'Application',
+      config: mockApplications[0]
+    },
+    position: { x: 800, y: 250 },
+  },
+];
+
+// 初始边
+const initialEdges = [
+  { id: 'e1-2', source: '1', target: '2', animated: true, label: '处理结果' },
+];
+
+// Mock数据：可用的智能体列表
+const mockAgents: AgentConfig[] = [
+  {
+    id: 'agent1',
+    name: '通用问答智能体',
+    description: '处理一般性问题的智能体',
+    type: 'agent',
+    model: 'gpt-4',
+    temperature: 0.7,
+    maxTokens: 4096,
+    systemPrompt: '你是一个助手，帮助用户回答问题。',
+    knowledgeBase: true,
+    webSearch: true,
+    imageSupport: true,
+    voiceSupport: false,
+    // 新增字段
+    steps: [
+      { id: 'step1', name: '理解问题', description: '解析用户问题', type: 'reasoning' },
+      { id: 'step2', name: '搜索知识库', description: '在知识库中查找相关信息', type: 'action' },
+      { id: 'step3', name: '生成回答', description: '基于知识库结果生成回答', type: 'reasoning' }
+    ],
+    tools: [
+      { 
+        id: 'tool1', 
+        name: '搜索工具', 
+        type: 'search',
+        description: '在互联网上搜索信息',
+        parameters: [
+          { name: 'query', type: 'string', required: true }
+        ],
+        usage_examples: ['搜索最新的AI发展趋势']
+      },
+      { 
+        id: 'tool2', 
+        name: '计算器', 
+        type: 'calculator',
+        description: '执行数学计算',
+        parameters: [
+          { name: 'expression', type: 'string', required: true }
+        ]
+      }
+    ],
+    capabilities: ['文本处理', '问答', '搜索', '计算'],
+    limitations: ['无法处理过于复杂的数学问题'],
+    executionOrder: 'sequential',
+    color: '#667eea',
+    icon: '🤖'
+  },
+  {
+    id: 'agent2',
+    name: '数据分析智能体',
+    description: '专门处理数据分析任务',
+    type: 'agent',
+    model: 'gpt-4',
+    temperature: 0.2,
+    maxTokens: 8192,
+    systemPrompt: '你是一个数据分析专家，帮助用户分析数据。',
+    knowledgeBase: true,
+    webSearch: false,
+    imageSupport: true,
+    voiceSupport: false,
+    // 新增字段
+    steps: [
+      { id: 'step1', name: '数据导入', description: '导入用户数据', type: 'action' },
+      { id: 'step2', name: '数据清洗', description: '清洗和准备数据', type: 'action' },
+      { id: 'step3', name: '数据分析', description: '执行统计分析', type: 'api_call' },
+      { id: 'step4', name: '结果可视化', description: '将结果转换为图表', type: 'action' },
+      { id: 'step5', name: '解释结果', description: '解释数据分析结果', type: 'reasoning' }
+    ],
+    tools: [
+      { 
+        id: 'tool3', 
+        name: '数据可视化', 
+        type: 'visualization',
+        description: '将数据转换为图表',
+        parameters: [
+          { name: 'data', type: 'array', required: true },
+          { name: 'chart_type', type: 'string', required: true }
+        ]
+      },
+      { 
+        id: 'tool4', 
+        name: '统计分析', 
+        type: 'statistics',
+        description: '执行统计分析',
+        parameters: [
+          { name: 'data', type: 'array', required: true },
+          { name: 'analysis_type', type: 'string', required: true }
+        ]
+      }
+    ],
+    capabilities: ['数据清洗', '数据分析', '可视化', '统计'],
+    limitations: ['不支持超大规模数据集'],
+    executionOrder: 'sequential',
+    color: '#4facfe',
+    icon: '📊'
+  },
+  {
+    id: 'agent3',
+    name: '代码助手',
+    description: '帮助编写和修改代码',
+    type: 'agent',
+    model: 'gpt-4',
+    temperature: 0.3,
+    maxTokens: 8192,
+    systemPrompt: '你是一个编程助手，帮助用户解决代码问题。',
+    knowledgeBase: false,
+    webSearch: true,
+    imageSupport: false,
+    voiceSupport: false,
+    // 新增字段
+    steps: [
+      { id: 'step1', name: '理解需求', description: '理解编程需求', type: 'reasoning' },
+      { id: 'step2', name: '代码生成', description: '生成代码', type: 'reasoning' },
+      { id: 'step3', name: '代码测试', description: '测试生成的代码', type: 'action' },
+      { id: 'step4', name: '代码优化', description: '优化代码性能和可读性', type: 'reflection' }
+    ],
+    tools: [
+      { 
+        id: 'tool5', 
+        name: '代码补全', 
+        type: 'code-completion',
+        description: '提供代码补全建议',
+        parameters: [
+          { name: 'code_prefix', type: 'string', required: true },
+          { name: 'language', type: 'string', required: true }
+        ]
+      },
+      { 
+        id: 'tool6', 
+        name: '代码审查', 
+        type: 'code-review',
+        description: '检查和审查代码质量',
+        parameters: [
+          { name: 'code', type: 'string', required: true },
+          { name: 'language', type: 'string', required: true }
+        ]
+      },
+      {
+        id: 'tool7',
+        name: '执行代码',
+        type: 'code-execution',
+        description: '在安全环境中执行代码',
+        parameters: [
+          { name: 'code', type: 'string', required: true },
+          { name: 'language', type: 'string', required: true }
+        ]
+      }
+    ],
+    capabilities: ['代码生成', '代码补全', '代码审查', '代码执行'],
+    limitations: ['可能无法生成完美的大型代码项目'],
+    executionOrder: 'sequential',
+    color: '#8a5cf6',
+    icon: '💻'
+  }
+];
+
+// Mock数据：可用的工具
+const mockTools: ToolConfig[] = [
+  { 
+    id: 'tool1', 
+    name: '搜索工具', 
+    type: 'search', 
+    description: '在互联网上搜索信息',
+    parameters: [
+      { name: 'query', type: 'string', required: true },
+      { name: 'limit', type: 'number', required: false }
+    ],
+    usage_examples: ['搜索最新的AI发展趋势', '查询特定技术文档'],
+    icon: '🔍'
+  },
+  { 
+    id: 'tool2', 
+    name: '计算器', 
+    type: 'calculator', 
+    description: '执行数学计算',
+    parameters: [
+      { name: 'expression', type: 'string', required: true }
+    ],
+    usage_examples: ['计算复杂数学表达式', '执行单位转换'],
+    icon: '🧮'
+  },
+  { 
+    id: 'tool3', 
+    name: '数据可视化', 
+    type: 'visualization', 
+    description: '将数据转换为图表',
+    parameters: [
+      { name: 'data', type: 'array', required: true },
+      { name: 'chart_type', type: 'string', required: true },
+      { name: 'options', type: 'object', required: false }
+    ],
+    usage_examples: ['生成销售数据柱状图', '创建用户增长曲线图'],
+    icon: '📊'
+  }
+];
+
+// 表单值类型
+interface FormValues {
+  label: string;
+  type: string;
+  description: string;
+}
+
+// 添加工具引用接口
+interface ToolsRef {
+  handleSave: () => void;
+  handleEdit: () => void;
+  handleExport: () => void;
+  handleImport: () => void;
+  handlePublish: () => void;
+  handleValidate: () => boolean;
+  isValid: boolean;
+  workflowName: string;
+}
+
+// 底部工具栏组件
+const FlowToolbar = ({ 
+  onUndo, 
+  onRedo, 
+  onLock, 
+  onUnlock, 
+  onDeleteNode, 
+  onClearAll,
+  onZoomIn,
+  onZoomOut,
+  onFitView,
+  onSave,
+  onCancel,
+  isLocked,
+  hasSelectedNode,
+  canUndo,
+  canRedo
+}: {
+  onUndo: () => void;
+  onRedo: () => void;
+  onLock: () => void;
+  onUnlock: () => void;
+  onDeleteNode: () => void;
+  onClearAll: () => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onFitView: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  isLocked: boolean;
+  hasSelectedNode: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+}) => {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        gap: '10px',
+        background: 'white',
+        padding: '10px 15px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+        zIndex: 10
+      }}
+    >
+      <Tooltip title={canUndo ? "撤销" : "没有可撤销的操作"}>
+        <Button 
+          icon={<UndoOutlined />} 
+          onClick={onUndo} 
+          disabled={!canUndo}
+          type={canUndo ? "default" : "text"}
+        />
+      </Tooltip>
+      <Tooltip title={canRedo ? "重做" : "没有可重做的操作"}>
+        <Button 
+          icon={<RedoOutlined />} 
+          onClick={onRedo} 
+          disabled={!canRedo}
+          type={canRedo ? "default" : "text"}
+        />
+      </Tooltip>
+      {isLocked ? (
+        <Tooltip title="解锁节点">
+          <Button 
+            icon={<UnlockOutlined />} 
+            onClick={onUnlock} 
+            type="primary"
+          />
+        </Tooltip>
+      ) : (
+        <Tooltip title="锁定节点">
+          <Button 
+            icon={<LockOutlined />} 
+            onClick={onLock}
+          />
+        </Tooltip>
+      )}
+      <Tooltip title={hasSelectedNode ? "删除选中节点" : "请先选择节点"}>
+        <Button 
+          icon={<DeleteOutlined />} 
+          onClick={onDeleteNode}
+          disabled={!hasSelectedNode}
+          danger={hasSelectedNode}
+        />
+      </Tooltip>
+      <Tooltip title="清空所有">
+        <Button 
+          icon={<ClearOutlined />} 
+          onClick={onClearAll}
+          danger
+        />
+      </Tooltip>
+      <div style={{ width: '1px', background: '#eee', margin: '0 5px' }}></div>
+      <Tooltip title="放大">
+        <Button icon={<ZoomInOutlined />} onClick={onZoomIn} />
+      </Tooltip>
+      <Tooltip title="缩小">
+        <Button icon={<ZoomOutOutlined />} onClick={onZoomOut} />
+      </Tooltip>
+      <Tooltip title="适应视图">
+        <Button icon={<FullscreenOutlined />} onClick={onFitView} />
+      </Tooltip>
+      <div style={{ width: '1px', background: '#eee', margin: '0 5px' }}></div>
+      <Tooltip title="取消">
+        <Button icon={<CloseOutlined />} onClick={onCancel} />
+      </Tooltip>
+      <Tooltip title="保存工作流">
+        <Button type="primary" icon={<SaveOutlined />} onClick={onSave} />
+      </Tooltip>
+    </div>
+  );
+};
+
+const FlowEditor: React.FC<FlowEditorProps> = ({
+  workflow,
+  isCreateMode,
+  onSave,
+  onCancel,
+  renderHeaderTools,
+  headerMode = false
+}) => {
+  // 初始化节点和边
+  const initialState = workflow ? { 
+    nodes: workflow.nodes, 
+    edges: workflow.edges 
+  } : { 
+    nodes: initialNodes, 
+    edges: initialEdges 
+  };
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialState.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialState.edges);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [agentModalVisible, setAgentModalVisible] = useState(false);
+  const [toolModalVisible, setToolModalVisible] = useState(false);
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+  const [workflowFormValues, setWorkflowFormValues] = useState<WorkflowFormValues>(
+    workflow ? {
+      name: workflow.name,
+      description: workflow.description
+    } : {
+      name: '',
+      description: ''
+    }
+  );
+  const [availableAgents, setAvailableAgents] = useState<AgentConfig[]>(mockAgents);
+  const [availableTools] = useState<ToolConfig[]>(mockTools);
+  const [nodeForm] = Form.useForm();
+  const [workflowForm] = Form.useForm();
+  
+  // 历史状态管理，用于撤销和重做
+  const [history, setHistory] = useState<Array<{nodes: Node[]; edges: Edge[]}>>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [nodesLocked, setNodesLocked] = useState(false);
+  const [isConnectingMode, setIsConnectingMode] = useState(false);
+  const [connectionSource, setConnectionSource] = useState<string | null>(null);
+  
+  // 提前声明toolsRef，但先不初始化具体内容
+  const toolsRef = useRef<ToolsRef>({
+    handleSave: () => {},
+    handleEdit: () => {},
+    handleExport: () => {},
+    handleImport: () => {},
+    handlePublish: () => {},
+    handleValidate: () => false,
+    isValid: false,
+    workflowName: ''
+  });
+
+  // 打开保存工作流模态框
+  const openSaveModal = () => {
+    workflowForm.setFieldsValue(workflowFormValues);
+    setSaveModalVisible(true);
+  };
+
+  // 记录历史状态的函数
+  const recordHistory = useCallback(() => {
+    if (nodes && edges) {
+      setHistory(prev => {
+        // 如果当前不是最新状态，则清除之后的历史记录
+        const newHistory = prev.slice(0, historyIndex + 1);
+        return [...newHistory, { nodes: nodes, edges: edges }];
+      });
+      setHistoryIndex(prev => prev + 1);
+    }
+  }, [nodes, edges, historyIndex]);
+
+  // 在节点或边发生变化时记录历史
+  useEffect(() => {
+    // 初始加载时不记录
+    if (historyIndex >= 0) {
+      recordHistory();
+    }
+  }, [nodes, edges, recordHistory]);
+
+  // 处理连接节点
+  const onConnect = useCallback(
+    (params: Connection) => setEdges((eds) => addEdge(
+      { ...params, animated: true, label: '处理结果' }, 
+      eds
+    )),
+    [setEdges]
+  );
+
+  // 复制节点
+  const handleDuplicateNode = useCallback((nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    
+    if (!node) return;
+    
+    const newNode = {
+      ...node,
+      id: `node_${Date.now()}`,
+      position: {
+        x: node.position.x + 50,
+        y: node.position.y + 50,
+      }
+    };
+    
+    setNodes((nds) => [...nds, newNode]);
+    message.success('节点已复制');
+  }, [nodes, setNodes]);
+  
+  // 进入连接模式
+  const handleConnectNode = useCallback((nodeId: string) => {
+    setIsConnectingMode(true);
+    setConnectionSource(nodeId);
+    message.info('请选择要连接的目标节点');
+  }, []);
+  
+  // 编辑节点处理逻辑
+  const handleEditNode = useCallback((nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    
+    if (!node) return;
+    
+    setSelectedNode(node);
+    nodeForm.setFieldsValue({
+      label: node.data.label,
+      type: node.type,
+      description: node.data.description || '',
+    });
+    setDrawerVisible(true);
+  }, [nodeForm, nodes]);
+
+  // 删除节点处理逻辑
+  const handleDeleteSelectedNode = useCallback((nodeId: string) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: '确定要删除该节点吗？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => {
+        setNodes(nds => nds.filter(node => node.id !== nodeId));
+        setEdges(eds => eds.filter(edge => 
+          edge.source !== nodeId && edge.target !== nodeId
+        ));
+        message.success('节点已删除');
+      }
+    });
+  }, [setNodes, setEdges]);
+
+  // 修改节点点击事件处理
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    if (isConnectingMode) {
+      // 如果处于连接模式，则创建一个从源节点到目标节点的连接
+      if (connectionSource && connectionSource !== node.id) {
+        const newEdge: Connection = {
+          source: connectionSource,
+          target: node.id,
+          sourceHandle: null,
+          targetHandle: null
+        };
+        
+        setEdges((eds) => addEdge(
+          {
+            ...newEdge,
+            animated: true,
+            label: '处理结果'
+          },
+          eds
+        ));
+        
+        setIsConnectingMode(false);
+        setConnectionSource(null);
+        message.success('节点已连接');
+      }
+      return;
+    }
+    
+    // 更新所有节点，隐藏其他节点的工具条
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === node.id) {
+          // 对于当前点击的节点，展示工具条
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              nodeId: n.id,
+              showToolbar: true
+            }
+          };
+        } else {
+          // 对于其他节点，隐藏工具条
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              showToolbar: false
+            }
+          };
+        }
+      })
+    );
+    
+    setSelectedNode(node);
+  }, [setNodes, isConnectingMode, connectionSource]);
+
+  // 点击画布背景时，隐藏所有工具条
+  const onPaneClick = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          showToolbar: false
+        }
+      }))
+    );
+    
+    setSelectedNode(null);
+    
+    if (isConnectingMode) {
+      setIsConnectingMode(false);
+      setConnectionSource(null);
+      message.info('已取消连接模式');
+    }
+  }, [setNodes, isConnectingMode]);
+
+  // 更新节点数据
+  const updateNodeData = (values: FormValues) => {
+    if (selectedNode) {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === selectedNode.id) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                label: values.label,
+                description: values.description,
+              },
+              type: values.type,
+            };
+          }
+          return node;
+        })
+      );
+      setDrawerVisible(false);
+      message.success('节点已更新');
+    }
+  };
+
+  // 撤销操作
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const prevState = history[historyIndex - 1];
+      setNodes(prevState.nodes);
+      setEdges(prevState.edges);
+      setHistoryIndex(historyIndex - 1);
+    } else {
+      message.info('没有可撤销的操作');
+    }
+  }, [history, historyIndex, setEdges, setNodes]);
+
+  // 重做操作
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1];
+      setNodes(nextState.nodes);
+      setEdges(nextState.edges);
+      setHistoryIndex(historyIndex + 1);
+    } else {
+      message.info('没有可重做的操作');
+    }
+  }, [history, historyIndex, setEdges, setNodes]);
+
+  // 锁定节点
+  const handleLockNodes = useCallback(() => {
+    setNodes(nds =>
+      nds.map(node => ({
+        ...node,
+        draggable: false,
+      }))
+    );
+    setNodesLocked(true);
+    message.success('节点已锁定');
+  }, [setNodes]);
+
+  // 解锁节点
+  const handleUnlockNodes = useCallback(() => {
+    setNodes(nds =>
+      nds.map(node => ({
+        ...node,
+        draggable: true,
+      }))
+    );
+    setNodesLocked(false);
+    message.success('节点已解锁');
+  }, [setNodes]);
+
+  // 清空所有节点和连线
+  const handleClearAll = useCallback(() => {
+    Modal.confirm({
+      title: '确认清空',
+      content: '确定要清空所有节点和连线吗？此操作不可撤销。',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => {
+        setNodes([]);
+        setEdges([]);
+        message.success('已清空所有节点和连线');
+      }
+    });
+  }, [setNodes, setEdges]);
+
+  // 放大
+  const handleZoomIn = useCallback(() => {
+    if (reactFlowInstance) {
+      reactFlowInstance.zoomIn();
+    }
+  }, [reactFlowInstance]);
+
+  // 缩小
+  const handleZoomOut = useCallback(() => {
+    if (reactFlowInstance) {
+      reactFlowInstance.zoomOut();
+    }
+  }, [reactFlowInstance]);
+
+  // 适应视图
+  const handleFitView = useCallback(() => {
+    if (reactFlowInstance) {
+      reactFlowInstance.fitView();
+    }
+  }, [reactFlowInstance]);
+
+  // 打开智能体选择模态框
+  const openAgentModal = () => {
+    setAgentModalVisible(true);
+  };
+
+  // 打开工具选择模态框
+  const openToolModal = () => {
+    setToolModalVisible(true);
+  };
+
+  // 从智能体列表中选择并添加节点
+  const handleSelectAgent = (agent: AgentConfig) => {
+    const newNode = {
+      id: `node_${Date.now()}`,
+      type: 'agent',
+      data: { 
+        label: agent.name, 
+        type: 'Agent',
+        description: agent.description,
+        config: agent
+      },
+      position: {
+        x: Math.random() * 300 + 50,
+        y: Math.random() * 300 + 50,
+      },
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+    setAgentModalVisible(false);
+    message.success(`已添加智能体: ${agent.name}`);
+  };
+
+  // 从工具列表中选择并添加节点
+  const handleSelectTool = (tool: ToolConfig) => {
+    const newNode = {
+      id: `node_${Date.now()}`,
+      type: 'tool',
+      data: { 
+        label: tool.name, 
+        type: 'Tool',
+        description: tool.description,
+        config: tool
+      },
+      position: {
+        x: Math.random() * 300 + 50,
+        y: Math.random() * 300 + 50,
+      },
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+    setToolModalVisible(false);
+    message.success(`已添加工具: ${tool.name}`);
+  };
+
+  // 添加新自定义节点
+  const addCustomNode = (type: string) => {
+    const newNode = {
+      id: `node_${Date.now()}`,
+      type,
+      data: { 
+        label: `新${type === 'agent' ? '智能体' : type === 'tool' ? '工具' : '应用'}`, 
+        type: type === 'agent' ? 'Agent' : type === 'tool' ? 'Tool' : 'Application',
+        config: type === 'application' ? {
+          ...mockApplications[1],
+          id: `app_${Date.now()}`
+        } : undefined
+      },
+      position: {
+        x: Math.random() * 300 + 50,
+        y: Math.random() * 300 + 50,
+      },
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+  };
+
+  // 导出工作流为JSON
+  const handleExportJson = useCallback(() => {
+    if (!reactFlowInstance) return;
+    const flowExport = reactFlowInstance.toObject();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(flowExport));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `${workflowFormValues.name || "workflow"}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }, [reactFlowInstance, workflowFormValues.name]);
+
+  // 导入JSON工作流
+  const handleImportJson = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (!target.files) return;
+      
+      const file = target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const flow = JSON.parse(event.target?.result as string);
+          if (flow.nodes && flow.edges) {
+            setNodes(flow.nodes);
+            setEdges(flow.edges);
+            message.success('成功导入工作流');
+          }
+        } catch {
+          message.error('导入失败，无效的工作流文件');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }, [setNodes, setEdges]);
+
+  // 验证工作流
+  const handleValidateWorkflow = useCallback(() => {
+    const hasStartNode = nodes.some(n => n.type === 'agent');
+    const hasEndConnection = edges.length > 0;
+    
+    if (!hasStartNode) {
+      message.warning('工作流至少需要一个智能体节点');
+      return false;
+    }
+    
+    if (!hasEndConnection) {
+      message.warning('节点之间需要建立连接');
+      return false;
+    }
+    
+    message.success('工作流验证通过');
+    return true;
+  }, [nodes, edges]);
+
+  // 发布工作流
+  const handlePublishWorkflow = useCallback(() => {
+    if (handleValidateWorkflow()) {
+      message.info('工作流发布功能即将上线');
+    }
+  }, [handleValidateWorkflow]);
+
+  // 保存工作流
+  const handleSaveWorkflow = (values: WorkflowFormValues) => {
+    const currentWorkflow = {
+      id: workflow ? workflow.id : `workflow_${Date.now()}`,
+      name: values.name,
+      description: values.description,
+      nodes,
+      edges,
+      createdAt: workflow ? workflow.createdAt : new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    onSave(currentWorkflow);
+    setSaveModalVisible(false);
+  };
+
+  // 保存操作
+  const handleSave = () => {
+    // 如果没有设置名称和描述，打开保存对话框
+    if (!workflowFormValues.name) {
+      openSaveModal();
+      return;
+    }
+    
+    // 否则直接保存
+    handleSaveWorkflow(workflowFormValues);
+  };
+
+  // 现在函数都已定义好，更新toolsRef的值
+  useEffect(() => {
+    toolsRef.current = {
+      handleSave,
+      handleEdit: openSaveModal,
+      handleExport: handleExportJson,
+      handleImport: handleImportJson,
+      handlePublish: handlePublishWorkflow,
+      handleValidate: handleValidateWorkflow,
+      isValid: nodes.length > 0 && edges.length > 0,
+      workflowName: workflowFormValues.name
+    };
+  }, [
+    handleSave,
+    openSaveModal,
+    handleExportJson,
+    handleImportJson,
+    handlePublishWorkflow,
+    handleValidateWorkflow,
+    nodes.length,
+    edges.length,
+    workflowFormValues.name
+  ]);
+
+  // 如果提供了头部工具渲染函数，则调用它
+  useEffect(() => {
+    if (renderHeaderTools) {
+      renderHeaderTools(toolsRef.current);
+    }
+  }, [renderHeaderTools]);
+
+  // 添加节点信息显示处理函数
+  const handleShowNodeInfo = useCallback((nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    
+    if (!node) return;
+    
+    let title = '';
+    let content = '';
+    
+    if (node.type === 'agent') {
+      const config = node.data.config as AgentConfig;
+      title = `智能体: ${config?.name || node.data.label}`;
+      content = `
+        <p><strong>类型:</strong> ${config?.type || '智能体'}</p>
+        <p><strong>模型:</strong> ${config?.model || '未指定'}</p>
+        <p><strong>描述:</strong> ${config?.description || '无描述'}</p>
+        ${config?.systemPrompt ? `<p><strong>系统提示词:</strong> ${config.systemPrompt}</p>` : ''}
+        ${config?.capabilities ? `<p><strong>能力:</strong> ${config.capabilities.join(', ')}</p>` : ''}
+        ${config?.limitations ? `<p><strong>限制:</strong> ${config.limitations.join(', ')}</p>` : ''}
+      `;
+    } else if (node.type === 'tool') {
+      const config = node.data.config as ToolConfig;
+      title = `工具: ${config?.name || node.data.label}`;
+      content = `
+        <p><strong>类型:</strong> ${config?.type || '工具'}</p>
+        <p><strong>描述:</strong> ${config?.description || '无描述'}</p>
+        ${config?.parameters ? `<p><strong>参数数量:</strong> ${config.parameters.length}</p>` : ''}
+        ${config?.usage_examples ? `<p><strong>示例数量:</strong> ${config.usage_examples.length}</p>` : ''}
+      `;
+    } else {
+      const config = node.data.config as ApplicationConfig;
+      title = `应用: ${config?.name || node.data.label}`;
+      content = `
+        <p><strong>类型:</strong> ${config?.type || '应用'}</p>
+        <p><strong>描述:</strong> ${config?.description || '无描述'}</p>
+        ${config?.features ? `<p><strong>功能数量:</strong> ${config.features.length}</p>` : ''}
+        ${config?.integrations ? `<p><strong>集成方式:</strong> ${config.integrations.join(', ')}</p>` : ''}
+      `;
+    }
+    
+    Modal.info({
+      title,
+      content: <div dangerouslySetInnerHTML={{ __html: content }} />,
+      width: 500,
+      okText: '关闭',
+      icon: <InfoCircleOutlined style={{ color: '#1890ff' }} />
+    });
+  }, [nodes]);
+
+  // 添加节点锁定处理函数
+  const handleLockNode = useCallback((nodeId: string) => {
+    setNodes(nds =>
+      nds.map(node => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            draggable: false,
+            data: {
+              ...node.data,
+              locked: true
+            }
+          };
+        }
+        return node;
+      })
+    );
+    message.success('节点已锁定');
+  }, [setNodes]);
+
+  // 设置全局处理函数
+  useEffect(() => {
+    window.editNode = handleEditNode;
+    window.deleteNode = handleDeleteSelectedNode;
+    window.duplicateNode = handleDuplicateNode;
+    window.connectNode = handleConnectNode;
+    window.showNodeInfo = handleShowNodeInfo;
+    window.lockNode = handleLockNode;
+    
+    return () => {
+      // 清理全局函数
+      window.editNode = undefined;
+      window.deleteNode = undefined;
+      window.duplicateNode = undefined;
+      window.connectNode = undefined;
+      window.showNodeInfo = undefined;
+      window.lockNode = undefined;
+    };
+  }, [
+    handleEditNode, 
+    handleDeleteSelectedNode, 
+    handleDuplicateNode, 
+    handleConnectNode,
+    handleShowNodeInfo,
+    handleLockNode
+  ]);
+
+  const reactFlowWrapper = useCallback((instance: ReactFlowInstance | null) => {
+    if (instance) {
+      setReactFlowInstance(instance);
+      
+      // 初始化历史记录
+      setHistory([{ nodes: initialState.nodes, edges: initialState.edges }]);
+      setHistoryIndex(0);
+    }
+  }, [initialState.edges, initialState.nodes]);
+
+  // 加载已有智能体数据
+  useEffect(() => {
+    const agents = getAgents();
+    if (agents && agents.length > 0) {
+      setAvailableAgents(agents);
+    }
+  }, []);
+
+  // 智能体列表的列定义
+  const agentColumns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: '模型',
+      dataIndex: 'model',
+      key: 'model',
+    },
+    {
+      title: '能力',
+      key: 'capabilities',
+      render: (_: string, record: AgentConfig) => (
+        <>
+          {record.knowledgeBase && <Tag color="blue">知识库</Tag>}
+          {record.webSearch && <Tag color="green">网络搜索</Tag>}
+          {record.imageSupport && <Tag color="purple">图像支持</Tag>}
+          {record.voiceSupport && <Tag color="orange">语音支持</Tag>}
+        </>
+      ),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_: string, record: AgentConfig) => (
+        <Button type="primary" size="small" onClick={() => handleSelectAgent(record)}>
+          添加
+        </Button>
+      ),
+    },
+  ];
+
+  // 工具列表的列定义
+  const toolColumns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_: string, record: ToolConfig) => (
+        <Button type="primary" size="small" onClick={() => handleSelectTool(record)}>
+          添加
+        </Button>
+      ),
+    },
+  ];
+
+  // 工具栏状态
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  return (
+    <div style={{ 
+      height: '100%', 
+      width: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      position: 'relative'
+    }}
+    className="flow-editor-container"
+    >
+      {/* 添加默认工具栏，当renderHeaderTools未提供或不是headerMode时显示 */}
+      {!headerMode && !renderHeaderTools && (
+        <div className="editor-toolbar">
+          <div className="toolbar-left">
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={handleSave}
+            >
+              保存
+            </Button>
+            <Button
+              icon={<EditOutlined />}
+              onClick={openSaveModal}
+            >
+              编辑信息
+            </Button>
+            <Divider type="vertical" />
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={handleExportJson}
+            >
+              导出
+            </Button>
+            <Button
+              icon={<UploadOutlined />}
+              onClick={handleImportJson}
+            >
+              导入
+            </Button>
+            <Divider type="vertical" />
+            <Button 
+              type="primary"
+              icon={<CloudUploadOutlined />}
+              onClick={handlePublishWorkflow}
+            >
+              发布
+            </Button>
+            <Button
+              icon={<CheckOutlined />}
+              onClick={handleValidateWorkflow}
+            >
+              验证
+            </Button>
+          </div>
+          <div className="toolbar-right">
+            <Space>
+              <Tooltip title="查看文档">
+                <Button 
+                  icon={<FileSearchOutlined />}
+                  onClick={() => message.info('文档功能即将上线')}
+                />
+              </Tooltip>
+              <Tooltip title="高级设置">
+                <Button 
+                  icon={<SettingOutlined />}
+                  onClick={() => message.info('高级设置功能即将上线')}
+                />
+              </Tooltip>
+            </Space>
+          </div>
+        </div>
+      )}
+
+      <ReactFlowProvider>
+        <div style={{ 
+          flex: 1, 
+          position: 'relative',
+          height: headerMode || renderHeaderTools ? '100%' : 'calc(100% - 44px)', // 减去工具栏高度
+          width: '100%',
+          minHeight: '500px' // 确保最小高度
+        }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onInit={reactFlowWrapper}
+            onNodeClick={onNodeClick}
+            onPaneClick={onPaneClick}
+            nodeTypes={nodeTypes}
+            fitView
+            deleteKeyCode="Delete"
+            style={{ 
+              background: '#f8f9fa',
+              height: '100%',
+              width: '100%'
+            }}
+          >
+            <Background />
+            <MiniMap />
+            <Panel position="top-right">
+              <Card style={{ width: 200 }}>
+                <Typography.Title level={5}>添加节点</Typography.Title>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <Button type="primary" onClick={openAgentModal}>
+                    选择智能体
+                  </Button>
+                  <Button type="primary" onClick={openToolModal}>
+                    选择工具
+                  </Button>
+                  <Button onClick={() => addCustomNode('application')}>
+                    添加自定义应用
+                  </Button>
+                </div>
+              </Card>
+            </Panel>
+            
+            {/* 恢复底部工具栏 */}
+            <FlowToolbar 
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onLock={handleLockNodes}
+              onUnlock={handleUnlockNodes}
+              onDeleteNode={() => selectedNode && handleDeleteSelectedNode(selectedNode.id)}
+              onClearAll={handleClearAll}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              onFitView={handleFitView}
+              onSave={handleSave}
+              onCancel={onCancel}
+              isLocked={nodesLocked}
+              hasSelectedNode={selectedNode !== null}
+              canUndo={canUndo}
+              canRedo={canRedo}
+            />
+          </ReactFlow>
+        </div>
+      </ReactFlowProvider>
+
+      {/* 节点属性抽屉 */}
+      <Drawer
+        title="节点属性"
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={400}
+      >
+        <Form
+          form={nodeForm}
+          layout="vertical"
+          onFinish={updateNodeData}
+        >
+          <Form.Item name="label" label="名称" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          
+          <Form.Item name="type" label="类型">
+            <Select>
+              <Select.Option value="agent">智能体</Select.Option>
+              <Select.Option value="tool">工具</Select.Option>
+              <Select.Option value="application">应用</Select.Option>
+            </Select>
+          </Form.Item>
+          
+          <Form.Item name="description" label="描述">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              保存
+            </Button>
+          </Form.Item>
+        </Form>
+      </Drawer>
+
+      {/* 智能体选择模态框 */}
+      <Modal
+        title="选择智能体"
+        open={agentModalVisible}
+        onCancel={() => setAgentModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Table 
+          dataSource={availableAgents} 
+          columns={agentColumns} 
+          rowKey="id"
+          pagination={false}
+        />
+      </Modal>
+
+      {/* 工具选择模态框 */}
+      <Modal
+        title="选择工具"
+        open={toolModalVisible}
+        onCancel={() => setToolModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Table 
+          dataSource={availableTools} 
+          columns={toolColumns} 
+          rowKey="id"
+          pagination={false}
+        />
+      </Modal>
+
+      {/* 保存工作流模态框 */}
+      <Modal
+        title={isCreateMode ? "保存新工作流" : "更新工作流"}
+        open={saveModalVisible}
+        onCancel={() => setSaveModalVisible(false)}
+        footer={null}
+      >
+        <Form 
+          form={workflowForm}
+          layout="vertical"
+          onFinish={handleSaveWorkflow}
+          onValuesChange={(_, allValues) => setWorkflowFormValues(allValues as WorkflowFormValues)}
+        >
+          <Form.Item 
+            name="name" 
+            label="工作流名称" 
+            rules={[{ required: true, message: '请输入工作流名称' }]}
+          >
+            <AntInput placeholder="输入工作流名称" />
+          </Form.Item>
+          
+          <Form.Item 
+            name="description" 
+            label="工作流描述"
+          >
+            <AntInput.TextArea rows={4} placeholder="描述此工作流的用途和功能" />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              保存
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export default FlowEditor; 
