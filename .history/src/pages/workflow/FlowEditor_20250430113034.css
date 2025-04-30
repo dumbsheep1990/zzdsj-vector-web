@@ -1,0 +1,63 @@
+.flow-editor-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.flow-editor-container .react-flow__pane {
+  cursor: default;
+}
+
+.react-flow__node {
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.react-flow__edge {
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.react-flow__controls {
+  z-index: 6;
+}
+
+.react-flow {
+  --rf-edge-path-color: #b1b1b7;
+  --rf-edge-path-hover-color: #555;
+  --rf-edge-selected-color: #2563eb;
+  --rf-connection-line-color: #2563eb;
+  background-color: #f8fafc;
+}
+
+/* React Flow在模态框中的调整 */
+.flow-editor-modal {
+  max-width: 1800px;
+}
+
+.flow-editor-modal .ant-modal-content {
+  overflow: hidden;
+}
+
+.flow-editor-modal .ant-modal-body {
+  padding: 0;
+  overflow: hidden;
+}
+
+.flow-editor-modal .ant-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f9fafb;
+}
+
+.flow-editor-modal .ant-modal-close {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+}
+
+.flow-editor-modal .ant-modal-close:hover {
+  background: #fff;
+  transform: scale(1.1);
+} 

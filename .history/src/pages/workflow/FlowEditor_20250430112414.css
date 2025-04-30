@@ -1,0 +1,40 @@
+.flow-editor-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.flow-editor-container .react-flow__pane {
+  cursor: default;
+}
+
+.react-flow__node {
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.react-flow__edge {
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.react-flow__controls {
+  z-index: 6;
+}
+
+.react-flow {
+  --rf-edge-path-color: #b1b1b7;
+  --rf-edge-path-hover-color: #555;
+  --rf-edge-selected-color: #2563eb;
+  --rf-connection-line-color: #2563eb;
+}
+
+/* React Flow在模态框中的调整 */
+.flow-editor-modal .ant-modal-content {
+  overflow: hidden;
+}
+
+.flow-editor-modal .ant-modal-body {
+  padding: 0;
+  overflow: hidden;
+} 

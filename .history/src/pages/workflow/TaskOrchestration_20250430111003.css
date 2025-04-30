@@ -1,0 +1,34 @@
+.task-orchestration-container {
+  pointer-events: auto;
+}
+
+.task-orchestration-container .react-flow__pane {
+  cursor: default;
+}
+
+.react-flow__node {
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.react-flow__edge {
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.react-flow__controls {
+  z-index: 6;
+}
+
+/* 增强侧边栏的可点击性 */
+.sidebar-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.react-flow {
+  --rf-edge-path-color: #b1b1b7;
+  --rf-edge-path-hover-color: #555;
+  --rf-edge-selected-color: #2563eb;
+  --rf-connection-line-color: #2563eb;
+} 

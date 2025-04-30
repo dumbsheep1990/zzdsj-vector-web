@@ -530,7 +530,7 @@ const Sidebar: React.FC = () => {
     }, [activeSection, expandedItems, hoveredItem, sidebarExpanded, handleMouseEnter, handleMouseLeave, handleItemClick, handleSubItemClick, renderPopupMenu, getNavItemStyle, getIconByType, verticalLineStyle, iconContainerStyle]);
 
     return (
-        <div style={sidebarStyle} className="sidebar-container">
+        <div style={sidebarStyle}>
             <div style={logoContainerStyle}>
                 <div style={logoStyle}>
                     <Database color="#2563eb" size={24} />
