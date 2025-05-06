@@ -1,0 +1,109 @@
+/* 卡片样式 */
+.prompt-template-card {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.prompt-template-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, rgb(0, 201, 255), rgb(146, 254, 157));
+  z-index: 2;
+}
+
+.prompt-template-card .ant-card-body {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 255, 0.95) 100%);
+}
+
+.prompt-template-card h3 {
+  color: #000 !important;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.prompt-template-card p {
+  color: #000 !important;
+}
+
+/* 卡片悬停效果 */
+.prompt-template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.prompt-template-card .ant-tag {
+  transition: all 0.2s;
+}
+
+.prompt-template-card .ant-tag:hover {
+  transform: translateY(-2px);
+}
+
+/* 模态框样式 */
+.template-bind-modal .ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.template-bind-modal .ant-modal-header {
+  position: relative;
+  background-color: transparent;
+  padding: 16px 24px;
+  border-bottom: none;
+}
+
+.template-bind-modal .ant-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, rgb(0, 201, 255), rgb(146, 254, 157));
+}
+
+.template-bind-modal .ant-modal-body {
+  background-color: transparent;
+}
+
+.template-bind-modal .ant-modal-footer {
+  background-color: transparent;
+  border-top: none;
+}
+
+.template-bind-modal .ant-modal-close {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.template-bind-modal .ant-modal-mask {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* 分页样式 */
+.prompt-pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.prompt-pagination .ant-pagination-item-active {
+  background: linear-gradient(to right, rgba(0, 201, 255, 0.8), rgba(146, 254, 157, 0.8));
+  border: none;
+}
+
+.prompt-pagination .ant-pagination-item-active a {
+  color: white !important;
+}

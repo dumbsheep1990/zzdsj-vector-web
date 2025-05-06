@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, Bell, Server, User, Settings, X, CheckCircle, AlertCircle, LogOut, Menu } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
+import { zIndexLevels } from '../../styles/zIndexLevels';
 
 interface ActionButton {
     icon: React.ReactNode;
@@ -97,6 +100,16 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         };
     }, [showNotifications, showServiceStatus, showUserMenu]);
     
+    // 获取菜单的位置信息，用于定位Portal渲染的下拉菜单
+    const [notificationBtnRect, setNotificationBtnRect] = useState<DOMRect | null>(null);
+    const [serviceBtnRect, setServiceBtnRect] = useState<DOMRect | null>(null);
+    const [userBtnRect, setUserBtnRect] = useState<DOMRect | null>(null);
+    
+    // 获取portal容器
+    const portalContainer = document.getElementById('portal-container');
+    
+    const { logout } = useAuth();
+
     return (
         <div className="bg-white border-b border-gray-100">
             {/* 标题栏 */}
@@ -188,166 +201,200 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     {/* 右侧图标按钮组 */}
                     <div className="flex items-center space-x-4">
                         {/* 通知按钮 */}
-                        <div className="relative">
-                            <button 
-                                className="p-1.5 rounded-full hover:bg-indigo-100 transition-colors relative"
-                                onClick={() => {
-                                    setShowNotifications(!showNotifications);
-                                    if (!showNotifications) {
-                                        clearNotifications();
-                                    }
+                        <button 
+                            className="p-1.5 rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center relative bg-blue-600 text-white"
+                            onClick={(e) => {
+                                setShowNotifications(!showNotifications);
+                                setShowServiceStatus(false);
+                                setShowUserMenu(false);
+                                setNotificationBtnRect(e.currentTarget.getBoundingClientRect());
+                            }}
+                            aria-label="通知"
+                        >
+                            <Bell size={18} className="text-white" />
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                    {notificationCount}
+                                </span>
+                            )}
+                        </button>
+                        
+                        {/* 通知下拉框 - 通过Portal渲染到body层级 */}
+                        {showNotifications && portalContainer && createPortal(
+                            <div className="absolute bg-white rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden" 
+                                style={{ 
+                                    width: '320px', 
+                                    right: `${window.innerWidth - (notificationBtnRect?.right || 0)}px`,
+                                    top: `${(notificationBtnRect?.bottom || 0) + 8}px`,
+                                    pointerEvents: 'auto' 
                                 }}
                             >
-                                <Bell size={18} className="text-gray-600" />
-                                {notificationCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                        {notificationCount}
-                                    </span>
-                                )}
-                            </button>
-                            
-                            {/* 通知下拉框 */}
-                            {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
-                                    <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                                        <h3 className="font-medium text-gray-800">通知消息</h3>
-                                        <button 
-                                            className="text-gray-400 hover:text-gray-600"
-                                            onClick={() => setShowNotifications(false)}
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-                                    <div className="max-h-72 overflow-y-auto">
-                                        {notifications.length > 0 ? (
-                                            notifications.map((notification) => (
-                                                <div key={notification.id} className="p-3 border-b border-gray-100 hover:bg-indigo-50">
-                                                    <div className="flex items-start">
-                                                        <div className="flex-shrink-0 mt-0.5">
-                                                            {notification.type === 'success' ? (
-                                                                <CheckCircle size={16} className="text-green-500" />
-                                                            ) : (
-                                                                <AlertCircle size={16} className="text-amber-500" />
-                                                            )}
-                                                        </div>
-                                                        <div className="ml-2">
-                                                            <p className="text-sm text-gray-800">{notification.message}</p>
-                                                            <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
-                                                        </div>
-                                                    </div>
+                                <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                                    <h3 className="font-medium text-gray-800">通知消息</h3>
+                                    <button 
+                                        className="text-gray-400 hover:text-gray-600"
+                                        onClick={() => setShowNotifications(false)}
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="max-h-72 overflow-y-auto">
+                                    {notifications.map(notification => (
+                                        <div key={notification.id} className="p-3 border-b border-gray-100 hover:bg-blue-50">
+                                            <div className="flex">
+                                                <div className="mr-3">
+                                                    {notification.type === 'success' 
+                                                        ? <CheckCircle size={18} className="text-green-500" /> 
+                                                        : <AlertCircle size={18} className="text-amber-500" />
+                                                    }
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <div className="p-4 text-center text-gray-500 text-sm">
-                                                暂无通知
+                                                <div>
+                                                    <p className="text-sm text-gray-800 mb-1">{notification.message}</p>
+                                                    <p className="text-xs text-gray-500">{notification.time}</p>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
-                        </div>
-
+                                <div className="p-2 text-center border-t border-gray-100">
+                                    <button 
+                                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                        onClick={clearNotifications}
+                                    >
+                                        清空所有通知
+                                    </button>
+                                </div>
+                            </div>,
+                            portalContainer
+                        )}
+                        
                         {/* 服务状态按钮 */}
-                        <div className="relative">
-                            <button 
-                                className="p-1.5 rounded-full hover:bg-indigo-100 transition-colors"
-                                onClick={() => setShowServiceStatus(!showServiceStatus)}
+                        <button 
+                            className="p-1.5 rounded-full hover:bg-green-700 transition-colors flex items-center justify-center relative bg-green-600 text-white"
+                            onClick={(e) => {
+                                setShowServiceStatus(!showServiceStatus);
+                                setShowNotifications(false);
+                                setShowUserMenu(false);
+                                setServiceBtnRect(e.currentTarget.getBoundingClientRect());
+                            }}
+                            aria-label="服务状态"
+                        >
+                            <Server size={18} className="text-white" />
+                        </button>
+                        
+                        {/* 服务状态下拉框 - 通过Portal渲染 */}
+                        {showServiceStatus && portalContainer && createPortal(
+                            <div className="absolute bg-white rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden" 
+                                style={{ 
+                                    width: '280px', 
+                                    right: `${window.innerWidth - (serviceBtnRect?.right || 0)}px`,
+                                    top: `${(serviceBtnRect?.bottom || 0) + 8}px`,
+                                    pointerEvents: 'auto' 
+                                }}
                             >
-                                <Server size={18} className="text-gray-600" />
-                            </button>
-                            
-                            {/* 服务状态下拉框 */}
-                            {showServiceStatus && (
-                                <div className="absolute right-0 mt-2 w-72 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
-                                    <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                                        <h3 className="font-medium text-gray-800">服务状态</h3>
-                                        <button 
-                                            className="text-gray-400 hover:text-gray-600"
-                                            onClick={() => setShowServiceStatus(false)}
-                                        >
-                                            <X size={16} />
-                                        </button>
+                                <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                                    <h3 className="font-medium text-gray-800">服务状态</h3>
+                                    <button 
+                                        className="text-gray-400 hover:text-gray-600"
+                                        onClick={() => setShowServiceStatus(false)}
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="max-h-72 overflow-y-auto p-3">
+                                    <div className="mb-3">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm text-gray-800 font-medium">知识库服务</span>
+                                            <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">运行中</span>
+                                        </div>
+                                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                            <div className="h-full bg-green-500 rounded-full" style={{ width: '95%' }}></div>
+                                        </div>
                                     </div>
-                                    <div className="max-h-72 overflow-y-auto">
-                                        <div className="p-3 border-b border-gray-100">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm text-gray-800">向量数据库</span>
-                                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
-                                            </div>
+                                    <div className="mb-3">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm text-gray-800 font-medium">模型服务</span>
+                                            <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">运行中</span>
                                         </div>
-                                        <div className="p-3 border-b border-gray-100">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm text-gray-800">文件处理服务</span>
-                                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
-                                            </div>
+                                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                            <div className="h-full bg-green-500 rounded-full" style={{ width: '85%' }}></div>
                                         </div>
-                                        <div className="p-3 border-b border-gray-100">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm text-gray-800">搜索服务</span>
-                                                <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">负载高</span>
-                                            </div>
+                                    </div>
+                                    <div className="mb-3">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm text-gray-800 font-medium">存储服务</span>
+                                            <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">负载高</span>
                                         </div>
-                                        <div className="p-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm text-gray-800">API 网关</span>
-                                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">正常</span>
-                                            </div>
+                                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                            <div className="h-full bg-amber-500 rounded-full" style={{ width: '75%' }}></div>
                                         </div>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>,
+                            portalContainer
+                        )}
 
                         {/* 用户菜单按钮 */}
-                        <div className="relative">
-                            <button 
-                                className="p-1.5 rounded-full hover:bg-indigo-700 transition-colors flex items-center justify-center bg-indigo-600 text-white w-8 h-8"
-                                onClick={() => setShowUserMenu(!showUserMenu)}
-                                aria-label="用户菜单"
+                        <button 
+                            className="p-1.5 rounded-full hover:bg-indigo-700 transition-colors flex items-center justify-center relative bg-indigo-600"
+                            onClick={(e) => {
+                                setShowUserMenu(!showUserMenu);
+                                setShowServiceStatus(false);
+                                setShowNotifications(false);
+                                setUserBtnRect(e.currentTarget.getBoundingClientRect());
+                            }}
+                            aria-label="用户菜单"
+                        >
+                            <User size={18} className="text-white" />
+                        </button>
+                        
+                        {/* 用户菜单下拉框 - 通过Portal渲染 */}
+                        {showUserMenu && portalContainer && createPortal(
+                            <div className="absolute bg-white rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden" 
+                                style={{ 
+                                    width: '250px', 
+                                    right: `${window.innerWidth - (userBtnRect?.right || 0)}px`,
+                                    top: `${(userBtnRect?.bottom || 0) + 8}px`,
+                                    pointerEvents: 'auto' 
+                                }}
                             >
-                                <User size={18} className="text-white" />
-                            </button>
-                            
-                            {/* 用户菜单下拉框 */}
-                            {showUserMenu && (
-                                <div className="absolute right-0 mt-2 w-64 bg-white/90 backdrop-blur-md rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden">
-                                    <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                                        <div className="flex items-center">
-                                            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
-                                                <User size={16} className="text-white" />
-                                            </div>
-                                            <h3 className="font-medium text-gray-800">{username}</h3>
+                                <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                                    <div className="flex items-center">
+                                        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
+                                            <User size={16} className="text-white" />
                                         </div>
+                                        <h3 className="font-medium text-gray-800">{username}</h3>
+                                    </div>
+                                    <button 
+                                        className="text-gray-400 hover:text-gray-600"
+                                        onClick={() => setShowUserMenu(false)}
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="max-h-72 overflow-y-auto">
+                                    <div className="p-3 border-b border-gray-100 hover:bg-indigo-50">
                                         <button 
-                                            className="text-gray-400 hover:text-gray-600"
-                                            onClick={() => setShowUserMenu(false)}
+                                            className="flex items-center text-sm text-gray-800 w-full"
+                                            onClick={() => console.log('点击了设置')}
                                         >
-                                            <X size={16} />
+                                            <Settings size={16} className="mr-2 text-indigo-600" />
+                                            设置
                                         </button>
                                     </div>
-                                    <div className="max-h-72 overflow-y-auto">
-                                        <div className="p-3 border-b border-gray-100 hover:bg-indigo-50">
-                                            <button 
-                                                className="flex items-center text-sm text-gray-800 w-full"
-                                                onClick={() => console.log('点击了设置')}
-                                            >
-                                                <Settings size={16} className="mr-2 text-indigo-600" />
-                                                设置
-                                            </button>
-                                        </div>
-                                        <div className="p-3 hover:bg-indigo-50">
-                                            <button 
-                                                className="flex items-center text-sm text-gray-800 w-full"
-                                                onClick={() => console.log('点击了退出登录')}
-                                            >
-                                                <LogOut size={16} className="mr-2 text-indigo-600" />
-                                                退出登录
-                                            </button>
-                                        </div>
+                                    <div className="p-3 hover:bg-indigo-50">
+                                        <button 
+                                            className="flex items-center text-sm text-gray-800 w-full"
+                                            onClick={logout}
+                                        >
+                                            <LogOut size={16} className="mr-2 text-indigo-600" />
+                                            退出登录
+                                        </button>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>,
+                            portalContainer
+                        )}
                     </div>
                 </div>
             </div>

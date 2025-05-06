@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { 
     ChevronDown, 
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { navigationItems } from '../../utils/mockData';
+import { zIndexLevels } from '../../styles/zIndexLevels';
 
 interface NavigationItem {
     id: string;
@@ -33,6 +35,8 @@ const Sidebar: React.FC = () => {
     const [expandedItems, setExpandedItems] = useState<string[]>(['qa-management', 'knowledge-base']);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [hoveredSubItem, setHoveredSubItem] = useState<string | null>(null);
+    const [hoveredItemRect, setHoveredItemRect] = useState<DOMRect | null>(null);
+    const [hoveredItemIndex, setHoveredItemIndex] = useState<number | null>(null);
     const hoverTimeoutRef = useRef<number | null>(null);
     const isInitialMount = useRef(true);
     const navigate = useNavigate();
@@ -41,6 +45,7 @@ const Sidebar: React.FC = () => {
         'dashboard': '/dashboard',
         'assistant-list': '/qa-assistant/assistant-list',
         'qa-management': '/qa-assistant/qa-management',
+        'prompt-templates': '/qa-assistant/prompt-templates',
         'knowledge-base': '/knowledge-base/files',
         'vectors': '/knowledge-base/vectors',
         'metadata': '/knowledge-base/metadata',
@@ -102,12 +107,14 @@ const Sidebar: React.FC = () => {
         });
     }, []);
 
-    const handleMouseEnter = useCallback((itemId: string) => {
+    const handleMouseEnter = useCallback((itemId: string, index: number, e: React.MouseEvent<HTMLButtonElement>) => {
         if (hoverTimeoutRef.current) {
             window.clearTimeout(hoverTimeoutRef.current);
             hoverTimeoutRef.current = null;
         }
         setHoveredItem(itemId);
+        setHoveredItemIndex(index);
+        setHoveredItemRect(e.currentTarget.getBoundingClientRect());
     }, []);
 
     const handleMouseLeave = useCallback(() => {
@@ -118,6 +125,7 @@ const Sidebar: React.FC = () => {
         hoverTimeoutRef.current = window.setTimeout(() => {
             setHoveredItem(null);
             setHoveredSubItem(null);
+            setHoveredItemRect(null);
             hoverTimeoutRef.current = null;
         }, 50);
     }, []);
@@ -360,11 +368,11 @@ const Sidebar: React.FC = () => {
         borderRadius: '8px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1)',
         padding: '0.5rem 0',
-        zIndex: 1000,
+        zIndex: zIndexLevels.POPOVER,
         border: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'block',
-        backdropFilter: 'blur(8px)',
-        background: 'rgba(31, 41, 55, 0.85)'
+        background: 'rgb(31, 41, 55)',
+        isolation: 'isolate'
     };
 
     const popupMenuItemStyle = {
@@ -395,16 +403,21 @@ const Sidebar: React.FC = () => {
         color: '#9ca3af'
     };
 
+    const portalContainer = document.getElementById('portal-container');
+
     const renderPopupMenu = useCallback((item: NavigationItem, index: number) => {
         if (!hoveredItem || hoveredItem !== item.id || sidebarExpanded) return null;
 
-        const menuTop = 56 + (index * 44);
+        // 如果没有portal容器或位置信息，不渲染菜单
+        if (!portalContainer || !hoveredItemRect) return null;
 
-        return (
+        return createPortal(
             <div 
                 style={{
                     ...popupMenuStyle,
-                    top: `${menuTop}px`
+                    top: `${hoveredItemRect.top}px`,
+                    left: `${hoveredItemRect.right + 5}px`,
+                    pointerEvents: 'auto'
                 }}
                 onMouseEnter={() => {
                     if (hoverTimeoutRef.current) {
@@ -441,9 +454,10 @@ const Sidebar: React.FC = () => {
                         {child.label}
                     </div>
                 ))}
-            </div>
+            </div>,
+            portalContainer
         );
-    }, [activeSection, hoveredItem, hoveredSubItem, sidebarExpanded, handleMouseLeave, handleSubItemMouseEnter, handleSubItemMouseLeave, handleSubItemClick]);
+    }, [activeSection, hoveredItem, hoveredItemRect, hoveredSubItem, sidebarExpanded, handleMouseLeave, handleSubItemMouseEnter, handleSubItemMouseLeave, handleSubItemClick, popupMenuStyle, popupMenuItemStyle, popupSubMenuItemStyle, popupMenuItemHoverStyle, portalContainer]);
 
     const renderNavItem = useCallback((item: NavigationItem, isChild: boolean = false, index: number = 0) => {
         const isParentActive = item.children?.some(child => child.id === activeSection) ?? false;
@@ -471,7 +485,7 @@ const Sidebar: React.FC = () => {
             <li key={item.id} style={{ position: 'relative' }}>
                 <button
                     style={currentStyle}
-                    onMouseEnter={() => handleMouseEnter(item.id)}
+                    onMouseEnter={(e) => handleMouseEnter(item.id, index, e)}
                     onMouseLeave={handleMouseLeave}
                     onClick={() => {
                         if (isChild) {

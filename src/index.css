@@ -71,3 +71,61 @@ code {
     opacity: 0;
   }
 }
+
+/* 全局禁用所有模糊效果 - 强力版本 */
+/* 这将禁用所有弹框组件上的模糊效果 */
+* {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Ant Design Modal 和下拉菜单特定修复 */
+.ant-modal-content,
+.ant-modal-header,
+.ant-modal-body,
+.ant-modal-footer,
+.ant-drawer-content,
+.ant-drawer-header,
+.ant-drawer-body,
+.ant-dropdown-menu,
+.ant-popover-content,
+.ant-popover-inner,
+.ant-popover-inner-content,
+.ant-tooltip-inner,
+.dropdown-menu,
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer,
+.popover-content,
+.tooltip-content,
+.rc-dialog,
+.rc-dialog-content,
+.MuiDialog-paper,
+.MuiPopover-paper,
+.MuiMenu-paper,
+[class*="modal"],
+[class*="drawer"],
+[class*="popup"],
+[class*="dropdown"],
+[class*="tooltip"],
+[class*="popover"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  background: #ffffff !important;
+}
+
+/* 特别处理背景遮罩 - 仅允许背景遮罩使用模糊效果 */
+.ant-modal-mask,
+.ant-drawer-mask,
+.modal-backdrop,
+.MuiBackdrop-root,
+[class*="mask"],
+[class*="backdrop"] {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}

@@ -1,0 +1,67 @@
+/* 提示词模板卡片样式 */
+.prompt-template-card .ant-typography,
+.prompt-template-card .ant-typography * {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+.prompt-template-card .ant-card-body {
+  color: #000000 !important;
+}
+
+.prompt-template-card .ant-typography.ant-typography-ellipsis-multiple-line {
+  color: #000000 !important;
+}
+
+/* 标题强制黑色 */
+.prompt-title {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* 内容强制黑色 */
+.prompt-content {
+  color: #000000 !important;
+}
+
+/* 确保Paragraph组件中的文本是黑色 */
+.ant-typography.prompt-content {
+  color: #000000 !important;
+}
+
+/* 提高所有文本样式的优先级 */
+body .prompt-template-card * {
+  color: #000000 !important;
+}
+
+/* 针对标题和内容的特殊覆盖 */
+body .prompt-title,
+body span.prompt-title,
+body div.prompt-title {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+body .prompt-content,
+body div.prompt-content,
+body span.prompt-content {
+  color: #000000 !important;
+}
+
+/* 动画效果 */
+.prompt-template-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.prompt-template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.prompt-tag {
+  transition: all 0.2s;
+}
+
+.prompt-tag:hover {
+  transform: translateY(-2px);
+}

@@ -21,6 +21,11 @@ export const navigationItems: NavItem[] = [
         id: 'qa-management',
         label: '问答管理',
         iconType: 'MessageCircle'
+      },
+      {
+        id: 'prompt-templates',
+        label: '提示词模板',
+        iconType: 'FileText'
       }
     ]
   },

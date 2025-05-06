@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Tabs, Button, Input, Form, Select, Checkbox, Upload } from 'antd';
-import { FolderOutlined } from '@ant-design/icons';
+import { Tabs, Button, Input, Form, Select, Checkbox, Upload } from 'antd';
+import { FolderOutlined, CloseOutlined } from '@ant-design/icons';
 
 interface AddMCPModalProps {
   open: boolean;
@@ -12,6 +12,9 @@ const { TextArea } = Input;
 
 const AddMCPModal: React.FC<AddMCPModalProps> = ({ open, onCancel, onOk }) => {
   const [form] = Form.useForm();
+
+  // 如果未打开，不渲染任何内容
+  if (!open) return null;
 
   const items = [
     {
@@ -129,14 +132,136 @@ const AddMCPModal: React.FC<AddMCPModalProps> = ({ open, onCancel, onOk }) => {
     },
   ];
 
+  // 自定义遮罩层样式 - 参考登录页面风格
+  const maskStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  };
+
+  // 自定义模态框容器样式
+  const modalContainerStyle: React.CSSProperties = {
+    position: 'relative',
+    width: '800px',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 1px 8px rgba(0, 0, 0, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.5)',
+    display: 'flex',
+    flexDirection: 'column',
+    animation: 'fadeIn 0.3s ease'
+  };
+
+  // 模态框背景样式 - 半透明渐变背景加模糊效果
+  const modalBackgroundStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(120deg, rgba(245, 247, 250, 0.95) 0%, rgba(228, 236, 247, 0.95) 100%)',
+    backdropFilter: 'blur(15px)',
+    WebkitBackdropFilter: 'blur(15px)',
+    zIndex: -1
+  };
+
+  // 自定义标题区样式
+  const headerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px 24px',
+    borderBottom: 'none'
+  };
+
+  // 自定义内容区样式
+  const bodyStyle: React.CSSProperties = {
+    padding: '20px 24px',
+    overflow: 'auto',
+    maxHeight: 'calc(90vh - 110px)',
+    background: 'rgba(255, 255, 255, 0.5)'
+  };
+
+  // 自定义底部区样式
+  const footerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '8px',
+    padding: '10px 24px 20px',
+    borderTop: 'none'
+  };
+
+  // CSS动画样式
+  const styleTag = document.createElement('style');
+  styleTag.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(styleTag);
+
+  // 阻止事件冒泡
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <Modal
-      title="添加服务器"
-      open={open}
-      onCancel={onCancel}
-      width={800}
-      footer={
-        <div className="flex justify-end gap-2">
+    <div 
+      style={maskStyle} 
+      onClick={onCancel}
+    >
+      <div 
+        style={modalContainerStyle} 
+        onClick={stopPropagation}
+      >
+        {/* 背景模糊层 */}
+        <div style={modalBackgroundStyle} />
+        
+        {/* 标题栏 */}
+        <div style={headerStyle}>
+          <span style={{ fontSize: 16, fontWeight: 600 }}>添加服务器</span>
+          <Button 
+            type="text" 
+            icon={<CloseOutlined />} 
+            onClick={onCancel}
+            style={{ marginRight: -8 }}
+          />
+        </div>
+        
+        {/* 内容区 */}
+        <div style={bodyStyle}>
+          <Form
+            form={form}
+            layout="vertical"
+          >
+            <Tabs
+              defaultActiveKey="json"
+              items={items}
+              className="mt-4"
+              style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                padding: '16px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)'
+              }}
+            />
+          </Form>
+        </div>
+        
+        {/* 底部按钮区 */}
+        <div style={footerStyle}>
           <Button onClick={onCancel}>
             取消
           </Button>
@@ -150,20 +275,9 @@ const AddMCPModal: React.FC<AddMCPModalProps> = ({ open, onCancel, onOk }) => {
             提交
           </Button>
         </div>
-      }
-    >
-      <Form
-        form={form}
-        layout="vertical"
-      >
-        <Tabs
-          defaultActiveKey="json"
-          items={items}
-          className="mt-4"
-        />
-      </Form>
-    </Modal>
+      </div>
+    </div>
   );
 };
 
-export default AddMCPModal; 
+export default AddMCPModal;

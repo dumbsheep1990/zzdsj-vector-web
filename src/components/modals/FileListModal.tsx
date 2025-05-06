@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, FileText } from 'lucide-react';
 import Files from '../../pages/Files';
+import { zIndexLevels } from '../../styles/zIndexLevels';
 
 interface FileListModalProps {
     isOpen: boolean;
@@ -12,15 +13,19 @@ const FileListModal: React.FC<FileListModalProps> = ({ isOpen, onClose, knowledg
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0" style={{ zIndex: zIndexLevels.MODAL }}>
             {/* Backdrop */}
             <div 
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
+                style={{ zIndex: zIndexLevels.MODAL_BACKDROP }}
             />
             
             {/* Modal */}
-            <div className="absolute inset-4 bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
+            <div 
+                className="absolute inset-4 bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col"
+                style={{ zIndex: zIndexLevels.MODAL }}
+            >
                 <div 
                     className="flex items-center justify-between p-5"
                     style={{ 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AssistantList from '../pages/AssistantList';
 import QAManagement from '../pages/QAManagement';
+import PromptTemplates from '../pages/PromptTemplates';
 import Datasets from '../pages/Datasets';
 import KnowledgeBase from '../pages/KnowledgeBase';
 import Vectors from '../pages/Vectors';
@@ -19,37 +20,187 @@ import MCPCenter from '../pages/MCPCenter';
 import DataProcessingTools from '../pages/DataProcessingTools';
 import ApplicationOrchestrationPage from '../pages/workflow/ApplicationOrchestrationPage';
 import TaskOrchestrationPage from '../pages/workflow/TaskOrchestrationPage';
+import Login from '../pages/auth/Login';
+import Register from '../pages/auth/Register';
+import AuthGuard from '../components/auth/AuthGuard';
+import { useAuth } from '../context/AuthContext';
 
 const AppRoutes: React.FC = () => {
+  const { authState } = useAuth();
+
+  // 将已认证用户从登录/注册页面重定向走
+  const AuthRedirect: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return authState.isAuthenticated 
+      ? <Navigate to="/dashboard" replace /> 
+      : <>{children}</>;
+  };
+
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/qa-assistant" element={<Navigate to="/qa-assistant/assistant-list" replace />} />
-      <Route path="/qa-assistant/assistant-list" element={<AssistantList />} />
-      <Route path="/qa-assistant/qa-management" element={<QAManagement />} />
-      <Route path="/qa-assistant/datasets" element={<Datasets />} />
-      <Route path="/knowledge-base" element={<Navigate to="/knowledge-base/files" replace />} />
-      <Route path="/knowledge-base/files" element={<KnowledgeBase />} />
-      <Route path="/knowledge-base/vectors" element={<Vectors />} />
-      <Route path="/knowledge-base/metadata" element={<Metadata />} />
-      <Route path="/knowledge-graph" element={<Navigate to="/knowledge-graph/database" replace />} />
-      <Route path="/knowledge-graph/database" element={<GraphDatabase />} />
-      <Route path="/knowledge-graph/preview" element={<GraphPreview />} />
-      <Route path="/settings" element={<Navigate to="/settings/basic" replace />} />
-      <Route path="/settings/basic" element={<BasicSettings />} />
-      <Route path="/settings/model" element={<ModelSettings />} />
-      <Route path="/tool-plaza" element={<Navigate to="/tool-plaza/data-integration" replace />} />
-      <Route path="/tool-plaza/data-integration" element={<DataIntegration />} />
-      <Route path="/tool-plaza/agent-tools" element={<AgentTools />} />
-      <Route path="/tool-plaza/tool-factory" element={<ToolFactory />} />
-      <Route path="/tool-plaza/mcp" element={<MCPCenter />} />
-      <Route path="/tool-plaza/data-processing" element={<DataProcessingTools />} />
-      <Route path="/workflow" element={<Navigate to="/workflow/application-orchestration" replace />} />
-      <Route path="/workflow/application-orchestration" element={<ApplicationOrchestrationPage />} />
-      <Route path="/workflow/task-orchestration" element={<TaskOrchestrationPage />} />
-      <Route path="/document/:documentId" element={<DocumentManagement />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* 公开路由（不需要认证） */}
+      <Route path="/login" element={
+        <AuthRedirect>
+          <Login />
+        </AuthRedirect>
+      } />
+      <Route path="/register" element={
+        <AuthRedirect>
+          <Register />
+        </AuthRedirect>
+      } />
+
+      {/* 默认重定向 */}
+      <Route path="/" element={
+        authState.isAuthenticated 
+          ? <Navigate to="/dashboard" replace /> 
+          : <Navigate to="/login" replace />
+      } />
+
+      {/* 需要认证的路由 */}
+      <Route path="/dashboard" element={
+        <AuthGuard>
+          <Dashboard />
+        </AuthGuard>
+      } />
+      
+      <Route path="/qa-assistant" element={
+        <AuthGuard>
+          <Navigate to="/qa-assistant/assistant-list" replace />
+        </AuthGuard>
+      } />
+      <Route path="/qa-assistant/assistant-list" element={
+        <AuthGuard>
+          <AssistantList />
+        </AuthGuard>
+      } />
+      <Route path="/qa-assistant/qa-management" element={
+        <AuthGuard>
+          <QAManagement />
+        </AuthGuard>
+      } />
+      <Route path="/qa-assistant/prompt-templates" element={
+        <AuthGuard>
+          <PromptTemplates />
+        </AuthGuard>
+      } />
+      <Route path="/qa-assistant/datasets" element={
+        <AuthGuard>
+          <Datasets />
+        </AuthGuard>
+      } />
+      
+      <Route path="/knowledge-base" element={
+        <AuthGuard>
+          <Navigate to="/knowledge-base/files" replace />
+        </AuthGuard>
+      } />
+      <Route path="/knowledge-base/files" element={
+        <AuthGuard>
+          <KnowledgeBase />
+        </AuthGuard>
+      } />
+      <Route path="/knowledge-base/vectors" element={
+        <AuthGuard>
+          <Vectors />
+        </AuthGuard>
+      } />
+      <Route path="/knowledge-base/metadata" element={
+        <AuthGuard>
+          <Metadata />
+        </AuthGuard>
+      } />
+      
+      <Route path="/knowledge-graph" element={
+        <AuthGuard>
+          <Navigate to="/knowledge-graph/database" replace />
+        </AuthGuard>
+      } />
+      <Route path="/knowledge-graph/database" element={
+        <AuthGuard>
+          <GraphDatabase />
+        </AuthGuard>
+      } />
+      <Route path="/knowledge-graph/preview" element={
+        <AuthGuard>
+          <GraphPreview />
+        </AuthGuard>
+      } />
+      
+      <Route path="/settings" element={
+        <AuthGuard>
+          <Navigate to="/settings/basic" replace />
+        </AuthGuard>
+      } />
+      <Route path="/settings/basic" element={
+        <AuthGuard>
+          <BasicSettings />
+        </AuthGuard>
+      } />
+      <Route path="/settings/model" element={
+        <AuthGuard>
+          <ModelSettings />
+        </AuthGuard>
+      } />
+      
+      <Route path="/tool-plaza" element={
+        <AuthGuard>
+          <Navigate to="/tool-plaza/data-integration" replace />
+        </AuthGuard>
+      } />
+      <Route path="/tool-plaza/data-integration" element={
+        <AuthGuard>
+          <DataIntegration />
+        </AuthGuard>
+      } />
+      <Route path="/tool-plaza/agent-tools" element={
+        <AuthGuard>
+          <AgentTools />
+        </AuthGuard>
+      } />
+      <Route path="/tool-plaza/tool-factory" element={
+        <AuthGuard>
+          <ToolFactory />
+        </AuthGuard>
+      } />
+      <Route path="/tool-plaza/mcp" element={
+        <AuthGuard>
+          <MCPCenter />
+        </AuthGuard>
+      } />
+      <Route path="/tool-plaza/data-processing" element={
+        <AuthGuard>
+          <DataProcessingTools />
+        </AuthGuard>
+      } />
+      
+      <Route path="/workflow" element={
+        <AuthGuard>
+          <Navigate to="/workflow/application-orchestration" replace />
+        </AuthGuard>
+      } />
+      <Route path="/workflow/application-orchestration" element={
+        <AuthGuard>
+          <ApplicationOrchestrationPage />
+        </AuthGuard>
+      } />
+      <Route path="/workflow/task-orchestration" element={
+        <AuthGuard>
+          <TaskOrchestrationPage />
+        </AuthGuard>
+      } />
+      
+      <Route path="/document/:documentId" element={
+        <AuthGuard>
+          <DocumentManagement />
+        </AuthGuard>
+      } />
+      
+      {/* 通配符路由 */}
+      <Route path="*" element={
+        authState.isAuthenticated 
+          ? <Navigate to="/dashboard" replace /> 
+          : <Navigate to="/login" replace />
+      } />
     </Routes>
   );
 };
