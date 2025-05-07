@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { List, Modal, Form, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import PageHeader from '../components/layout/PageHeader';
@@ -9,6 +9,7 @@ import {
   ModifiedAssistant as Assistant
 } from '../components/modules/assistants';
 import AssistantTypeSelector, { AssistantType } from '../components/modules/assistants/AssistantTypeSelector';
+import { AssistantListSkeleton } from '../components/skeleton';
 import { mockAssistants } from '../utils/mockData';
 
 // Helper function to map old types to AssistantType
@@ -22,14 +23,8 @@ const mapOldTypeToAssistantType = (oldType: 'qa' | 'chat' | 'custom'): Assistant
 
 const AssistantList: React.FC = () => {
   // 状态管理
-  const [assistants, setAssistants] = useState<Assistant[]>(
-    mockAssistants.map(a => ({
-      ...a,
-      model: a.config.model,
-      status: a.status === 'training' ? 'offline' : a.status,
-      type: mapOldTypeToAssistantType(a.type) // Map the type here
-    }))
-  );
+  const [loading, setLoading] = useState(true);
+  const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [isTypeSelectModalVisible, setIsTypeSelectModalVisible] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -39,6 +34,33 @@ const AssistantList: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'alphabetical'>('newest');
   const [searchText] = useState<string>('');
+  
+  // 加载数据
+  useEffect(() => {
+    const loadAssistants = async () => {
+      try {
+        // 模拟网络请求延迟
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // 模拟数据处理
+        const data = mockAssistants.map(a => ({
+          ...a,
+          model: a.config.model,
+          status: a.status === 'training' ? 'offline' : a.status,
+          type: mapOldTypeToAssistantType(a.type) // Map the type here
+        }));
+        
+        setAssistants(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('加载助手数据失败:', error);
+        message.error('加载助手列表失败，请刷新页面重试');
+        setLoading(false);
+      }
+    };
+    
+    loadAssistants();
+  }, []);
 
   // 切换在线状态
   const handleStatusChange = (id: string, status: 'online' | 'offline') => {
@@ -168,40 +190,47 @@ const AssistantList: React.FC = () => {
         <PageHeader 
           title="助手列表" 
           parentTitle="问答助手"
-          description={`共 ${assistants.length} 个助手`}
+          description={loading ? '加载中...' : `共 ${assistants.length} 个助手`}
           primaryActions={[
             {
               icon: <PlusOutlined />,
               label: '新建助手',
-              onClick: handleCreate
+              onClick: handleCreate,
+              disabled: loading
             }
           ]}
           filterComponent={
-            <AssistantFilter 
-              filterStatus={filterStatus}
-              setFilterStatus={setFilterStatus}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
-            />
+            loading ? null : (
+              <AssistantFilter 
+                filterStatus={filterStatus}
+                setFilterStatus={setFilterStatus}
+                sortOrder={sortOrder}
+                setSortOrder={setSortOrder}
+              />
+            )
           }
         />
       </div>
       
       <div className="flex-1 min-h-0 overflow-auto bg-gray-50 p-6">
-        <List<Assistant>
-          grid={{ gutter: 12, xs: 1, sm: 1, md: 1, lg: 2, xl: 3, xxl: 4 }}
-          dataSource={filteredAssistants}
-          renderItem={(item) => (
-            <List.Item className="mb-3">
-              <AssistantCard
-                assistant={item}
-                handleEdit={handleEdit}
-                handleDelete={handleDelete}
-                handleStatusChange={handleStatusChange}
-              />
-            </List.Item>
-          )}
-        />
+        {loading ? (
+          <AssistantListSkeleton count={8} columns={4} />
+        ) : (
+          <List<Assistant>
+            grid={{ gutter: 12, xs: 1, sm: 1, md: 1, lg: 2, xl: 3, xxl: 4 }}
+            dataSource={filteredAssistants}
+            renderItem={(item) => (
+              <List.Item className="mb-3">
+                <AssistantCard
+                  assistant={item}
+                  handleEdit={handleEdit}
+                  handleDelete={handleDelete}
+                  handleStatusChange={handleStatusChange}
+                />
+              </List.Item>
+            )}
+          />
+        )}
       </div>
 
       {/* 助手类型选择模态框 */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid, Paper } from '@mui/material';
 
 // 侧边栏装饰组件接口定义
 interface DecorativeSidebarProps {
@@ -130,7 +130,7 @@ const DecorativeSidebar: React.FC<DecorativeSidebarProps> = ({
         </Typography>
       </Box>
 
-      {/* 功能特点列表 */}
+      {/* 功能特点卡片 */}
       <Box sx={{ px: 6, py: 4, position: 'relative', zIndex: 2 }}>
         <Typography
           variant="h6"
@@ -156,52 +156,100 @@ const DecorativeSidebar: React.FC<DecorativeSidebarProps> = ({
         >
           核心功能特点
         </Typography>
-        {features.map((feature, index) => (
-          <Box
-            key={index}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mb: 3.5,
-              transform: 'translateX(0)',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateX(10px)',
-                '& .feature-icon-box': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                }
-              },
-            }}
-          >
-            <Box
-              className="feature-icon-box"
-              sx={{
-                mr: 3,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 46,
-                height: 46,
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              {feature.icon}
-            </Box>
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: 500,
-                opacity: 0.95,
-                fontSize: '1.15rem',
-                letterSpacing: '0.3px',
-              }}
-            >
-              {feature.text}
-            </Typography>
-          </Box>
-        ))}
+        
+        <Grid container spacing={3} sx={{ mt: 1 }}>
+          {features.map((feature, index) => (
+            <Grid item xs={12} key={index}>
+              <Paper
+                elevation={0}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(6px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderLeft: '3px solid rgba(0, 201, 255, 0.6)',
+                  borderRadius: '12px',
+                  boxShadow: `
+                    0 4px 12px rgba(0, 0, 0, 0.1), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                  `,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateX(4px)',
+                    boxShadow: `
+                      0 5px 15px rgba(0, 0, 0, 0.15), 
+                      inset 0 1px 0 rgba(255, 255, 255, 0.15)
+                    `,
+                  },
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.1) 100%)',
+                  }
+                }}
+              >
+                <Box sx={{ 
+                  p: 2.5,
+                  pl: 3,
+                  display: 'flex', 
+                  alignItems: 'center',
+                  position: 'relative'
+                }}>
+                  <Box
+                    sx={{
+                      mr: 3,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 42,
+                      height: 42,
+                      borderRadius: '10px',
+                      background: 'linear-gradient(135deg, rgba(0, 201, 255, 0.15) 0%, rgba(146, 254, 157, 0.15) 100%)',
+                      boxShadow: `
+                        0 3px 6px rgba(0, 0, 0, 0.08), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+                        inset 0 -1px 1px rgba(0, 0, 0, 0.05)
+                      `,
+                      position: 'relative',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        borderRadius: '10px',
+                        padding: '1px',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))',
+                        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                        WebkitMaskComposite: 'xor',
+                        maskComposite: 'exclude',
+                      }
+                    }}
+                  >
+                    {feature.icon}
+                  </Box>
+                  
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: '0.95rem',
+                      letterSpacing: '0.2px',
+                      color: 'rgba(255, 255, 255, 0.95)',
+                      flex: 1,
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                    }}
+                  >
+                    {feature.text}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
 
       {/* 页脚 */}

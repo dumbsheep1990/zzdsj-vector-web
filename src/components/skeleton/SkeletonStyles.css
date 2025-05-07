@@ -1,0 +1,127 @@
+/* 骨架屏基础样式 */
+.skeleton-pulse {
+  position: relative;
+  overflow: hidden;
+  background: rgba(229, 231, 235, 0.3);
+  border-radius: 4px;
+}
+
+.skeleton-pulse::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -150%;
+  bottom: 0;
+  left: -150%;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0) 100%);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 渐变边框效果 */
+.skeleton-gradient-border {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.skeleton-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(128, 128, 128, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 模拟磨砂玻璃效果 */
+.skeleton-glass {
+  background: rgba(240, 240, 240, 0.1);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(200, 200, 200, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 适配不同尺寸 */
+.skeleton-sm {
+  height: 24px;
+}
+
+.skeleton-md {
+  height: 36px;
+}
+
+.skeleton-lg {
+  height: 48px;
+}
+
+.skeleton-xl {
+  height: 64px;
+}
+
+/* 形状变体 */
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+.skeleton-rounded {
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  border-radius: 4px;
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+/* 动画变体 */
+.skeleton-fade {
+  animation: fade 1.5s infinite alternate;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+/* 自定义颜色变体 - 使用黑灰配色 */
+.skeleton-brand-color {
+  background: linear-gradient(90deg, 
+    rgba(50, 50, 50, 0.1) 0%, 
+    rgba(100, 100, 100, 0.1) 100%);
+}
+
+/* 多段文本骨架 */
+.skeleton-text-row {
+  width: 100%;
+}
+
+.skeleton-text-row:last-child {
+  width: 75%;
+}
+
+/* 统一阴影效果 */
+.skeleton-with-shadow {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05),
+              0 0 1px rgba(0, 0, 0, 0.1);
+}

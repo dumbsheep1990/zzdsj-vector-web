@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Button, Typography } from 'antd';
 import { 
   User, 
@@ -17,81 +17,125 @@ import {
   HelpCircle
 } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
+import { DashboardSkeleton } from '../components/skeleton';
 import './Dashboard.css';
 
 const { Title } = Typography;
 
 const Dashboard: React.FC = () => {
-  // 模拟数据
-  const stats = {
-    assistants: {
-      total: 12,
-      active: 8,
-      inactive: 4
-    },
-    calls: {
-      total: 1560,
-      today: 120,
-      averageResponseTime: '1.2s'
-    },
-    models: {
-      total: 5,
-      active: 3,
-      tokensUsed: '1.2M'
-    }
-  };
+  // 添加加载状态
+  const [loading, setLoading] = useState(true);
+  // 添加数据状态
+  const [stats, setStats] = useState<any>(null);
+  const [docs, setDocs] = useState<any[]>([]);
+  const [bestPractices, setBestPractices] = useState<any[]>([]);
+  
+  // 模拟API请求加载数据
+  useEffect(() => {
+    // 模拟API加载延迟
+    const loadData = async () => {
+      try {
+        // 模拟网络请求延迟
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // 模拟数据 - 在实际应用中，这些将来自API
+        const statsData = {
+          assistants: {
+            total: 12,
+            active: 8,
+            inactive: 4
+          },
+          calls: {
+            total: 1560,
+            today: 120,
+            averageResponseTime: '1.2s'
+          },
+          models: {
+            total: 5,
+            active: 3,
+            tokensUsed: '1.2M'
+          }
+        };
 
-  // 文档卡片数据
-  const docs = [
-    {
-      title: 'API 接口文档',
-      description: '详细的 API 接口说明和使用方法',
-      icon: <Code className="w-6 h-6 text-blue-500" />,
-      link: '/docs/api'
-    },
-    {
-      title: '使用指南',
-      description: '系统功能使用说明和最佳实践',
-      icon: <BookOpen className="w-6 h-6 text-green-500" />,
-      link: '/docs/guide'
-    },
-    {
-      title: '开发文档',
-      description: '系统架构和开发规范说明',
-      icon: <FileText className="w-6 h-6 text-purple-500" />,
-      link: '/docs/development'
-    },
-    {
-      title: '常见问题',
-      description: '常见问题解答和故障排除',
-      icon: <HelpCircle className="w-6 h-6 text-orange-500" />,
-      link: '/docs/faq'
-    }
-  ];
+        // 文档卡片数据
+        const docsData = [
+          {
+            title: 'API 接口文档',
+            description: '详细的 API 接口说明和使用方法',
+            icon: <Code className="w-6 h-6 text-blue-500" />,
+            link: '/docs/api'
+          },
+          {
+            title: '使用指南',
+            description: '系统功能使用说明和最佳实践',
+            icon: <BookOpen className="w-6 h-6 text-green-500" />,
+            link: '/docs/guide'
+          },
+          {
+            title: '开发文档',
+            description: '系统架构和开发规范说明',
+            icon: <FileText className="w-6 h-6 text-purple-500" />,
+            link: '/docs/development'
+          },
+          {
+            title: '常见问题',
+            description: '常见问题解答和故障排除',
+            icon: <HelpCircle className="w-6 h-6 text-orange-500" />,
+            link: '/docs/faq'
+          }
+        ];
 
-  // 最佳实践数据
-  const bestPractices = [
-    {
-      title: '助手优化建议',
-      description: '根据当前助手使用情况，建议优化以下方面：',
-      items: [
-        '增加助手训练数据量',
-        '优化问答响应时间',
-        '完善知识库覆盖范围'
-      ],
-      icon: <Lightbulb className="w-5 h-5 text-yellow-500" />
-    },
-    {
-      title: '模型使用建议',
-      description: '基于当前模型使用情况，建议：',
-      items: [
-        '合理分配模型资源',
-        '优化Token使用效率',
-        '定期更新模型版本'
-      ],
-      icon: <Lightbulb className="w-5 h-5 text-yellow-500" />
-    }
-  ];
+        // 最佳实践数据
+        const bestPracticesData = [
+          {
+            title: '助手优化建议',
+            description: '根据当前助手使用情况，建议优化以下方面：',
+            items: [
+              '增加助手训练数据量',
+              '优化问答响应时间',
+              '完善知识库覆盖范围'
+            ],
+            icon: <Lightbulb className="w-5 h-5 text-yellow-500" />
+          },
+          {
+            title: '模型使用建议',
+            description: '基于当前模型使用情况，建议：',
+            items: [
+              '合理分配模型资源',
+              '优化Token使用效率',
+              '定期更新模型版本'
+            ],
+            icon: <Lightbulb className="w-5 h-5 text-yellow-500" />
+          }
+        ];
+
+        // 更新状态
+        setStats(statsData);
+        setDocs(docsData);
+        setBestPractices(bestPracticesData);
+        setLoading(false);
+      } catch (error) {
+        console.error('加载数据失败:', error);
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  // 如果正在加载，显示骨架屏
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <PageHeader 
+          title="统计看板" 
+          description="系统运行状态和关键指标概览"
+        />
+        <DashboardSkeleton />
+      </div>
+    );
+  }
+
 
   return (
     <div className="dashboard-container">
@@ -296,4 +340,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

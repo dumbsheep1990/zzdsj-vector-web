@@ -105,21 +105,30 @@ const Login: React.FC = () => {
               width: '100%',
               background: `linear-gradient(120deg, ${alpha('#f5f7fa', 0.6)} 0%, ${alpha('#e4ecf7', 0.6)} 100%)`,
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               position: 'relative',
               overflow: 'hidden',
-              '&::after': {
+              boxShadow: `
+                0 10px 25px rgba(0, 201, 255, 0.07),
+                0 6px 12px rgba(0, 201, 255, 0.05),
+                inset 0 -2px 5px rgba(255, 255, 255, 0.8),
+                inset 0 2px 0 rgba(255, 255, 255, 0.8),
+                0 0 0 1px rgba(0, 201, 255, 0.1)
+              `,
+              border: '1px solid rgba(255, 255, 255, 0.8)',
+              '&::before': {
                 content: '""',
                 position: 'absolute',
-                height: '6px',
-                top: 0,
-                left: 0,
-                right: 0,
-                background: 'linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #2980b9 100%)',
-                borderRadius: '4px 4px 0 0',
+                inset: 0,
+                borderRadius: 3,
+                padding: '2px',
+                background: 'linear-gradient(135deg, rgba(0, 201, 255, 0.2), rgba(146, 254, 157, 0.2))',
+                WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+                pointerEvents: 'none'
               }
             }}
           >

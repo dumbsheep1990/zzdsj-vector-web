@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Filter, BarChart2, Settings } from 'lucide-react';
 import { knowledgeBaseData } from '../utils/mockData';
 import type { KnowledgeBaseItem } from '../utils/types';
@@ -8,13 +8,37 @@ import SearchInput from '../components/common/SearchInput';
 import Switch from '../components/ui/Switch';
 import { useAppContext } from '../context/AppContext';
 import { FileIcon, Database } from 'lucide-react';
+import { KnowledgeBaseListSkeleton } from '../components/skeleton';
+import { Empty } from 'antd';
 
 const KnowledgeBase: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBaseItem | null>(null);
-    const [knowledgeBaseItems, setKnowledgeBaseItems] = useState(knowledgeBaseData);
+    const [knowledgeBaseItems, setKnowledgeBaseItems] = useState<KnowledgeBaseItem[]>([]);
+    const [loading, setLoading] = useState(true); // 添加加载状态
+    const [hasData, setHasData] = useState(true); // 是否有数据状态
     const { state } = useAppContext();
+
+    // 加载数据
+    useEffect(() => {
+        loadKnowledgeBaseData();
+    }, []);
+
+    // 加载知识库数据
+    const loadKnowledgeBaseData = () => {
+        setLoading(true);
+        // 模拟API调用延迟
+        setTimeout(() => {
+            setKnowledgeBaseItems(knowledgeBaseData);
+            setLoading(false);
+        }, 1500);
+    };
+
+    // 刷新数据
+    const handleRefresh = () => {
+        loadKnowledgeBaseData();
+    };
 
     const getCategoryGradient = (category: string) => {
         switch (category) {
@@ -60,6 +84,7 @@ const KnowledgeBase: React.FC = () => {
         return 'rgba(59, 130, 246, 0.05)'; // 淡蓝色
     };
 
+    // 过滤数据并更新hasData状态
     const filteredData = knowledgeBaseItems.filter(kb => {
         const matchesSearch = kb.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             kb.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,6 +92,11 @@ const KnowledgeBase: React.FC = () => {
         const matchesStatus = selectedStatus === 'all' || kb.status === selectedStatus;
         return matchesSearch && matchesStatus;
     });
+
+    // 更新是否有数据状态
+    useEffect(() => {
+        setHasData(filteredData.length > 0);
+    }, [filteredData]);
 
     const handleCardClick = (kb: KnowledgeBaseItem) => {
         setSelectedKnowledgeBase(kb);
@@ -87,91 +117,107 @@ const KnowledgeBase: React.FC = () => {
 
     const handleSettingsClick = (kb: KnowledgeBaseItem, e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log('Settings clicked for:', kb.name);
-        // 这里可以添加设置相关的逻辑，比如打开设置对话框等
+        console.log('Settings clicked for', kb.name);
     };
 
     const renderKnowledgeBaseCard = (kb: KnowledgeBaseItem) => {
-        // Use default value of 0 if vectorized is undefined
-        const vectorizedCount = kb.vectorized ?? 0;
-        const progressPercentage = Math.round((vectorizedCount / kb.fileCount) * 100);
-        
+        const { name, description, category, status, tags = [], progressPercentage, documentCount, questionCount } = kb;
+        const progressColor = getProgressColor(progressPercentage);
+        const incompleteColor = getIncompleteColor(progressPercentage);
+
         return (
-            <div 
-                key={kb.id} 
-                className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer hover:translate-y-[-2px]"
-                style={{ 
-                    background: getCategoryGradient(kb.category || 'default'),
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)'
-                }}
+            <div
+                key={kb.id}
                 onClick={() => handleCardClick(kb)}
+                className="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group overflow-hidden"
             >
-                <div className="relative z-10 p-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)' }}>
-                    <div className="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{kb.name}</h3>
-                            <p className="text-gray-700 text-sm mt-1 line-clamp-2">{kb.description}</p>
-                        </div>
-                        <div className="flex space-x-2 items-center">
-                            <div onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleToggleStatus(kb); }}>
-                                <Switch 
-                                    checked={kb.status === '活跃'}
-                                    onChange={() => {}}
-                                />
+                <div className="flex flex-col h-full">
+                    <div
+                        className="h-1"
+                        style={{ background: getCategoryGradient(category || '') }}
+                    ></div>
+
+                    <div className="p-4 flex-1 flex flex-col">
+                        <div className="flex justify-between items-start mb-1">
+                            <div className="flex items-center">
+                                <div
+                                    className="flex items-center justify-center w-10 h-10 rounded-full"
+                                    style={{ background: getCategoryGradient(category || '') }}
+                                >
+                                    <Database size={20} className="text-white" />
+                                </div>
+                                <h3 className="text-lg font-semibold ml-3 text-gray-800 group-hover:text-blue-600 transition-colors">
+                                    {name}
+                                </h3>
+                            </div>
+                            <div className="flex items-center">
+                                <div 
+                                    className="relative cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleToggleStatus(kb);
+                                    }}
+                                >
+                                    <Switch
+                                        checked={status === '活跃'}
+                                        size="sm"
+                                        className="data-[state=checked]:bg-blue-500"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="mt-4 backdrop-blur-sm bg-white/30 rounded-lg p-3 border border-gray-200 shadow-sm">
-                        <div className="flex justify-between text-gray-800 text-sm mb-2">
-                            <span className="font-medium">向量化进度</span>
-                            <span className="font-bold">{progressPercentage}%</span>
-                        </div>
-                        <div 
-                            className="w-full h-2.5 rounded-full overflow-hidden relative"
-                            style={{ 
-                                backgroundColor: getIncompleteColor(progressPercentage),
-                                backdropFilter: 'blur(4px)'
-                            }}
-                        >
-                            <div 
-                                className="h-full rounded-full transition-all duration-500 ease-out absolute top-0 left-0"
-                                style={{ 
-                                    width: `${progressPercentage}%`,
-                                    background: getProgressColor(progressPercentage),
-                                    boxShadow: progressPercentage >= 70 ? '0 0 10px rgba(139, 92, 246, 0.5)' : `0 0 8px ${getProgressColor(progressPercentage)}` 
-                                }}
-                            ></div>
-                        </div>
-                    </div>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{description}</p>
 
-                    <div className="mt-4 flex justify-between items-center">
-                        <div className="flex items-center space-x-4">
-                            <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center">
-                                <FileIcon className="h-4 w-4 text-gray-700 mr-1.5" />
-                                <span className="text-sm text-gray-800 font-medium">{kb.fileCount}</span>
+                        <div className="mb-3">
+                            <div className="flex justify-between text-xs mb-1">
+                                <span className="py-1 px-2 bg-gray-50 rounded-md text-gray-700 font-medium">完成进度</span>
+                                <span className="py-1 px-2 bg-blue-50 rounded-md text-blue-700 font-medium">{progressPercentage}%</span>
                             </div>
-                            <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center">
-                                <Database className="h-4 w-4 text-gray-700 mr-1.5" />
-                                <span className="text-sm text-gray-800 font-medium">{vectorizedCount}</span>
+                            <div className="h-2 w-full rounded-full" style={{ background: incompleteColor }}>
+                                <div
+                                    className="h-2 rounded-full transition-all duration-500"
+                                    style={{
+                                        width: `${progressPercentage}%`,
+                                        background: progressColor
+                                    }}
+                                ></div>
                             </div>
                         </div>
-                        <div className="text-gray-700 text-xs bg-gray-100 px-2.5 py-1 rounded-full">
-                            {kb.lastUpdated}
-                        </div>
-                    </div>
 
-                    <div className="mt-3">
-                        <p className="text-gray-700 text-xs mb-1 font-medium">{kb.tags && kb.tags.length > 0 ? '知识库相关标签' : '知识库配置'}</p>
-                        <div className="flex justify-between items-center">
-                            <div className="flex flex-wrap gap-2 flex-1">
-                                {kb.tags && kb.tags.length > 0 ? (
-                                    kb.tags.map((tag, index) => {
+                        <div className="flex mb-3">
+                            <div className="flex items-center mr-4 px-2 py-1 bg-blue-50 rounded-md">
+                                <FileIcon size={14} className="text-blue-600 mr-1" />
+                                <span className="text-sm text-blue-700 font-medium">{documentCount}</span>
+                            </div>
+                            <div className="flex items-center px-2 py-1 bg-purple-50 rounded-md">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="text-purple-600 mr-1"
+                                >
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span className="text-sm text-purple-700 font-medium">{questionCount}</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto pt-2 flex justify-between items-center">
+                            <div className="flex flex-wrap gap-2">
+                                {tags.length > 0 ? (
+                                    tags.slice(0, 3).map((tag, index) => {
                                         const tagColor = getTagColor(tag);
                                         return (
-                                            <span 
-                                                key={index} 
-                                                className="px-2.5 py-1 text-xs rounded-lg font-medium text-gray-700 transition-all duration-200 hover:shadow-sm"
+                                            <span
+                                                key={index}
+                                                className="text-xs px-2 py-1 rounded-md prompt-tag"
                                                 style={{
                                                     backgroundColor: tagColor.bg,
                                                     border: `1px solid ${tagColor.border}`
@@ -258,9 +304,21 @@ const KnowledgeBase: React.FC = () => {
             />
 
             <div className="flex-1 p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredData.map(renderKnowledgeBaseCard)}
-                </div>
+                {/* 显示骨架屏或内容 */}
+                {loading ? (
+                    <KnowledgeBaseListSkeleton count={6} />
+                ) : !hasData ? (
+                    <div className="flex-1 flex items-center justify-center h-64">
+                        <Empty 
+                            description="没有找到匹配的知识库" 
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {filteredData.map(renderKnowledgeBaseCard)}
+                    </div>
+                )}
             </div>
 
             <FileListModal 

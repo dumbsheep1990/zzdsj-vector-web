@@ -12,7 +12,9 @@ import {
   InputAdornment,
   IconButton,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Divider,
+  Stack
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { PersonOutline, LockOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
@@ -97,6 +99,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
       sx={{
         mt: 2,
         width: '100%',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: -20,
+          left: -20,
+          right: -20,
+          bottom: -20,
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: 3,
+          zIndex: -1
+        }
       }}
     >
       {formError && (
@@ -120,7 +135,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <PersonOutline sx={{ color: '#78909c' }} />
+              <PersonOutline sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
         }}
@@ -128,29 +143,32 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
           mb: 3,
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            backgroundColor: 'rgba(255, 255, 255, 0.65)',
+            backdropFilter: 'blur(12px)',
             transition: 'all 0.3s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(33, 150, 243, 0.1)'
+              backgroundColor: 'rgba(255, 255, 255, 0.75)',
+              boxShadow: '0 4px 10px rgba(0, 201, 255, 0.12)'
             },
             '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(33, 150, 243, 0.15)'
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              boxShadow: '0 4px 15px rgba(0, 201, 255, 0.18)'
             }
           },
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#2196f3', 0.2),
+            borderColor: alpha('#00c9ff', 0.25),
+            borderWidth: '1.5px',
             transition: 'all 0.3s'
           },
           '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#2196f3'
+            borderColor: '#00c9ff',
+            borderWidth: '2px'
           },
           '& .MuiInputLabel-root': {
             color: '#546e7a'
           },
           '& .MuiInputLabel-root.Mui-focused': {
-            color: '#2196f3'
+            color: '#00c9ff'
           }
         }}
       />
@@ -170,7 +188,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <LockOutlined sx={{ color: '#78909c' }} />
+              <LockOutlined sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
           endAdornment: (
@@ -189,29 +207,32 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
           mb: 3,
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            backgroundColor: 'rgba(255, 255, 255, 0.65)',
+            backdropFilter: 'blur(12px)',
             transition: 'all 0.3s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(33, 150, 243, 0.1)'
+              backgroundColor: 'rgba(255, 255, 255, 0.75)',
+              boxShadow: '0 4px 10px rgba(0, 201, 255, 0.12)'
             },
             '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(33, 150, 243, 0.15)'
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              boxShadow: '0 4px 15px rgba(0, 201, 255, 0.18)'
             }
           },
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#2196f3', 0.2),
+            borderColor: alpha('#00c9ff', 0.25),
+            borderWidth: '1.5px',
             transition: 'all 0.3s'
           },
           '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#2196f3'
+            borderColor: '#00c9ff',
+            borderWidth: '2px'
           },
           '& .MuiInputLabel-root': {
             color: '#546e7a'
           },
           '& .MuiInputLabel-root.Mui-focused': {
-            color: '#2196f3'
+            color: '#00c9ff'
           }
         }}
       />
@@ -221,9 +242,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
             value="remember" 
             color="primary" 
             sx={{ 
-              color: '#78909c',
+              color: alpha('#00c9ff', 0.6),
               '&.Mui-checked': {
-                color: '#2196f3',
+                color: '#00c9ff',
               }
             }} 
           />
@@ -247,12 +268,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
           mt: 1,
           mb: 3,
           borderRadius: 2,
-          backgroundColor: '#2196f3',
+          background: 'linear-gradient(to right, rgb(0, 201, 255), rgb(146, 254, 157))',
           fontWeight: 600,
           textTransform: 'none',
           fontSize: '1rem',
           letterSpacing: '0.5px',
-          boxShadow: '0 5px 15px rgba(33, 150, 243, 0.3)',
+          boxShadow: '0 5px 15px rgba(0, 201, 255, 0.25)',
           transition: 'all 0.3s',
           position: 'relative',
           overflow: 'hidden',
@@ -270,8 +291,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
             zIndex: 1
           },
           '&:hover': {
-            backgroundColor: '#1976d2',
-            boxShadow: '0 8px 20px rgba(33, 150, 243, 0.4)',
+            background: 'linear-gradient(to right, rgb(0, 190, 242), rgb(135, 245, 147))',
+            boxShadow: '0 8px 20px rgba(0, 201, 255, 0.35)',
             transform: 'translateY(-2px)',
             '&::after': {
               opacity: 1,
@@ -289,57 +310,86 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, formError })
           size="small"
           onClick={useTestAccount}
           sx={{
-            color: '#3498db',
+            color: '#00c9ff',
             fontSize: '0.85rem',
             textTransform: 'none',
+            borderRadius: 1.5,
+            px: 2,
+            py: 0.75,
             '&:hover': {
-              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              backgroundColor: 'rgba(0, 201, 255, 0.1)',
             }
           }}
         >
           使用测试账号登录
         </Button>
       </Box>
-      <Grid container sx={{ fontSize: '0.9rem' }}>
-        <Grid item xs>
-          <Link
-            component={RouterLink}
-            to="/forgot-password"
-            variant="body2"
-            sx={{ 
-              color: '#2196f3',
-              textDecoration: 'none',
-              transition: 'all 0.2s',
-              fontWeight: 500,
-              '&:hover': {
-                color: '#1565c0',
-                textDecoration: 'underline'
-              }
-            }}
-          >
-            忘记密码?
-          </Link>
-        </Grid>
-        <Grid item>
-          <Link
-            component={RouterLink}
-            to="/register"
-            variant="body2"
-            sx={{ 
-              color: '#2196f3',
-              textDecoration: 'none',
-              transition: 'all 0.2s',
-              fontWeight: 500,
-              '&:hover': {
-                color: '#1565c0',
-                textDecoration: 'underline'
-              }
-            }}
-          >
-            {"没有账号? 立即注册"}
-          </Link>
-        </Grid>
-      </Grid>
+      
+      {/* 分隔线 */}
+      <Box sx={{ mt: 1, mb: 2 }}>
+        <Divider sx={{ 
+          '&::before, &::after': {
+            borderColor: 'rgba(0, 201, 255, 0.15)',
+          }
+        }}>
+          <Typography variant="caption" color="text.secondary" sx={{ px: 1, fontSize: '0.75rem' }}>
+            或者
+          </Typography>
+        </Divider>
+      </Box>
+      
+      {/* 底部链接区域 - 两端对齐 */}
+      <Box 
+        sx={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          px: 2,
+          mt: 2
+        }}
+      >
+        <Link
+          component={RouterLink}
+          to="/forgot-password"
+          variant="body2"
+          sx={{ 
+            color: '#00c9ff',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            fontWeight: 500,
+            fontSize: '0.85rem',
+            padding: '8px 12px',
+            borderRadius: '4px',
+            '&:hover': {
+              color: '#008bc1',
+              backgroundColor: 'rgba(0, 201, 255, 0.05)'
+            }
+          }}
+        >
+          忘记密码?
+        </Link>
+        
+        <Link
+          component={RouterLink}
+          to="/register"
+          variant="body2"
+          sx={{ 
+            color: '#00c9ff',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            fontWeight: 500,
+            fontSize: '0.85rem',
+            padding: '8px 12px',
+            borderRadius: '4px',
+            '&:hover': {
+              color: '#008bc1',
+              backgroundColor: 'rgba(0, 201, 255, 0.05)'
+            }
+          }}
+        >
+          没有账号? 立即注册
+        </Link>
+      </Box>
     </Box>
   );
 };

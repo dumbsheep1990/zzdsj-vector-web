@@ -11,7 +11,9 @@ import {
   InputAdornment,
   IconButton,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Divider,
+  Typography
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { RegisterData } from '../../context/AuthContext';
@@ -118,6 +120,40 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  // 输入框统一样式
+  const textFieldStyle = {
+    mb: 3,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+      backgroundColor: 'rgba(255, 255, 255, 0.65)',
+      backdropFilter: 'blur(12px)',
+      transition: 'all 0.3s',
+      '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        boxShadow: '0 4px 10px rgba(0, 201, 255, 0.12)'
+      },
+      '&.Mui-focused': {
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        boxShadow: '0 4px 15px rgba(0, 201, 255, 0.18)'
+      }
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: alpha('#00c9ff', 0.25),
+      borderWidth: '1.5px',
+      transition: 'all 0.3s'
+    },
+    '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#00c9ff',
+      borderWidth: '2px'
+    },
+    '& .MuiInputLabel-root': {
+      color: '#546e7a'
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#00c9ff'
+    }
+  };
+
   return (
     <Box
       component="form"
@@ -125,6 +161,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
       sx={{
         mt: 2,
         width: '100%',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: -20,
+          left: -20,
+          right: -20,
+          bottom: -20,
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: 3,
+          zIndex: -1
+        }
       }}
     >
       {formError && (
@@ -148,39 +197,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <PersonOutline sx={{ color: '#3498db' }} />
+              <PersonOutline sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
         }}
-        sx={{
-          mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(52, 152, 219, 0.1)'
-            },
-            '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(52, 152, 219, 0.15)'
-            }
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#3498db', 0.3),
-            transition: 'all 0.3s'
-          },
-          '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#3498db'
-          },
-          '& .MuiInputLabel-root': {
-            color: '#2c3e50'
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: '#3498db'
-          }
-        }}
+        sx={textFieldStyle}
       />
       <TextField
         margin="normal"
@@ -197,39 +218,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <EmailOutlined sx={{ color: '#3498db' }} />
+              <EmailOutlined sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
         }}
-        sx={{
-          mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(52, 152, 219, 0.1)'
-            },
-            '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(52, 152, 219, 0.15)'
-            }
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#3498db', 0.3),
-            transition: 'all 0.3s'
-          },
-          '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#3498db'
-          },
-          '& .MuiInputLabel-root': {
-            color: '#2c3e50'
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: '#3498db'
-          }
-        }}
+        sx={textFieldStyle}
       />
       <TextField
         margin="normal"
@@ -246,39 +239,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <BadgeOutlined sx={{ color: '#3498db' }} />
+              <BadgeOutlined sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
         }}
-        sx={{
-          mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(52, 152, 219, 0.1)'
-            },
-            '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(52, 152, 219, 0.15)'
-            }
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#3498db', 0.3),
-            transition: 'all 0.3s'
-          },
-          '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#3498db'
-          },
-          '& .MuiInputLabel-root': {
-            color: '#2c3e50'
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: '#3498db'
-          }
-        }}
+        sx={textFieldStyle}
       />
       <TextField
         margin="normal"
@@ -296,7 +261,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <LockOutlined sx={{ color: '#3498db' }} />
+              <LockOutlined sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
           endAdornment: (
@@ -311,35 +276,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
             </InputAdornment>
           ),
         }}
-        sx={{
-          mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(52, 152, 219, 0.1)'
-            },
-            '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(52, 152, 219, 0.15)'
-            }
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#3498db', 0.3),
-            transition: 'all 0.3s'
-          },
-          '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#3498db'
-          },
-          '& .MuiInputLabel-root': {
-            color: '#2c3e50'
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: '#3498db'
-          }
-        }}
+        sx={textFieldStyle}
       />
       <TextField
         margin="normal"
@@ -357,7 +294,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <LockOutlined sx={{ color: '#3498db' }} />
+              <LockOutlined sx={{ color: alpha('#00c9ff', 0.75) }} />
             </InputAdornment>
           ),
           endAdornment: (
@@ -372,35 +309,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
             </InputAdornment>
           ),
         }}
-        sx={{
-          mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 10px rgba(52, 152, 219, 0.1)'
-            },
-            '&.Mui-focused': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 15px rgba(52, 152, 219, 0.15)'
-            }
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: alpha('#3498db', 0.3),
-            transition: 'all 0.3s'
-          },
-          '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#3498db'
-          },
-          '& .MuiInputLabel-root': {
-            color: '#2c3e50'
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: '#3498db'
-          }
-        }}
+        sx={textFieldStyle}
       />
       <FormControlLabel
         control={
@@ -410,16 +319,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
             checked={formData.agreeTerms}
             onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
             sx={{ 
-              color: '#2c3e50',
+              color: alpha('#00c9ff', 0.6),
               '&.Mui-checked': {
-                color: '#3498db',
+                color: '#00c9ff',
               }
             }} 
           />
         }
         label="我已阅读并同意服务条款和隐私政策"
         sx={{ 
-          color: '#2c3e50',
+          color: '#546e7a',
           mb: 2,
           '& .MuiTypography-root': {
             fontSize: '0.9rem'
@@ -436,12 +345,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
           mt: 1,
           mb: 3,
           borderRadius: 2,
-          backgroundColor: '#3498db',
+          background: 'linear-gradient(to right, rgb(0, 201, 255), rgb(146, 254, 157))',
           fontWeight: 600,
           textTransform: 'none',
           fontSize: '1rem',
           letterSpacing: '0.5px',
-          boxShadow: '0 5px 15px rgba(52, 152, 219, 0.3)',
+          boxShadow: '0 5px 15px rgba(0, 201, 255, 0.25)',
           transition: 'all 0.3s',
           position: 'relative',
           overflow: 'hidden',
@@ -459,8 +368,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
             zIndex: 1
           },
           '&:hover': {
-            backgroundColor: '#2980b9',
-            boxShadow: '0 8px 20px rgba(41, 128, 185, 0.3)',
+            background: 'linear-gradient(to right, rgb(0, 190, 242), rgb(135, 245, 147))',
+            boxShadow: '0 8px 20px rgba(0, 201, 255, 0.35)',
             transform: 'translateY(-2px)',
             '&::after': {
               opacity: 1,
@@ -472,19 +381,45 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading, formEr
       >
         {isLoading ? <CircularProgress size={24} color="inherit" /> : '创建账户'}
       </Button>
-      <Box sx={{ fontSize: '0.9rem', width: '100%', textAlign: 'center' }}>
+      
+      {/* 分隔线 */}
+      <Box sx={{ mt: 1, mb: 2 }}>
+        <Divider sx={{ 
+          '&::before, &::after': {
+            borderColor: 'rgba(0, 201, 255, 0.15)',
+          }
+        }}>
+          <Typography variant="caption" color="text.secondary" sx={{ px: 1, fontSize: '0.75rem' }}>
+            或者
+          </Typography>
+        </Divider>
+      </Box>
+      
+      {/* 底部链接区域 - 居中对齐更适合单个链接 */}
+      <Box 
+        sx={{ 
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          px: 2,
+          mt: 2
+        }}
+      >
         <Link
           component={RouterLink}
           to="/login"
           variant="body2"
           sx={{ 
-            color: '#3498db',
+            color: '#00c9ff',
             textDecoration: 'none',
             transition: 'all 0.2s',
             fontWeight: 500,
+            fontSize: '0.85rem',
+            padding: '8px 12px',
+            borderRadius: '4px',
             '&:hover': {
-              color: '#2980b9',
-              textDecoration: 'underline'
+              color: '#008bc1',
+              backgroundColor: 'rgba(0, 201, 255, 0.05)'
             }
           }}
         >

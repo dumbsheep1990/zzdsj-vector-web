@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Button, Select, Spin, Empty, message, Pagination } from 'antd';
+import { Input, Button, Select, Empty, message, Pagination } from 'antd';
 import { 
   SearchOutlined, 
   SyncOutlined, 
@@ -8,6 +8,7 @@ import {
 import PageHeader from '../components/layout/PageHeader';
 import PromptTemplateCard from '../components/modules/prompts/PromptTemplateCard';
 import BindTemplateModal from '../components/modules/prompts/BindTemplateModal';
+import { PromptTemplateListSkeleton } from '../components/skeleton';
 import '../styles/promptStyles.css'; // 导入新的样式文件
 
 // 类型定义
@@ -96,55 +97,45 @@ const categories = [
 ];
 
 const PromptTemplates: React.FC = () => {
-  const [templates, setTemplates] = useState<PromptTemplate[]>(mockTemplates);
-  const [loading, setLoading] = useState(false);
+  // 模板数据状态
+  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [filteredTemplates, setFilteredTemplates] = useState<PromptTemplate[]>([]);
+  const [loading, setLoading] = useState(true); // 默认为加载状态
+  
+  // 筛选状态
   const [searchText, setSearchText] = useState('');
-  const [category, setCategory] = useState<string>('all');
-  const [filteredTemplates, setFilteredTemplates] = useState<PromptTemplate[]>(mockTemplates);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  // 绑定弹窗相关状态
   const [bindModalVisible, setBindModalVisible] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<PromptTemplate | null>(null);
   const [modalMode, setModalMode] = useState<'bind' | 'unbind'>('bind');
   
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(9);
+  const [paginatedTemplates, setPaginatedTemplates] = useState<PromptTemplate[]>([]);
+  
+  // 是否有数据状态
+  const [hasData, setHasData] = useState(true);
 
   // 加载模板数据
-  useEffect(() => {
-    loadTemplates();
-  }, []);
-
-  // 筛选模板
-  useEffect(() => {
-    const filtered = templates.filter(template => {
-      const matchSearch = template.title.toLowerCase().includes(searchText.toLowerCase()) || 
-                         template.content.toLowerCase().includes(searchText.toLowerCase());
-      const matchCategory = category === 'all' || template.category === category;
-      
-      return matchSearch && matchCategory;
-    });
-    
-    setFilteredTemplates(filtered);
-    setCurrentPage(1); // 重置为第一页
-  }, [templates, searchText, category]);
-
-  // 加载模板数据
-  const loadTemplates = async () => {
+  const loadTemplates = () => {
     setLoading(true);
-    try {
-      // 模拟API调用延迟
-      await new Promise(resolve => setTimeout(resolve, 800));
+    // 模拟API调用延迟 - 增加延迟时间以展示骨架屏效果
+    setTimeout(() => {
+      // 模拟API调用
       setTemplates(mockTemplates);
+      setFilteredTemplates(mockTemplates);
       setLoading(false);
-    } catch (error) {
-      console.error('Failed to load templates:', error);
-      setLoading(false);
-    }
+    }, 1500);
   };
 
   // 刷新数据
   const handleRefresh = () => {
     loadTemplates();
+    // 显示刷新提示
+    message.info('正在刷新数据...');
   };
 
   // 搜索处理
@@ -154,7 +145,7 @@ const PromptTemplates: React.FC = () => {
 
   // 类别筛选处理
   const handleCategoryChange = (value: string) => {
-    setCategory(value);
+    setSelectedCategory(value);
   };
 
   // 绑定提示词模板（打开模态框）
@@ -179,51 +170,82 @@ const PromptTemplates: React.FC = () => {
 
   // 处理模板绑定/解绑确认
   const handleBindConfirm = (assistantIds: string[]) => {
-    if (currentTemplate && assistantIds.length > 0) {
-      // 在实际应用中，这里会调用API进行绑定/解绑操作
-      // 模拟成功操作
-      if (modalMode === 'bind') {
-        setTemplates(
-          templates.map(template => 
-            template.id === currentTemplate.id 
-              ? { ...template, isBound: true } 
-              : template
-          )
-        );
-        message.success(`已成功将模板"${currentTemplate.title}"绑定到${assistantIds.length}个助手`);
-      } else {
-        setTemplates(
-          templates.map(template => 
-            template.id === currentTemplate.id 
-              ? { ...template, isBound: false } 
-              : template
-          )
-        );
-        message.success(`已成功将模板"${currentTemplate.title}"从${assistantIds.length}个助手解绑`);
-      }
-    }
-    setBindModalVisible(false);
-    setCurrentTemplate(null);
+    if (!currentTemplate) return;
+    
+    // 模拟API调用 - 实际项目中需要与后端交互
+    setLoading(true);
+    setTimeout(() => {
+      // 更新模板状态
+      const updatedTemplates = templates.map(t => {
+        if (t.id === currentTemplate.id) {
+          return {
+            ...t,
+            isBound: modalMode === 'bind'
+          };
+        }
+        return t;
+      });
+      
+      setTemplates(updatedTemplates);
+      setBindModalVisible(false);
+      setCurrentTemplate(null);
+      setLoading(false);
+      
+      message.success(
+        modalMode === 'bind' 
+          ? `已成功将模板"${currentTemplate.title}"绑定到${assistantIds.length}个助手` 
+          : `已成功解绑模板"${currentTemplate.title}"`
+      );
+    }, 800);
   };
 
   // 编辑提示词模板
   const handleEditTemplate = (templateId: string) => {
-    console.log('Edit template:', templateId);
-    // 在这里添加编辑逻辑
-    message.info('编辑功能正在开发中');
+    // 暂时只显示消息提示
+    message.info('编辑模板功能正在开发中');
   };
-  
-  // 计算当前页的数据
-  const paginatedTemplates = filteredTemplates.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
   
   // 处理页面变化
   const handlePageChange = (page: number, size?: number) => {
     setCurrentPage(page);
     if (size) setPageSize(size);
   };
+
+  // 更新分页数据
+  const updatePagination = () => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, filteredTemplates.length);
+    setPaginatedTemplates(filteredTemplates.slice(startIndex, endIndex));
+  };
+
+  // 初始化加载数据
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  // 监听筛选条件变化
+  useEffect(() => {
+    const filtered = templates.filter(template => {
+      const matchSearch = template.title.toLowerCase().includes(searchText.toLowerCase()) || 
+                         template.content.toLowerCase().includes(searchText.toLowerCase());
+      const matchCategory = selectedCategory === 'all' || template.category === selectedCategory;
+      
+      return matchSearch && matchCategory;
+    });
+    
+    setFilteredTemplates(filtered);
+    setCurrentPage(1); // 重置为第一页
+  }, [templates, searchText, selectedCategory]);
+
+  // 分页处理
+  useEffect(() => {
+    updatePagination();
+  }, [filteredTemplates, currentPage, pageSize]);
+
+  // 检查是否有数据
+  useEffect(() => {
+    setHasData(filteredTemplates.length > 0);
+  }, [filteredTemplates]);
 
   // 添加内联样式到DOM
   useEffect(() => {
@@ -312,14 +334,17 @@ const PromptTemplates: React.FC = () => {
             </Button>
           </div>
 
-          {/* 模板列表 */}
+          {/* 模板列表 - 使用骨架屏替代简单的加载动画 */}
           {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <Spin size="large" tip="加载中..." />
+            <div className="flex-1">
+              <PromptTemplateListSkeleton count={pageSize} />
             </div>
-          ) : filteredTemplates.length === 0 ? (
+          ) : !hasData ? (
             <div className="flex-1 flex items-center justify-center">
-              <Empty description="没有找到匹配的提示词模板" />
+              <Empty 
+                description="没有找到匹配的提示词模板" 
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
             </div>
           ) : (
             <div className="flex-1 overflow-auto">
@@ -337,7 +362,7 @@ const PromptTemplates: React.FC = () => {
               
               {/* 分页组件 */}
               {filteredTemplates.length > pageSize && (
-                <div className="prompt-pagination">
+                <div className="mt-6 flex justify-center">
                   <Pagination
                     current={currentPage}
                     pageSize={pageSize}
