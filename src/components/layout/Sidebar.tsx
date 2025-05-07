@@ -46,6 +46,7 @@ const Sidebar: React.FC = () => {
         'assistant-list': '/qa-assistant/assistant-list',
         'qa-management': '/qa-assistant/qa-management',
         'prompt-templates': '/qa-assistant/prompt-templates',
+        'datasets': '/qa-assistant/datasets',
         'knowledge-base': '/knowledge-base/files',
         'vectors': '/knowledge-base/vectors',
         'metadata': '/knowledge-base/metadata',

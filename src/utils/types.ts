@@ -37,11 +37,12 @@ export interface ModelItem {
 
 // 向量库类型
 export interface VectorItem {
-    id: number;
+    id: string;
     name: string;
     fileCount: number;
-    lastUpdated: string;
+    documentCount?: number;
     size: string;
+    lastUpdated: string;
     status: string;
 }
 

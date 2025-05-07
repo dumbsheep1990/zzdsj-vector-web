@@ -1,0 +1,38 @@
+.blur-modal-mask {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.blur-modal .ant-modal-content {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.blur-modal .ant-modal-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(240, 240, 240, 0.5);
+}
+
+.blur-modal .ant-modal-footer {
+  border-top: 1px solid rgba(240, 240, 240, 0.5);
+  background: transparent;
+}
+
+.blur-modal .ant-modal-title {
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+/* 按钮样式 */
+.blur-modal .ant-btn-primary.ant-btn-dangerous {
+  background: rgba(255, 0, 0, 0.8);
+  border-color: rgba(255, 0, 0, 0.8);
+}
+
+.blur-modal .ant-btn-primary.ant-btn-dangerous:hover {
+  background: rgba(255, 0, 0, 0.9);
+  border-color: rgba(255, 0, 0, 0.9);
+}

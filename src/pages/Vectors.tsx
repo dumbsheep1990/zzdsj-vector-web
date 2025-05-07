@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TabsContainer, TabButton } from '../components/ui/Tabs';
 import VectorsList from '../components/modules/vectors/VectorsList';
+import VectorsListSkeleton from '../components/skeleton/VectorsListSkeleton';
+import EmptyVectorsState from '../components/modules/vectors/EmptyVectorsState';
 import KeywordsList from '../components/modules/vectors/KeywordsList';
 import SearchRecordsList from '../components/modules/vectors/SearchRecordsList';
 import DetailPanel from '../components/layout/DetailPanel';
 import PageHeader from '../components/layout/PageHeader';
-import { vectorData, keywordsData, searchRecordsData } from '../utils/mockData';
+import { vectorData as mockVectorData, keywordsData as mockKeywordsData, searchRecordsData as mockSearchRecordsData } from '../utils/mockData';
 import { VectorItem, KeywordItem, SearchRecordItem } from '../utils/types';
 import { Upload, RefreshCw, Download } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
@@ -15,7 +17,37 @@ const Vectors: React.FC = () => {
     const [selectedVector, setSelectedVector] = useState<VectorItem | null>(null);
     const [selectedKeyword, setSelectedKeyword] = useState<KeywordItem | null>(null);
     const [selectedSearchRecord, setSelectedSearchRecord] = useState<SearchRecordItem | null>(null);
+    const [vectorData, setVectorData] = useState<VectorItem[]>([]);
+    const [keywordsData, setKeywordsData] = useState<KeywordItem[]>([]);
+    const [searchRecordsData, setSearchRecordsData] = useState<SearchRecordItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { state } = useAppContext();
+
+    // 模拟API加载数据
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                // 模拟网络请求延迟
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 默认加载数据，这里可以切换来测试空状态
+                // 设置为空数组显示空状态，设置为mockXXXData显示数据
+                // 向量数据 - 可以修改为[] 测试空状态
+                setVectorData(mockVectorData); 
+                // 关键词数据
+                setKeywordsData(mockKeywordsData);
+                // 搜索记录数据
+                setSearchRecordsData(mockSearchRecordsData);
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        loadData();
+    }, []);
 
     // 获取当前选中的项目（根据当前活动模块）
     const getSelectedItem = () => {
@@ -47,32 +79,56 @@ const Vectors: React.FC = () => {
     };
 
     // 渲染不同模块的内容
+    const handleCreateNew = () => {
+        // 处理创建新向量库的逻辑
+        console.log('创建新向量库');
+        // 这里可以打开创建表单或对话框
+    };
+
     const renderModuleContent = () => {
         switch (activeModule) {
             case 'vectors':
-                return (
-                    <VectorsList 
-                        vectors={vectorData} 
-                        selectedItem={selectedVector} 
-                        setSelectedItem={setSelectedVector} 
-                    />
-                );
+                if (isLoading) {
+                    return <VectorsListSkeleton rowCount={5} />;
+                } else if (vectorData.length === 0) {
+                    return <EmptyVectorsState onCreateNew={handleCreateNew} />;
+                } else {
+                    return (
+                        <VectorsList 
+                            vectors={vectorData} 
+                            selectedItem={selectedVector} 
+                            setSelectedItem={setSelectedVector} 
+                        />
+                    );
+                }
             case 'keywords':
-                return (
-                    <KeywordsList 
-                        keywords={keywordsData} 
-                        selectedItem={selectedKeyword} 
-                        setSelectedItem={setSelectedKeyword} 
-                    />
-                );
+                if (isLoading) {
+                    return <VectorsListSkeleton rowCount={5} />;
+                } else if (keywordsData.length === 0) {
+                    return <EmptyVectorsState onCreateNew={handleCreateNew} />;
+                } else {
+                    return (
+                        <KeywordsList 
+                            keywords={keywordsData} 
+                            selectedItem={selectedKeyword} 
+                            setSelectedItem={setSelectedKeyword} 
+                        />
+                    );
+                }
             case 'searchRecords':
-                return (
-                    <SearchRecordsList 
-                        searchRecords={searchRecordsData} 
-                        selectedItem={selectedSearchRecord} 
-                        setSelectedItem={setSelectedSearchRecord} 
-                    />
-                );
+                if (isLoading) {
+                    return <VectorsListSkeleton rowCount={5} />;
+                } else if (searchRecordsData.length === 0) {
+                    return <EmptyVectorsState onCreateNew={handleCreateNew} />;
+                } else {
+                    return (
+                        <SearchRecordsList 
+                            searchRecords={searchRecordsData} 
+                            selectedItem={selectedSearchRecord} 
+                            setSelectedItem={setSelectedSearchRecord} 
+                        />
+                    );
+                }
             default:
                 return null;
         }
@@ -169,14 +225,15 @@ const Vectors: React.FC = () => {
         display: 'flex',
         flexDirection: 'column' as const,
         overflow: 'hidden',
-        backgroundColor: '#f3f4f6'
+        backgroundColor: '#f3f4f6',
+        height: '100vh' // 确保容器占满整个视窗高度
     };
 
     const contentContainerStyle = {
         flex: 1,
         display: 'flex',
         overflow: 'hidden',
-        padding: '0 1.5rem 1.5rem 1.5rem'
+        padding: '1.5rem 1.5rem 1.5rem 1.5rem' // 增加顶部间距
     };
 
     const mainContentStyle = {
@@ -186,17 +243,21 @@ const Vectors: React.FC = () => {
         backgroundColor: 'white',
         borderRadius: '0.5rem',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-        padding: '1.5rem'
+        padding: '1.25rem'
     };
 
     const detailPanelStyle = {
         width: 'calc(50% - 0.75rem)',
         backgroundColor: 'white',
-        overflow: 'auto',
+        height: '100%',  // 确保抽屉面板占满整个高度
+        display: 'flex',
+        flexDirection: 'column' as const,
         transition: 'all 0.3s ease',
         marginLeft: '1.5rem',
         borderRadius: '0.5rem',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        overflow: 'hidden', // 防止溢出
+        maxHeight: 'calc(100vh - 135px)' // 限制最大高度，保持在视口内
     };
 
     return (
@@ -212,12 +273,12 @@ const Vectors: React.FC = () => {
             
             <div style={contentContainerStyle}>
                 <div style={mainContentStyle}>
-                    <div className="mt-6">
+                    <div className="mt-4">
                         {renderModuleContent()}
                     </div>
                 </div>
 
-                {getSelectedItem() && (
+                {getSelectedItem() && !isLoading && (
                     <div style={detailPanelStyle}>
                         <DetailPanel 
                             selectedItem={getSelectedItem()} 

@@ -1,175 +1,282 @@
-import React from 'react';
-import { Table, Card, Button, Progress, Space, Tag } from 'antd';
-import type { TableProps } from 'antd';
-import { Plus, Download, RefreshCw } from 'lucide-react';
-
-interface Dataset {
-  id: string;
-  name: string;
-  description: string;
-  size: string;
-  records: number;
-  lastUpdated: string;
-  status: 'ready' | 'processing' | 'error';
-  type: string;
-}
-
-const mockDatasets: Dataset[] = [
-  {
-    id: '1',
-    name: '通用知识库',
-    description: '包含各领域基础知识的数据集',
-    size: '2.5GB',
-    records: 1000000,
-    lastUpdated: '2025-03-22',
-    status: 'ready',
-    type: 'knowledge'
-  },
-  {
-    id: '2',
-    name: '专业文档集',
-    description: '行业专业文档和技术资料集合',
-    size: '1.8GB',
-    records: 500000,
-    lastUpdated: '2025-03-21',
-    status: 'processing',
-    type: 'document'
-  },
-  {
-    id: '3',
-    name: '问答语料库',
-    description: '高质量问答对训练数据',
-    size: '3.2GB',
-    records: 2000000,
-    lastUpdated: '2025-03-20',
-    status: 'ready',
-    type: 'qa'
-  }
-];
+import React, { useState, useEffect } from 'react';
+import { TabsContainer, TabButton } from '../components/ui/Tabs';
+import DatasetsList from '../components/modules/datasets/DatasetsList';
+import DatasetsListSkeleton from '../components/skeleton/DatasetsListSkeleton';
+import EmptyDatasetsState from '../components/modules/datasets/EmptyDatasetsState';
+import DatasetDetailPanel from '../components/modules/datasets/DatasetDetailPanel';
+import QaPairDialog from '../components/modules/datasets/QaPairDialog';
+import AssistantLinkDialog from '../components/modules/datasets/AssistantLinkDialog';
+import QaSplitDialog from '../components/modules/datasets/QaSplitDialog';
+import PageHeader from '../components/layout/PageHeader';
+import { QaDataset, QaPair, AssistantItem } from '../utils/types';
+import { mockDatasets } from '../utils/mockQaData';
+import { Plus, Upload, FileUp, FilePlus } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 const Datasets: React.FC = () => {
-  const columns: TableProps<Dataset>['columns'] = [
-    {
-      title: '数据集名称',
-      dataIndex: 'name',
-      key: 'name',
-      width: '15%',
-    },
-    {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
-      width: '25%',
-    },
-    {
-      title: '大小',
-      dataIndex: 'size',
-      key: 'size',
-      width: '10%',
-    },
-    {
-      title: '记录数',
-      dataIndex: 'records',
-      key: 'records',
-      width: '10%',
-      render: (records: number) => records.toLocaleString(),
-    },
-    {
-      title: '最后更新',
-      dataIndex: 'lastUpdated',
-      key: 'lastUpdated',
-      width: '12%',
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      width: '10%',
-      render: (status: string) => {
-        const color = status === 'ready' ? 'success' : status === 'processing' ? 'processing' : 'error';
-        const text = status === 'ready' ? '就绪' : status === 'processing' ? '处理中' : '错误';
-        return <Tag color={color}>{text}</Tag>;
-      },
-    },
-    {
-      title: '类型',
-      dataIndex: 'type',
-      key: 'type',
-      width: '8%',
-      render: (type: string) => {
-        const typeMap: Record<string, { color: string; text: string }> = {
-          knowledge: { color: 'blue', text: '知识库' },
-          document: { color: 'green', text: '文档' },
-          qa: { color: 'purple', text: '问答' },
+    const [activeModule, setActiveModule] = useState<'datasets'>('datasets');
+    const [selectedDataset, setSelectedDataset] = useState<QaDataset | null>(null);
+    const [datasetsData, setDatasetsData] = useState<QaDataset[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { state } = useAppContext();
+    
+    // 对话框状态
+    const [showQaPairDialog, setShowQaPairDialog] = useState(false);
+    const [showAssistantLinkDialog, setShowAssistantLinkDialog] = useState(false);
+    const [showQaSplitDialog, setShowQaSplitDialog] = useState(false);
+    const [editingQaPair, setEditingQaPair] = useState<QaPair | undefined>(undefined);
+
+    // 模拟API加载数据
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                // 模拟网络请求延迟
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 加载数据集数据
+                setDatasetsData(mockDatasets);
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            } finally {
+                setIsLoading(false);
+            }
         };
-        const { color, text } = typeMap[type] || { color: 'default', text: type };
-        return <Tag color={color}>{text}</Tag>;
-      },
-    },
-    {
-      title: '操作',
-      key: 'action',
-      width: '10%',
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="text"
-            icon={<Download className="w-4 h-4" />}
-            disabled={record.status === 'processing'}
-          />
-          <Button
-            type="text"
-            icon={<RefreshCw className="w-4 h-4" />}
-            disabled={record.status === 'processing'}
-          />
-        </Space>
-      ),
-    },
-  ];
+        
+        loadData();
+    }, []);
 
-  return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">数据集管理</h1>
-        <Button type="primary" icon={<Plus className="w-4 h-4" />}>
-          添加数据集
-        </Button>
-      </div>
+    // 获取当前选中的项目
+    const getSelectedItem = () => {
+        return selectedDataset;
+    };
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card>
-          <div className="text-center">
-            <h3 className="text-lg font-medium mb-2">总数据集数量</h3>
-            <p className="text-3xl font-bold text-blue-600">3</p>
-          </div>
-        </Card>
-        <Card>
-          <div className="text-center">
-            <h3 className="text-lg font-medium mb-2">总记录数</h3>
-            <p className="text-3xl font-bold text-green-600">3.5M</p>
-          </div>
-        </Card>
-        <Card>
-          <div className="text-center">
-            <h3 className="text-lg font-medium mb-2">存储使用</h3>
-            <Progress type="circle" percent={75} width={80} />
-          </div>
-        </Card>
-      </div>
+    // 设置当前选中的项目
+    const setSelectedItem = (item: QaDataset | null) => {
+        setSelectedDataset(item);
+    };
 
-      <Table
-        columns={columns}
-        dataSource={mockDatasets}
-        rowKey="id"
-        pagination={{
-          total: mockDatasets.length,
-          pageSize: 10,
-          showSizeChanger: true,
-          showQuickJumper: true,
-        }}
-      />
-    </div>
-  );
+    // 创建新数据集
+    const handleCreateDataset = () => {
+        console.log('创建新数据集');
+        // 实际应用中，这里应该打开创建数据集的表单
+    };
+
+    // 创建问答对
+    const handleCreateQaPair = () => {
+        setEditingQaPair(undefined);
+        setShowQaPairDialog(true);
+    };
+
+    // 编辑问答对
+    const handleEditQaPair = (pair: QaPair) => {
+        setEditingQaPair(pair);
+        setShowQaPairDialog(true);
+    };
+
+    // 删除问答对
+    const handleDeleteQaPair = (pairId: string) => {
+        console.log('删除问答对:', pairId);
+        // 实际应用中，这里应该调用API删除问答对
+    };
+
+    // 保存问答对
+    const handleSaveQaPair = (qaPair: Partial<QaPair>) => {
+        console.log('保存问答对:', qaPair);
+        setShowQaPairDialog(false);
+        // 实际应用中，这里应该调用API保存问答对
+    };
+
+    // 管理助手绑定
+    const handleLinkAssistant = () => {
+        setShowAssistantLinkDialog(true);
+    };
+
+    // 保存助手绑定
+    const handleSaveAssistantLinks = (linkedAssistants: AssistantItem[]) => {
+        console.log('保存助手绑定:', linkedAssistants);
+        setShowAssistantLinkDialog(false);
+        // 实际应用中，这里应该调用API更新数据集的助手绑定
+    };
+
+    // 拆分问答
+    const handleSplitQa = () => {
+        setShowQaSplitDialog(true);
+    };
+
+    // 保存拆分的问答对
+    const handleSaveSplitQaPairs = (qaPairs: Partial<QaPair>[]) => {
+        console.log('保存拆分的问答对:', qaPairs);
+        setShowQaSplitDialog(false);
+        // 实际应用中，这里应该调用API保存拆分的问答对
+    };
+
+    // 渲染模块内容
+    const renderModuleContent = () => {
+        if (isLoading) {
+            return <DatasetsListSkeleton rowCount={5} />;
+        } else if (datasetsData.length === 0) {
+            return <EmptyDatasetsState onCreateNew={handleCreateDataset} />;
+        } else {
+            return (
+                <DatasetsList 
+                    datasets={datasetsData} 
+                    selectedItem={selectedDataset} 
+                    setSelectedItem={setSelectedDataset} 
+                />
+            );
+        }
+    };
+
+    // 模块标题
+    const getModuleTitle = () => {
+        return '问答数据集管理';
+    };
+
+    // 模块描述
+    const getModuleDescription = () => {
+        return '管理问答数据集，支持问答拆分和助手绑定';
+    };
+
+    // 主要操作按钮
+    const getPrimaryActions = () => {
+        return [
+            {
+                icon: <Plus size={20} />,
+                label: '新建数据集',
+                onClick: handleCreateDataset
+            },
+            {
+                icon: <Upload size={20} />,
+                label: '导入问答数据',
+                onClick: () => console.log('导入问答数据')
+            },
+            {
+                icon: <FilePlus size={20} />,
+                label: '添加问答对',
+                onClick: handleCreateQaPair,
+                disabled: !selectedDataset
+            }
+        ];
+    };
+
+    // Tab组件
+    const tabsComponent = (
+        <TabsContainer>
+            <TabButton 
+                active={activeModule === 'datasets'} 
+                onClick={() => setActiveModule('datasets')}
+            >
+                问答数据集
+            </TabButton>
+        </TabsContainer>
+    );
+
+    // 样式定义
+    const containerStyle = {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        overflow: 'hidden',
+        backgroundColor: '#f3f4f6',
+        height: '100vh' // 确保容器占满整个视窗高度
+    };
+
+    const contentContainerStyle = {
+        flex: 1,
+        display: 'flex',
+        overflow: 'hidden',
+        padding: '1.5rem 1.5rem 1.5rem 1.5rem'
+    };
+
+    const mainContentStyle = {
+        width: getSelectedItem() ? 'calc(50% - 0.75rem)' : '100%',
+        overflow: 'auto',
+        transition: 'width 0.3s ease',
+        backgroundColor: 'white',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        padding: '1.25rem'
+    };
+
+    const detailPanelStyle = {
+        width: 'calc(50% - 0.75rem)',
+        backgroundColor: 'white',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        transition: 'all 0.3s ease',
+        marginLeft: '1.5rem',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        overflow: 'hidden',
+        maxHeight: 'calc(100vh - 135px)'
+    };
+
+    return (
+        <div style={containerStyle}>
+            <PageHeader
+                parentTitle="知识库管理"
+                title={getModuleTitle()}
+                description={getModuleDescription()}
+                primaryActions={getPrimaryActions()}
+                filterComponent={tabsComponent}
+                username={state.username}
+            />
+            
+            <div style={contentContainerStyle}>
+                <div style={mainContentStyle}>
+                    <div className="mt-4">
+                        {renderModuleContent()}
+                    </div>
+                </div>
+
+                {getSelectedItem() && !isLoading && (
+                    <div style={detailPanelStyle}>
+                        <DatasetDetailPanel 
+                            dataset={getSelectedItem() as QaDataset} 
+                            onClose={() => setSelectedItem(null)}
+                            onCreatePair={handleCreateQaPair}
+                            onEditPair={handleEditQaPair}
+                            onDeletePair={handleDeleteQaPair}
+                            onLinkAssistant={handleLinkAssistant}
+                            onSplitQa={handleSplitQa}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* 问答对话框 */}
+            {showQaPairDialog && (
+                <QaPairDialog 
+                    isOpen={showQaPairDialog}
+                    onClose={() => setShowQaPairDialog(false)}
+                    onSave={handleSaveQaPair}
+                    qaPair={editingQaPair}
+                />
+            )}
+
+            {/* 助手绑定对话框 */}
+            {showAssistantLinkDialog && selectedDataset && (
+                <AssistantLinkDialog 
+                    isOpen={showAssistantLinkDialog}
+                    onClose={() => setShowAssistantLinkDialog(false)}
+                    onSave={handleSaveAssistantLinks}
+                    dataset={selectedDataset}
+                />
+            )}
+
+            {/* 问答拆分对话框 */}
+            {showQaSplitDialog && selectedDataset && (
+                <QaSplitDialog 
+                    isOpen={showQaSplitDialog}
+                    onClose={() => setShowQaSplitDialog(false)}
+                    onSave={handleSaveSplitQaPairs}
+                    datasetId={selectedDataset.id}
+                />
+            )}
+        </div>
+    );
 };
 
 export default Datasets;

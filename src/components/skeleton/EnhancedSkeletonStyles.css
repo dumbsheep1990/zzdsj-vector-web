@@ -1,0 +1,119 @@
+/* 增强版骨架屏样式 */
+.skeleton-enhanced {
+  position: relative;
+  overflow: hidden;
+  background: rgba(240, 245, 250, 0.25);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  border: 1px solid rgba(200, 200, 200, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* 渐变边框效果 - 使用品牌色调 */
+.skeleton-gradient-border-enhanced {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.skeleton-gradient-border-enhanced::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(0, 201, 255, 0.3), rgba(146, 254, 157, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: rotateGradient 8s linear infinite;
+}
+
+@keyframes rotateGradient {
+  0% {
+    background: linear-gradient(135deg, rgba(0, 201, 255, 0.3), rgba(146, 254, 157, 0.3));
+  }
+  25% {
+    background: linear-gradient(180deg, rgba(0, 201, 255, 0.3), rgba(146, 254, 157, 0.3));
+  }
+  50% {
+    background: linear-gradient(225deg, rgba(0, 201, 255, 0.3), rgba(146, 254, 157, 0.3));
+  }
+  75% {
+    background: linear-gradient(270deg, rgba(0, 201, 255, 0.3), rgba(146, 254, 157, 0.3));
+  }
+  100% {
+    background: linear-gradient(315deg, rgba(0, 201, 255, 0.3), rgba(146, 254, 157, 0.3));
+  }
+}
+
+/* 改进的脉冲效果 */
+.skeleton-pulse-enhanced {
+  position: relative;
+  overflow: hidden;
+  background: rgba(229, 231, 235, 0.2);
+  border-radius: 6px;
+}
+
+.skeleton-pulse-enhanced::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -150%;
+  bottom: 0;
+  left: -150%;
+  background: linear-gradient(90deg, 
+    rgba(0, 201, 255, 0) 0%, 
+    rgba(0, 201, 255, 0.1) 50%, 
+    rgba(146, 254, 157, 0) 100%);
+  animation: shimmer 1.8s infinite;
+}
+
+/* 阴影效果增强 */
+.shadow-hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05),
+              0 0 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.shadow-hover:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08),
+              0 0 3px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* 模拟磨砂玻璃效果增强 */
+.skeleton-glass-enhanced {
+  background: rgba(250, 250, 250, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(200, 200, 200, 0.05);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 20px 30px rgba(0, 0, 0, 0.04);
+}
+
+/* 品牌色彩渐变背景 */
+.skeleton-brand-gradient {
+  background: linear-gradient(135deg, rgba(0, 201, 255, 0.03), rgba(146, 254, 157, 0.03));
+}
+
+/* 顶部渐变光晕效果 */
+.skeleton-glow-top {
+  position: relative;
+}
+
+.skeleton-glow-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, rgb(0, 201, 255, 0.7), rgb(146, 254, 157, 0.7));
+  border-radius: 2px 2px 0 0;
+  box-shadow: 0 0 8px 1px rgba(0, 201, 255, 0.3);
+  opacity: 0.7;
+}
