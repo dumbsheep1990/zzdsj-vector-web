@@ -1,0 +1,261 @@
+import React, { useState } from 'react';
+import { TabsContainer, TabButton } from '../components/ui/Tabs';
+import DatasetsList from '../components/modules/datasets/DatasetsList';
+import DatasetsListSkeleton from '../components/skeleton/DatasetsListSkeleton';
+import EmptyDatasetsState from '../components/modules/datasets/EmptyDatasetsState';
+import DatasetDetailPanel from '../components/modules/datasets/DatasetDetailPanel';
+import QaPairDialog from '../components/modules/datasets/QaPairDialog';
+import AssistantLinkDialog from '../components/modules/datasets/AssistantLinkDialog';
+import QaSplitDialog from '../components/modules/datasets/QaSplitDialog';
+import PageHeader from '../components/layout/PageHeader';
+import { QaDataset, AssistantItem } from '../utils/types';
+import { Plus, Upload, FileUp, FilePlus } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
+
+// 导入自定义hooks
+import { useDatasetsData } from '../hooks/datasets/useDatasetsData';
+import { useQaPairs } from '../hooks/datasets/useQaPairs';
+import { useAssistantLink } from '../hooks/datasets/useAssistantLink';
+import { useQaSplit } from '../hooks/datasets/useQaSplit';
+
+const Datasets: React.FC = () => {
+    const [activeModule, setActiveModule] = useState<'datasets'>('datasets');
+    const { state } = useAppContext();
+    
+    // 使用数据集数据管理hook
+    const { 
+        datasetsData, 
+        selectedDataset, 
+        isLoading, 
+        setSelectedDataset,
+        createDataset,
+        updateDataset,
+        deleteDataset,
+        refreshData
+    } = useDatasetsData();
+
+    // 使用问答对管理hook
+    const {
+        showQaPairDialog,
+        editingQaPair,
+        createQaPair,
+        editQaPair,
+        closeQaPairDialog,
+        saveQaPair,
+        deleteQaPair
+    } = useQaPairs(selectedDataset, updateDataset);
+
+    // 使用助手绑定管理hook
+    const {
+        showAssistantLinkDialog,
+        openAssistantLinkDialog,
+        closeAssistantLinkDialog,
+        saveAssistantLinks
+    } = useAssistantLink(selectedDataset, updateDataset);
+
+    // 使用问答拆分管理hook
+    const {
+        showQaSplitDialog,
+        openQaSplitDialog,
+        closeQaSplitDialog,
+        saveSplitQaPairs
+    } = useQaSplit(selectedDataset, updateDataset);
+
+    // 获取当前选中的项目
+    const getSelectedItem = () => {
+        return selectedDataset;
+    };
+
+    // 设置当前选中的项目
+    const setSelectedItem = (item: QaDataset | null) => {
+        setSelectedDataset(item);
+    };
+
+    // 创建新数据集
+    const handleCreateDataset = () => {
+        // 这里应该打开一个创建数据集的表单
+        // 简化版本直接创建
+        createDataset('新数据集', '新数据集描述');
+    };
+
+    // 渲染模块内容
+    const renderModuleContent = () => {
+        if (isLoading) {
+            return <DatasetsListSkeleton />;
+        }
+
+        if (datasetsData.length === 0) {
+            return <EmptyDatasetsState onCreateDataset={handleCreateDataset} />;
+        }
+
+        return (
+            <DatasetsList 
+                datasets={datasetsData}
+                selectedDataset={selectedDataset}
+                onSelectDataset={setSelectedDataset}
+            />
+        );
+    };
+
+    // 模块标题
+    const getModuleTitle = () => {
+        return '问答数据集管理';
+    };
+
+    // 模块描述
+    const getModuleDescription = () => {
+        return '管理问答数据集，支持数据集的创建、编辑、删除和导入导出';
+    };
+
+    // 主要操作按钮
+    const getPrimaryActions = () => {
+        return [
+            {
+                icon: <Plus size={16} />,
+                text: '新建数据集',
+                onClick: handleCreateDataset,
+                primary: true
+            },
+            {
+                icon: <Upload size={16} />,
+                text: '导入数据集',
+                onClick: () => console.log('导入数据集'),
+                primary: false
+            },
+            {
+                icon: <FileUp size={16} />,
+                text: '导出数据集',
+                onClick: () => console.log('导出数据集'),
+                primary: false,
+                disabled: !selectedDataset
+            },
+            {
+                icon: <FilePlus size={16} />,
+                text: '添加问答对',
+                onClick: createQaPair,
+                primary: false,
+                disabled: !selectedDataset
+            }
+        ];
+    };
+
+    // 标签组件
+    const tabsComponent = (
+        <TabsContainer>
+            <TabButton 
+                active={activeModule === 'datasets'} 
+                onClick={() => setActiveModule('datasets')}
+            >
+                问答数据集
+            </TabButton>
+        </TabsContainer>
+    );
+
+    // 样式定义
+    const containerStyle = {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        overflow: 'hidden',
+        backgroundColor: '#f3f4f6',
+        height: '100vh' // 确保容器占满整个视窗高度
+    };
+
+    const contentContainerStyle = {
+        flex: 1,
+        display: 'flex',
+        overflow: 'hidden',
+        padding: '1.5rem 1.5rem 1.5rem 1.5rem'
+    };
+
+    const mainContentStyle = {
+        width: getSelectedItem() ? 'calc(50% - 0.75rem)' : '100%',
+        overflow: 'auto',
+        transition: 'width 0.3s ease',
+        backgroundColor: 'white',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        padding: '1.25rem'
+    };
+
+    const detailPanelStyle = {
+        width: 'calc(50% - 0.75rem)',
+        backgroundColor: 'white',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        transition: 'all 0.3s ease',
+        marginLeft: '1.5rem',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        overflow: 'hidden',
+        maxHeight: 'calc(100vh - 135px)'
+    };
+
+    return (
+        <div style={containerStyle}>
+            <PageHeader
+                parentTitle="知识库管理"
+                title={getModuleTitle()}
+                description={getModuleDescription()}
+                primaryActions={getPrimaryActions()}
+                filterComponent={tabsComponent}
+                username={state.username}
+            />
+            
+            <div style={contentContainerStyle}>
+                <div style={mainContentStyle}>
+                    <div className="mt-4">
+                        {renderModuleContent()}
+                    </div>
+                </div>
+
+                {getSelectedItem() && !isLoading && (
+                    <div style={detailPanelStyle}>
+                        <DatasetDetailPanel 
+                            dataset={getSelectedItem() as QaDataset} 
+                            onClose={() => setSelectedItem(null)}
+                            onCreatePair={createQaPair}
+                            onEditPair={editQaPair}
+                            onDeletePair={deleteQaPair}
+                            onLinkAssistant={openAssistantLinkDialog}
+                            onSplitQa={openQaSplitDialog}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* 问答对话框 */}
+            {showQaPairDialog && (
+                <QaPairDialog 
+                    isOpen={showQaPairDialog}
+                    onClose={closeQaPairDialog}
+                    onSave={saveQaPair}
+                    qaPair={editingQaPair}
+                />
+            )}
+
+            {/* 助手绑定对话框 */}
+            {showAssistantLinkDialog && selectedDataset && (
+                <AssistantLinkDialog 
+                    isOpen={showAssistantLinkDialog}
+                    onClose={closeAssistantLinkDialog}
+                    onSave={saveAssistantLinks}
+                    dataset={selectedDataset}
+                />
+            )}
+
+            {/* 问答拆分对话框 */}
+            {showQaSplitDialog && selectedDataset && (
+                <QaSplitDialog 
+                    isOpen={showQaSplitDialog}
+                    onClose={closeQaSplitDialog}
+                    onSave={saveSplitQaPairs}
+                    datasetId={selectedDataset.id}
+                />
+            )}
+        </div>
+    );
+};
+
+export default Datasets;

@@ -1,0 +1,302 @@
+import React from 'react';
+import { TabsContainer, TabButton } from '../components/ui/Tabs';
+import VectorsList from '../components/modules/vectors/VectorsList';
+import VectorsListSkeleton from '../components/skeleton/VectorsListSkeleton';
+import EmptyVectorsState from '../components/modules/vectors/EmptyVectorsState';
+import KeywordsList from '../components/modules/vectors/KeywordsList';
+import SearchRecordsList from '../components/modules/vectors/SearchRecordsList';
+import DetailPanel from '../components/layout/DetailPanel';
+import PageHeader from '../components/layout/PageHeader';
+import { VectorItem, KeywordItem, SearchRecordItem } from '../utils/types';
+import { Upload, RefreshCw, Download } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
+
+// 导入自定义hooks
+import { 
+  useVectorsData, 
+  useKeywordsData, 
+  useSearchRecordsData, 
+  useVectorModules,
+  VectorModuleType 
+} from '../hooks/vectors';
+
+/**
+ * 向量管理页面组件
+ * 
+ * 使用自定义hooks管理状态，组件本身专注于渲染逻辑
+ */
+const Vectors: React.FC = () => {
+    // 使用应用上下文
+    const { state } = useAppContext();
+    
+    // 使用模块管理hook
+    const { 
+        activeModule, 
+        switchModule, 
+        getModuleTitle, 
+        getModuleDescription 
+    } = useVectorModules();
+    
+    // 使用向量数据hook
+    const { 
+        vectorData, 
+        selectedVector, 
+        isLoading: isVectorsLoading, 
+        setSelectedVector,
+        refreshData: refreshVectors
+    } = useVectorsData();
+    
+    // 使用关键词数据hook
+    const { 
+        keywordsData, 
+        selectedKeyword, 
+        isLoading: isKeywordsLoading, 
+        setSelectedKeyword,
+        importKeywords
+    } = useKeywordsData();
+    
+    // 使用搜索记录数据hook
+    const { 
+        searchRecordsData, 
+        selectedSearchRecord, 
+        isLoading: isSearchRecordsLoading, 
+        setSelectedSearchRecord,
+        exportSearchRecords
+    } = useSearchRecordsData();
+
+    // 获取当前选中的项目（根据当前活动模块）
+    const getSelectedItem = () => {
+        switch (activeModule) {
+            case 'vectors':
+                return selectedVector;
+            case 'keywords':
+                return selectedKeyword;
+            case 'searchRecords':
+                return selectedSearchRecord;
+            default:
+                return null;
+        }
+    };
+
+    // 设置当前选中的项目（根据当前活动模块）
+    const setSelectedItem = (item: VectorItem | KeywordItem | SearchRecordItem | null) => {
+        switch (activeModule) {
+            case 'vectors':
+                setSelectedVector(item as VectorItem | null);
+                break;
+            case 'keywords':
+                setSelectedKeyword(item as KeywordItem | null);
+                break;
+            case 'searchRecords':
+                setSelectedSearchRecord(item as SearchRecordItem | null);
+                break;
+        }
+    };
+
+    // 处理创建新项目
+    const handleCreateNew = () => {
+        // 处理创建新向量库的逻辑
+        console.log('创建新向量库');
+        // 这里可以打开创建表单或对话框
+    };
+
+    // 检查当前模块是否在加载状态
+    const isLoading = () => {
+        switch (activeModule) {
+            case 'vectors':
+                return isVectorsLoading;
+            case 'keywords':
+                return isKeywordsLoading;
+            case 'searchRecords':
+                return isSearchRecordsLoading;
+            default:
+                return false;
+        }
+    };
+
+    // 渲染不同模块的内容
+    const renderModuleContent = () => {
+        switch (activeModule) {
+            case 'vectors':
+                if (isVectorsLoading) {
+                    return <VectorsListSkeleton rowCount={5} />;
+                } else if (vectorData.length === 0) {
+                    return <EmptyVectorsState onCreateNew={handleCreateNew} />;
+                } else {
+                    return (
+                        <VectorsList 
+                            data={vectorData} 
+                            onSelect={setSelectedVector} 
+                            selectedId={selectedVector?.id} 
+                        />
+                    );
+                }
+            case 'keywords':
+                if (isKeywordsLoading) {
+                    return <VectorsListSkeleton rowCount={5} />;
+                } else if (keywordsData.length === 0) {
+                    return <EmptyVectorsState onCreateNew={() => console.log('创建新关键词')} />;
+                } else {
+                    return (
+                        <KeywordsList 
+                            data={keywordsData} 
+                            onSelect={setSelectedKeyword} 
+                            selectedId={selectedKeyword?.id} 
+                        />
+                    );
+                }
+            case 'searchRecords':
+                if (isSearchRecordsLoading) {
+                    return <VectorsListSkeleton rowCount={5} />;
+                } else if (searchRecordsData.length === 0) {
+                    return <EmptyVectorsState onCreateNew={() => console.log('没有搜索记录')} />;
+                } else {
+                    return (
+                        <SearchRecordsList 
+                            data={searchRecordsData} 
+                            onSelect={setSelectedSearchRecord} 
+                            selectedId={selectedSearchRecord?.id} 
+                        />
+                    );
+                }
+            default:
+                return null;
+        }
+    };
+
+    // 获取主要操作按钮
+    const getPrimaryActions = () => {
+        switch (activeModule) {
+            case 'vectors':
+                return [
+                    {
+                        icon: <Upload size={20} />,
+                        label: '创建向量库',
+                        onClick: handleCreateNew
+                    },
+                    {
+                        icon: <RefreshCw size={20} />,
+                        label: '更新向量',
+                        onClick: refreshVectors
+                    }
+                ];
+            case 'keywords':
+                return [
+                    {
+                        icon: <Upload size={20} />,
+                        label: '导入关键词',
+                        onClick: () => importKeywords([]) // 这里应该打开一个导入对话框
+                    }
+                ];
+            case 'searchRecords':
+                return [
+                    {
+                        icon: <Download size={20} />,
+                        label: '导出记录',
+                        onClick: exportSearchRecords
+                    }
+                ];
+            default:
+                return [];
+        }
+    };
+
+    // 标签页组件
+    const tabsComponent = (
+        <TabsContainer>
+            <TabButton 
+                active={activeModule === 'vectors'} 
+                onClick={() => switchModule('vectors')}
+            >
+                向量数据
+            </TabButton>
+            <TabButton 
+                active={activeModule === 'keywords'} 
+                onClick={() => switchModule('keywords')}
+            >
+                关键词管理
+            </TabButton>
+            <TabButton 
+                active={activeModule === 'searchRecords'} 
+                onClick={() => switchModule('searchRecords')}
+            >
+                搜索记录
+            </TabButton>
+        </TabsContainer>
+    );
+
+    // 样式定义
+    const containerStyle = {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        overflow: 'hidden',
+        backgroundColor: '#f3f4f6',
+        height: '100vh' // 确保容器占满整个视窗高度
+    };
+
+    const contentContainerStyle = {
+        flex: 1,
+        display: 'flex',
+        overflow: 'hidden',
+        padding: '1.5rem 1.5rem 1.5rem 1.5rem' // 增加顶部间距
+    };
+
+    const mainContentStyle = {
+        width: getSelectedItem() ? 'calc(50% - 0.75rem)' : '100%',
+        overflow: 'auto',
+        transition: 'width 0.3s ease',
+        backgroundColor: 'white',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        padding: '1.25rem'
+    };
+
+    const detailPanelStyle = {
+        width: 'calc(50% - 0.75rem)',
+        backgroundColor: 'white',
+        height: '100%',  // 确保抽屉面板占满整个高度
+        display: 'flex',
+        flexDirection: 'column' as const,
+        transition: 'all 0.3s ease',
+        marginLeft: '1.5rem',
+        borderRadius: '0.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        overflow: 'hidden', // 防止溢出
+        maxHeight: 'calc(100vh - 135px)' // 限制最大高度，保持在视口内
+    };
+
+    // 渲染页面
+    return (
+        <div style={containerStyle}>
+            <PageHeader
+                parentTitle="知识库管理"
+                title={getModuleTitle()}
+                description={getModuleDescription()}
+                primaryActions={getPrimaryActions()}
+                filterComponent={tabsComponent}
+                username={state.username}
+            />
+            
+            <div style={contentContainerStyle}>
+                <div style={mainContentStyle}>
+                    <div className="mt-4">
+                        {renderModuleContent()}
+                    </div>
+                </div>
+
+                {getSelectedItem() && !isLoading() && (
+                    <div style={detailPanelStyle}>
+                        <DetailPanel 
+                            selectedItem={getSelectedItem()} 
+                            setSelectedItem={setSelectedItem}
+                            activeSection="vectors"
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default Vectors;

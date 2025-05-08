@@ -140,3 +140,6 @@ export interface AppState {
     darkMode: boolean;
     username: string;
 }
+
+// 导出QA相关类型
+export * from './qaTypes';
