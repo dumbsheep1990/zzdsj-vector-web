@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, Tooltip, Tag, message, Button, Input, Empty } from 'antd';
+import React from 'react';
+import { Menu, Tooltip, Tag, Button, Input, Empty } from 'antd';
 import PageHeader from '../components/layout/PageHeader';
 import { QuestionList } from '../components/modules/qa/QuestionList';
 import { QASettings } from '../components/modules/qa/QASettings';
@@ -12,140 +12,39 @@ import {
   PlusOutlined,
   SearchOutlined
 } from '@ant-design/icons';
-import { mockAssistants } from '../utils/mockData';
+import { useQaPage } from '../hooks/qa/useQaPage';
+import { QaAssistant } from '../hooks/qa/useQaAssistants';
 
-// 类型定义
-interface Assistant {
-  id: string;
-  name: string;
-  description: string;
-  status: 'online' | 'offline' | 'training';
-  questionCount: number;
-  documentCount: number;
-  config: {
-    model: string;
-    temperature: number;
-    maxTokens: number;
-  };
-  type: 'qa' | 'chat' | 'custom';
-  createTime: string;
-  updateTime: string;
-  capabilities: string[];
-}
-
-interface Question {
-  id: string;
-  title: string;
-  content: string;
-  status: 'active' | 'archived';
-  createdAt: string;
-  updatedAt: string;
-  tags: string[];
-}
 
 const QAManagement: React.FC = () => {
-  const [assistants, setAssistants] = useState<Assistant[]>([]);
-  const [selectedAssistant, setSelectedAssistant] = useState<Assistant | null>(null);
-  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'questions' | 'settings'>('questions');
-  const [loading, setLoading] = useState(true);
-  const [assistantsLoading, setAssistantsLoading] = useState(true);
-  const [isAddQuestionModalVisible, setIsAddQuestionModalVisible] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [hasSearchResults, setHasSearchResults] = useState(true);
-
-  // 初始化加载助手列表
-  useEffect(() => {
-    const loadAssistants = async () => {
-      setLoading(true);
-      setAssistantsLoading(true);
-      try {
-        // 模拟网络请求延迟
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // TODO: 替换为实际的API调用
-        const data = mockAssistants;
-        setAssistants(data);
-        
-        // 如果有助手，选中第一个
-        if (data.length > 0) {
-          setSelectedAssistant(data[0]);
-        }
-        
-        // 先停止助手列表的加载状态，然后停止整体加载状态
-        setTimeout(() => {
-          setAssistantsLoading(false);
-          setTimeout(() => {
-            setLoading(false);
-          }, 300);
-        }, 500);
-      } catch (error) {
-        console.error('加载助手数据失败:', error);
-        message.error('加载助手列表失败，请刷新页面重试');
-        setAssistantsLoading(false);
-        setLoading(false);
-      }
-    };
-
-    loadAssistants();
-  }, []);
-
-  // 获取助手状态标签颜色
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'online':
-        return 'success';
-      case 'offline':
-        return 'default';
-      case 'training':
-        return 'processing';
-      default:
-        return 'default';
-    }
-  };
-
-  // 处理助手选择
-  const handleAssistantSelect = (assistantId: string) => {
-    const assistant = assistants.find(a => a.id === assistantId);
-    setSelectedAssistant(assistant || null);
-  };
-
-  // 处理问题选择
-  const handleQuestionSelect = (questionId: string) => {
-    setSelectedQuestion(questionId);
-    setActiveTab('settings');
-  };
-
-  // 处理标签切换
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as 'questions' | 'settings');
-  };
-
-  // 处理新增问题
-  const handleAddQuestion = (values: {
-    question: string;
-    answer: string;
-    mode: 'manual' | 'smart';
-  }) => {
-    // TODO: 调用API添加问题
-    console.log('New question:', values);
-    message.success('问题添加成功');
-    setIsAddQuestionModalVisible(false);
-  };
-
-  // 处理搜索
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    // 模拟搜索结果
-    setHasSearchResults(value === '' || Math.random() > 0.3);
-    // TODO: 实现实际的搜索功能
-  };
-
-  // 处理创建助手
-  const handleCreateAssistant = () => {
-    message.info('跳转到助手创建页面');
-    // TODO: 跳转到助手创建页面
-  };
+  // 使用整合式问答管理页面hook
+  const {
+    // 数据状态
+    assistants,
+    selectedAssistant,
+    selectedAssistantId,
+    questions,
+    selectedQuestion,
+    selectedQuestionId,
+    activeTab,
+    isLoading,
+    isAddQuestionModalVisible,
+    searchText,
+    hasSearchResults,
+    statistics,
+    
+    // 操作方法
+    handleAssistantSelect,
+    handleQuestionSelect,
+    handleTabChange,
+    handleAddQuestion,
+    handleSearch,
+    handleCreateAssistant,
+    getStatusColor,
+    showAddQuestionModal,
+    hideAddQuestionModal,
+    clearSearchAndRestoreResults,
+  } = useQaPage();
 
   // 处理菜单选择
   const handleMenuSelect = ({ key }: { key: string }) => {
@@ -154,7 +53,7 @@ const QAManagement: React.FC = () => {
 
   // 渲染助手列表骨架屏
   const renderAssistantSkeletons = () => {
-    return Array(5).fill(0).map((_, index) => (
+    return Array(5).fill(null).map((_, index) => (
       <AssistantListItemSkeleton key={index} />
     ));
   };
@@ -162,29 +61,26 @@ const QAManagement: React.FC = () => {
   // 渲染标签页内容
   const renderTabContent = () => {
     if (!selectedAssistant) return null;
-
-    switch (activeTab) {
-      case 'questions':
-        return (
-          <QuestionList 
-            assistantId={selectedAssistant.id}
-            onSelectQuestion={handleQuestionSelect}
-          />
-        );
-      case 'settings':
-        return (
-          <QASettings 
-            assistantId={selectedAssistant.id}
-            selectedQuestion={selectedQuestion}
-          />
-        );
-      default:
-        return null;
+    
+    if (activeTab === 'questions') {
+      return (
+        <QuestionList 
+          assistantId={selectedAssistant.id}
+          onSelectQuestion={handleQuestionSelect}
+        />
+      );
+    } else {
+      return (
+        <QASettings 
+          assistantId={selectedAssistant.id}
+          selectedQuestion={selectedQuestionId}
+        />
+      );
     }
   };
 
   // 生成菜单项 - 使用原始样式
-  const renderAssistantMenuItem = (assistant: Assistant) => (
+  const renderAssistantMenuItem = (assistant: QaAssistant) => (
     <Menu.Item key={assistant.id}>
       <div className={`py-4 px-4 transition-all duration-300 rounded-xl border ${
         selectedAssistant?.id === assistant.id 
@@ -259,8 +155,7 @@ const QAManagement: React.FC = () => {
 
   // 渲染内容区域
   const renderMainContent = () => {
-    // 当整体页面在加载时，显示骨架屏
-    if (loading) {
+    if (isLoading) {
       return <QAManagementSkeleton />;
     }
 
@@ -269,7 +164,7 @@ const QAManagement: React.FC = () => {
       <div className="flex h-full">
         {/* 左侧助手列表 */}
         <div className="w-[360px] border-r border-gray-100 h-full overflow-hidden">
-          {assistantsLoading ? (
+          {isLoading ? (
             // 助手列表加载中，显示骨架屏
             <div className="py-2 px-3 h-full overflow-auto">
               {renderAssistantSkeletons()}
@@ -308,14 +203,15 @@ const QAManagement: React.FC = () => {
                   <DatabaseOutlined className="mr-2 text-blue-500" />
                   助手列表
                 </h3>
-                {assistants.length === 0 && (
+                {assistants.length === 0 && !isLoading && (
                   <Button 
                     type="primary" 
                     size="small"
+                    icon={<PlusOutlined />}
+                    className="bg-blue-500 hover:bg-blue-600 border-none shadow-sm hover:shadow-md transition-all"
                     onClick={handleCreateAssistant}
-                    className="bg-blue-500 hover:bg-blue-600 border-none text-xs px-3"
                   >
-                    创建助手
+                    新增
                   </Button>
                 )}
               </div>
@@ -344,7 +240,7 @@ const QAManagement: React.FC = () => {
                     type="primary" 
                     icon={<PlusOutlined />}
                     className="bg-blue-500 hover:bg-blue-600 border-none shadow-sm hover:shadow-md transition-all"
-                    onClick={() => setIsAddQuestionModalVisible(true)}
+                    onClick={showAddQuestionModal}
                   >
                     新增问题
                   </Button>
@@ -356,10 +252,7 @@ const QAManagement: React.FC = () => {
                   {!hasSearchResults && searchText ? (
                     <EmptyStateDisplay 
                       type="no-search-result"
-                      onAction={() => {
-                        setSearchText('');
-                        setHasSearchResults(true);
-                      }}
+                      onAction={clearSearchAndRestoreResults}
                     />
                   ) : (
                     renderTabContent()
@@ -401,7 +294,7 @@ const QAManagement: React.FC = () => {
       {/* 新增问题弹窗 */}
       <AddQuestionModal
         open={isAddQuestionModalVisible}
-        onCancel={() => setIsAddQuestionModalVisible(false)}
+        onCancel={hideAddQuestionModal}
         onOk={handleAddQuestion}
       />
     </div>

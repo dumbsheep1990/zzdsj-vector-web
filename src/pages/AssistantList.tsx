@@ -1,188 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { List, Modal, Form, message } from 'antd';
+import React from 'react';
+import { List, Modal, Form } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+
+// 布局组件
 import PageHeader from '../components/layout/PageHeader';
+
+// 助手相关组件
 import { 
   AssistantCard, 
   AssistantFilter, 
   AssistantForm, 
   ModifiedAssistant as Assistant
 } from '../components/modules/assistants';
-import AssistantTypeSelector, { AssistantType } from '../components/modules/assistants/AssistantTypeSelector';
+import AssistantTypeSelector from '../components/modules/assistants/AssistantTypeSelector';
 import { AssistantListSkeleton } from '../components/skeleton';
-import { mockAssistants } from '../utils/mockData';
 
-// Helper function to map old types to AssistantType
-const mapOldTypeToAssistantType = (oldType: 'qa' | 'chat' | 'custom'): AssistantType => {
-  switch (oldType) {
-    case 'qa': return 'knowledge';
-    case 'chat': return 'regular';
-    case 'custom': return 'planning';
-  }
-};
+// 自定义Hooks - 使用集成的助手页面管理Hook
+import { useAssistantPage } from '../hooks/assistants/useAssistantPage';
 
+/**
+ * 助手列表页面组件
+ * 展示所有助手，并提供创建、编辑、删除和状态管理功能
+ */
 const AssistantList: React.FC = () => {
-  // 状态管理
-  const [loading, setLoading] = useState(true);
-  const [assistants, setAssistants] = useState<Assistant[]>([]);
-  const [isTypeSelectModalVisible, setIsTypeSelectModalVisible] = useState(false);
-  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [selectedAssistantType, setSelectedAssistantType] = useState<AssistantType | null>(null);
-  const [currentAssistant, setCurrentAssistant] = useState<Assistant | null>(null);
+  // 使用Form实例
   const [form] = Form.useForm();
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'alphabetical'>('newest');
-  const [searchText] = useState<string>('');
   
-  // 加载数据
-  useEffect(() => {
-    const loadAssistants = async () => {
-      try {
-        // 模拟网络请求延迟
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // 模拟数据处理
-        const data = mockAssistants.map(a => ({
-          ...a,
-          model: a.config.model,
-          status: a.status === 'training' ? 'offline' : a.status,
-          type: mapOldTypeToAssistantType(a.type) // Map the type here
-        }));
-        
-        setAssistants(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('加载助手数据失败:', error);
-        message.error('加载助手列表失败，请刷新页面重试');
-        setLoading(false);
-      }
-    };
+  // 使用集成的助手页面管理Hook
+  const {
+    // 数据状态
+    assistants,
+    filteredAssistants,
+    isLoading,
+    isDeleting,
+    isSubmitting,
+    error,
+    errors,
+    filterOptions,
+    currentAssistant,
     
-    loadAssistants();
-  }, []);
-
-  // 切换在线状态
-  const handleStatusChange = (id: string, status: 'online' | 'offline') => {
-    setAssistants(prevAssistants => 
-      prevAssistants.map(assistant => 
-        assistant.id === id 
-          ? { ...assistant, status }
-          : assistant
-      )
-    );
-    message.success(`${status === 'online' ? '已启用' : '已停用'}助手服务`);
-  };
-
-  // 编辑助手
-  const handleEdit = (assistant: Assistant) => {
-    setCurrentAssistant(assistant);
-    setIsEditModalVisible(true);
-  };
-
-  // 删除助手
-  const handleDelete = (id: string) => {
-    const assistant = assistants.find(a => a.id === id);
-    if (!assistant) return;
+    // 模态框状态
+    isTypeSelectModalVisible,
+    isCreateModalVisible,
+    isEditModalVisible,
+    selectedAssistantType,
     
-    Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除助手 "${assistant.name}" 吗？`,
-      okText: '确认',
-      cancelText: '取消',
-      onOk: () => {
-        setAssistants(assistants.filter(a => a.id !== id));
-        message.success('助手已删除');
-      }
-    });
+    // 方法
+    handleCreate,
+    handleTypeSelect,
+    handleDelete,
+    handleStatusChange,
+    handleFormSubmit,
+    handleFormCancel,
+    handleFilterStatusChange,
+    handleSortOrderChange,
+    getAssistantTypeTitle,
+    handleEdit,
+    _setFormValues,
+    
+    // 搜索相关
+    setSearchText
+  } = useAssistantPage();
+  
+  // 我们需要将handleEdit和_setFormValues结合起来使用
+  const handleEditWithForm = (assistant: Assistant) => {
+    handleEdit(assistant);
+    _setFormValues(assistant, form);
   };
-
-  // 打开类型选择模态框
-  const handleCreate = () => {
-    setIsTypeSelectModalVisible(true);
-  };
-
-  // 处理类型选择
-  const handleTypeSelect = (type: AssistantType) => {
-    setSelectedAssistantType(type);
-    setIsTypeSelectModalVisible(false);
-    setIsCreateModalVisible(true);
-  };
-
-  // 表单提交
-  const handleFormSubmit = (values: Partial<Assistant>) => {
-    if (isEditModalVisible && currentAssistant) {
-      // 处理编辑
-      const updatedAssistants = assistants.map(assistant => 
-        assistant.id === currentAssistant.id 
-          ? { ...assistant, ...values }
-          : assistant
-      );
-      setAssistants(updatedAssistants);
-      message.success('助手已更新');
-      setIsEditModalVisible(false);
-    } else {
-      // 处理创建
-      const newAssistant: Assistant = {
-        id: `assistant-${Date.now()}`,
-        name: values.name!,
-        description: values.description!,
-        model: values.model!,
-        status: values.status || 'offline',
-        createTime: new Date().toISOString().split('T')[0] + ' 00:00:00',
-        capabilities: values.capabilities || [],
-        type: selectedAssistantType || 'regular', // 添加助手类型
-      };
-      setAssistants([...assistants, newAssistant]);
-      message.success('助手已创建');
-      setIsCreateModalVisible(false);
-      setSelectedAssistantType(null);
-    }
-    form.resetFields();
-  };
-
-  // 关闭模态框
-  const handleFormCancel = () => {
-    setIsTypeSelectModalVisible(false);
-    setIsCreateModalVisible(false);
-    setIsEditModalVisible(false);
-    setSelectedAssistantType(null);
-    form.resetFields();
-  };
-
-  // 获取过滤后的助手列表
-  const filteredAssistants = assistants
-    .filter(a => {
-      // 根据状态筛选
-      if (filterStatus && a.status !== filterStatus) return false;
-      
-      // 根据搜索文本筛选
-      if (searchText && !a.name.toLowerCase().includes(searchText.toLowerCase())) return false;
-      
-      return true;
-    })
-    .sort((a, b) => {
-      // 根据排序方式排序
-      if (sortOrder === 'alphabetical') {
-        return a.name.localeCompare(b.name);
-      } else if (sortOrder === 'newest') {
-        // 使用 id 属性进行排序
-        return (b.id || '').localeCompare(a.id || '');
-      } else {
-        // 使用 id 属性进行排序
-        return (a.id || '').localeCompare(b.id || '');
-      }
-    });
-
-  // 获取类型标题和表单标题
-  const getAssistantTypeTitle = (type: AssistantType | null) => {
-    switch (type) {
-      case 'regular': return '普通问答助手';
-      case 'knowledge': return '知识问答助手';
-      case 'planning': return '自主规划助手';
-      default: return '新建助手';
-    }
-  };
+  
+  // 处理API错误 - 只记录错误，不阻止界面渲染
+  if (error) {
+    // 可以根据错误类型显示不同的错误信息
+    console.error('助手管理API错误:', error);
+    // 实际项目中可考虑显示错误通知或提示重试
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -190,30 +81,31 @@ const AssistantList: React.FC = () => {
         <PageHeader 
           title="助手列表" 
           parentTitle="问答助手"
-          description={loading ? '加载中...' : `共 ${assistants.length} 个助手`}
+          description={isLoading ? '加载中...' : `共 ${assistants.length} 个助手`}
           primaryActions={[
             {
               icon: <PlusOutlined />,
               label: '新建助手',
               onClick: handleCreate,
-              disabled: loading
+              disabled: isLoading
             }
           ]}
           filterComponent={
-            loading ? null : (
+            isLoading ? null : (
               <AssistantFilter 
-                filterStatus={filterStatus}
-                setFilterStatus={setFilterStatus}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
+                filterStatus={filterOptions.searchText}
+                setFilterStatus={handleFilterStatusChange}
+                sortOrder={'newest'} 
+                setSortOrder={handleSortOrderChange}
+                onSearch={(value) => setSearchText(value)}
               />
             )
           }
         />
       </div>
       
-      <div className="flex-1 min-h-0 overflow-auto bg-gray-50 p-6">
-        {loading ? (
+      <div className="flex-1 min-h-0 overflow-auto bg-gray-50 p-6" data-testid="assistant-list-container">
+        {isLoading ? (
           <AssistantListSkeleton count={8} columns={4} />
         ) : (
           <List<Assistant>
@@ -223,7 +115,7 @@ const AssistantList: React.FC = () => {
               <List.Item className="mb-3">
                 <AssistantCard
                   assistant={item}
-                  handleEdit={handleEdit}
+                  handleEdit={handleEditWithForm}
                   handleDelete={handleDelete}
                   handleStatusChange={handleStatusChange}
                 />
@@ -260,6 +152,8 @@ const AssistantList: React.FC = () => {
           assistantType={selectedAssistantType}
           onFinish={handleFormSubmit}
           onCancel={handleFormCancel}
+          errors={errors}
+          isSubmitting={isSubmitting}
         />
       </Modal>
 
@@ -277,6 +171,8 @@ const AssistantList: React.FC = () => {
           onFinish={handleFormSubmit}
           onCancel={handleFormCancel}
           initialValues={currentAssistant || undefined}
+          errors={errors}
+          isSubmitting={isSubmitting}
         />
       </Modal>
     </div>

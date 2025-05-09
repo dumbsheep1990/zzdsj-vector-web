@@ -9,6 +9,7 @@ interface ActionButton {
     icon: React.ReactNode;
     label: string;
     onClick: () => void;
+    disabled?: boolean;
 }
 
 interface PageHeaderProps {

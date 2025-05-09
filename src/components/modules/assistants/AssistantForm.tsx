@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Select, Button, Space, FormInstance } from 'antd';
+import { Form, Input, Select, Button, Space, FormInstance, Alert, Typography } from 'antd';
 import { Assistant } from './types';
 import { AssistantType } from './AssistantTypeSelector';
+// 从useAssistantForm导入ValidationErrors类型
+import { ValidationErrors } from '../../../hooks/assistants/useAssistantForm';
 
 const { TextArea } = Input;
 const { Option } = Select;
+const { Text } = Typography;
 
 interface AssistantFormProps {
   form: FormInstance;
@@ -13,6 +16,8 @@ interface AssistantFormProps {
   onCancel: () => void;
   initialValues?: Assistant;
   assistantType?: AssistantType | null;
+  errors?: ValidationErrors; // 表单验证错误
+  isSubmitting?: boolean; // 表单提交状态
 }
 
 const AssistantForm: React.FC<AssistantFormProps> = ({ 
@@ -21,7 +26,9 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
   onFinish, 
   onCancel, 
   initialValues,
-  assistantType = 'regular'
+  assistantType = 'regular',
+  errors = {},
+  isSubmitting = false
 }) => {
   useEffect(() => {
     if (initialValues && isEdit) {
@@ -119,6 +126,9 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
     }
   };
 
+  // 检查是否存在验证错误
+  const hasErrors = Object.keys(errors).length > 0;
+
   return (
     <Form
       form={form}
@@ -130,6 +140,24 @@ const AssistantForm: React.FC<AssistantFormProps> = ({
         type: assistantType
       }}
     >
+      {/* 显示表单验证错误信息 */}
+      {hasErrors && (
+        <Alert
+          message="表单验证错误"
+          description={
+            <ul className="mt-2 pl-4">
+              {Object.entries(errors).map(([field, message]) => (
+                <li key={field}>
+                  <Text type="danger">{message}</Text>
+                </li>
+              ))}
+            </ul>
+          }
+          type="error"
+          className="mb-4"
+          showIcon
+        />
+      )}
       <Form.Item
         name="type"
         hidden
