@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: "vector-bff",
+    name: "前端服务层组件",
     script: "./dist/app.js",
     instances: "max",
     exec_mode: "cluster",

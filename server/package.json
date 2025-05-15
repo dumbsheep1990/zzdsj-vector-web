@@ -1,7 +1,7 @@
 {
-  "name": "vector-web-bff",
+  "name": "前端服务层组件",
   "version": "0.1.0",
-  "description": "BFF layer for Vector Web UI",
+  "description": "前端服务层",
   "main": "dist/app.js",
   "scripts": {
     "build": "tsc",

@@ -91,7 +91,7 @@ process.on('unhandledRejection', (reason) => {
 // 启动服务器
 if (require.main === module) {
   const server = app.listen(PORT, () => {
-    logger.info(`BFF服务运行在 http://localhost:${PORT}, 环境: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`服务运行在 http://localhost:${PORT}, 环境: ${process.env.NODE_ENV || 'development'}`);
   });
 
   // 优雅关闭
