@@ -22,6 +22,19 @@ export const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 // 是否启用API请求日志（开发环境）
 export const ENABLE_API_LOGS = import.meta.env.NODE_ENV === 'development';
 
+// localStorage中存储的令牌键名
+export const ACCESS_TOKEN_KEY = 'access_token';
+export const REFRESH_TOKEN_KEY = 'refresh_token';
+
+// 公开API端点（无需验证）
+export const PUBLIC_ENDPOINTS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/validate'
+];
+
 // API错误消息
 export const API_ERROR_MESSAGES = {
   DEFAULT: '请求失败，请稍后再试',

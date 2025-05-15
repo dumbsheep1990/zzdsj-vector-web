@@ -1,13 +1,51 @@
 /**
  * API客户端主文件，提供HTTP请求方法
  */
-import { API_BASE_URL, API_ERROR_MESSAGES, DEFAULT_HEADERS, ENABLE_API_LOGS, REQUEST_TIMEOUT } from './config';
+import { 
+  API_BASE_URL, 
+  API_ERROR_MESSAGES, 
+  DEFAULT_HEADERS, 
+  ENABLE_API_LOGS, 
+  REQUEST_TIMEOUT,
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  PUBLIC_ENDPOINTS 
+} from './config';
 
 // 请求选项接口
 export interface RequestOptions {
   headers?: Record<string, string>;
   timeout?: number;
   signal?: AbortSignal;
+}
+
+/**
+ * 获取访问Token
+ */
+function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+/**
+ * 获取刷新Token
+ */
+function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+/**
+ * 判断是否公开端点
+ */
+function isPublicEndpoint(url: string): boolean {
+  // 移除基础URL和前端斜杠
+  const cleanUrl = url.replace(API_BASE_URL, '').replace(/^\/+/, '');
+  // 移除URL参数
+  const path = cleanUrl.split('?')[0];
+  // 检查是否在公开端点列表中
+  return PUBLIC_ENDPOINTS.some(endpoint => {
+    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    return path === cleanEndpoint || path.startsWith(`${cleanEndpoint}/`);
+  });
 }
 
 // API响应接口
@@ -59,12 +97,25 @@ async function request<T>(
   
   try {
     // 请求配置
+    const headers: Record<string, string> = {
+      ...DEFAULT_HEADERS,
+      ...options.headers,
+    };
+    
+    // 如果不是公开端点，添加JWT token验证
+    if (!isPublicEndpoint(fullUrl)) {
+      const token = getAccessToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        // 如果需要Token但没有Token，抛出未授权错误
+        throw new ApiError(API_ERROR_MESSAGES.UNAUTHORIZED, 401);
+      }
+    }
+    
     const config: RequestInit = {
       method,
-      headers: {
-        ...DEFAULT_HEADERS,
-        ...options.headers,
-      },
+      headers,
       signal,
     };
     
@@ -226,6 +277,22 @@ export function patch<T>(url: string, data?: any, options?: RequestOptions): Pro
   return request<T>(url, 'PATCH', data, options);
 }
 
+/**
+ * 保存令牌
+ */
+export function saveTokens(accessToken: string, refreshToken: string): void {
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+}
+
+/**
+ * 清除令牌
+ */
+export function clearTokens(): void {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
 // 导出API客户端
 const apiClient = {
   get,
@@ -233,7 +300,9 @@ const apiClient = {
   put,
   delete: del,
   patch,
-  request
+  request,
+  saveTokens,
+  clearTokens
 };
 
 export default apiClient;

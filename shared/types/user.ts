@@ -3,12 +3,14 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  displayName?: string;
-  avatar?: string;
-  role: 'admin' | 'user' | 'guest';
-  status: 'active' | 'inactive' | 'locked';
-  createdAt: string;
-  lastLogin?: string;
+  full_name?: string;
+  avatar_url?: string;
+  roles: string[];
+  is_superuser: boolean;
+  disabled: boolean;
+  last_login?: string;
+  created_at: string;
+  updated_at?: string;
   permissions?: string[];
   metadata?: Record<string, any>;
 }

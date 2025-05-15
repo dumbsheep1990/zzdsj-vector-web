@@ -19,6 +19,10 @@ import notificationApi from './notification';
 import systemStatusApi from './system-status';
 import mcpApi from './mcp';
 import promptTemplateApi from './prompt-template';
+import authApi from './auth';
+import permissionsApi from './permissions';
+import quotaApi from './quota';
+import auditApi from './audit';
 
 // 导出所有API服务
 export {
@@ -44,7 +48,11 @@ export {
   notificationApi,
   systemStatusApi,
   mcpApi,
-  promptTemplateApi
+  promptTemplateApi,
+  authApi,
+  permissionsApi,
+  quotaApi,
+  auditApi
 };
 
 // 默认导出所有API服务的集合
@@ -64,7 +72,11 @@ const api = {
   notification: notificationApi,
   systemStatus: systemStatusApi,
   mcp: mcpApi,
-  promptTemplate: promptTemplateApi
+  promptTemplate: promptTemplateApi,
+  auth: authApi,
+  permissions: permissionsApi,
+  quota: quotaApi,
+  audit: auditApi
 };
 
 export default api;
