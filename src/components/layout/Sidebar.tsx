@@ -16,7 +16,11 @@ import {
     Users,
     MessageCircle,
     BarChart2,
-    Wrench
+    Wrench,
+    Brain,
+    List,
+    Copy,
+    Send
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { navigationItems } from '../../utils/mockData';
@@ -62,6 +66,10 @@ const Sidebar: React.FC = () => {
         'application-orchestration': '/workflow/application-orchestration',
         'task-orchestration': '/workflow/task-orchestration',
         'autonomous-orchestration': '/workflow/autonomous-orchestration',
+        'agent-list': '/agent-system/list',
+        'agent-builder': '/agent-system/builder',
+        'agent-template': '/agent-system/template',
+        'agent-deployment': '/agent-system/deployment',
     };
 
     useEffect(() => {
@@ -198,6 +206,14 @@ const Sidebar: React.FC = () => {
                 return <MessageCircle size={size} />;
             case 'BarChart2':
                 return <BarChart2 size={size} />;
+            case 'Brain':
+                return <Brain size={size} />;
+            case 'List':
+                return <List size={size} />;
+            case 'Copy':
+                return <Copy size={size} />;
+            case 'Send':
+                return <Send size={size} />;
             default:
                 return <FileText size={size} />;
         }

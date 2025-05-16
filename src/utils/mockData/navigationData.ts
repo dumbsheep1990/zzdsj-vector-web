@@ -101,6 +101,33 @@ export const navigationItems: NavItem[] = [
     ]
   },
   {
+    id: 'agent-system',
+    label: '智能体',
+    iconType: 'Brain',
+    children: [
+      {
+        id: 'agent-list',
+        label: '智能体列表',
+        iconType: 'List'
+      },
+      {
+        id: 'agent-builder',
+        label: '智能体构建',
+        iconType: 'Tool'
+      },
+      {
+        id: 'agent-template',
+        label: '智能体模板',
+        iconType: 'Copy'
+      },
+      {
+        id: 'agent-deployment',
+        label: '智能体部署',
+        iconType: 'Send'
+      }
+    ]
+  },
+  {
     id: 'tool-plaza',
     label: '工具广场',
     iconType: 'Wrench',

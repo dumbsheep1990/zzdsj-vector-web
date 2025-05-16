@@ -20,6 +20,13 @@ import MCPCenter from '../pages/MCPCenter';
 import DataProcessingTools from '../pages/DataProcessingTools';
 import ApplicationOrchestrationPage from '../pages/workflow/ApplicationOrchestrationPage';
 import TaskOrchestrationPage from '../pages/workflow/TaskOrchestrationPage';
+
+// 智能体系统页面
+import AgentList from '../pages/agent/AgentList';
+import AgentBuilder from '../pages/agent/AgentBuilder';
+import AgentTemplate from '../pages/agent/AgentTemplate';
+import AgentDeployment from '../pages/agent/AgentDeployment';
+
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import AuthGuard from '../components/auth/AuthGuard';
@@ -186,6 +193,32 @@ const AppRoutes: React.FC = () => {
       <Route path="/workflow/task-orchestration" element={
         <AuthGuard>
           <TaskOrchestrationPage />
+        </AuthGuard>
+      } />
+      
+      <Route path="/agent-system" element={
+        <AuthGuard>
+          <Navigate to="/agent-system/list" replace />
+        </AuthGuard>
+      } />
+      <Route path="/agent-system/list" element={
+        <AuthGuard>
+          <AgentList />
+        </AuthGuard>
+      } />
+      <Route path="/agent-system/builder" element={
+        <AuthGuard>
+          <AgentBuilder />
+        </AuthGuard>
+      } />
+      <Route path="/agent-system/template" element={
+        <AuthGuard>
+          <AgentTemplate />
+        </AuthGuard>
+      } />
+      <Route path="/agent-system/deployment" element={
+        <AuthGuard>
+          <AgentDeployment />
         </AuthGuard>
       } />
       
