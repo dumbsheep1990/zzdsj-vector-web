@@ -107,6 +107,8 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
   }
 ];
 
+
+
 // 智能体构建器组件
 const AgentBuilder = () => {
   // 组件状态
@@ -232,7 +234,7 @@ const AgentBuilder = () => {
   const renderToolChips = () => {
     if (selectedTools.length === 0) {
       return (
-        <Box sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 1 }}>
+        <Box sx={{ mt: 1, color: 'text.secondary', fontSize: '0.9rem' }}>
           还没有选择工具
         </Box>
       );
@@ -254,9 +256,12 @@ const AgentBuilder = () => {
               sx={{
                 bgcolor: color.bg,
                 color: color.text,
+                borderColor: color.border,
                 '& .MuiChip-deleteIcon': {
                   color: color.text,
-                  '&:hover': { color: color.dark }
+                  '&:hover': {
+                    color: color.text
+                  }
                 }
               }}
             />
@@ -265,13 +270,12 @@ const AgentBuilder = () => {
       </Box>
     );
   };
-
+  
   // 处理保存
   const handleSave = () => {
-    // 保存逻辑 - 实际项目中可能需要API调用
-    console.log('保存智能助手', {
-      name: agentName,
-      description,
+    console.log('保存智能体:', { 
+      agentName, 
+      description, 
       baseAgentType,
       systemPrompt,
       selectedTools: selectedTools.map(t => t.id) 
@@ -281,6 +285,87 @@ const AgentBuilder = () => {
     navigate('/agent');
   };
 
+  // 预定义可用的工具
+  const availableTools: Tool[] = [
+    {
+      id: 'search',
+      name: '搜索',
+      description: '在网上搜索信息',
+      category: 'utility',
+      icon: <SearchIcon />
+    },
+    {
+      id: 'calculator',
+      name: '计算器',
+      description: '执行复杂的数学计算',
+      category: 'utility',
+      icon: <CalculateIcon />
+    },
+    {
+      id: 'weather',
+      name: '天气',
+      description: '获取天气信息',
+      category: 'utility',
+      icon: <CloudIcon />
+    },
+    {
+      id: 'code_interpreter',
+      name: '代码解释器',
+      description: '解析和执行代码',
+      category: 'development',
+      icon: <CodeIcon />
+    },
+    {
+      id: 'github',
+      name: 'GitHub',
+      description: '操作GitHub仓库',
+      category: 'development',
+      icon: <GitHubIcon />
+    },
+    {
+      id: 'terminal',
+      name: '终端',
+      description: '执行命令行操作',
+      category: 'development',
+      icon: <TerminalIcon />
+    },
+    {
+      id: 'knowledge_base',
+      name: '知识库',
+      description: '查询结构化知识',
+      category: 'data',
+      icon: <StorageIcon />
+    },
+    {
+      id: 'image_generator',
+      name: '图像生成',
+      description: '生成图像和图形',
+      category: 'creative',
+      icon: <ImageIcon />
+    }
+  ];
+  
+  // 应用选择的模板
+  const applyTemplate = (template: AgentTemplate) => {
+    setAgentName(template.name);
+    setDescription(template.description);
+    setBaseAgentType(template.baseAgentType);
+    setSystemPrompt(template.systemPrompt);
+    
+    // 根据模板建议选择工具
+    const availableToolsById = availableTools.reduce<Record<string, Tool>>((acc: Record<string, Tool>, tool: Tool) => {
+      acc[tool.id] = tool;
+      return acc;
+    }, {});
+    
+    const suggestedToolObjects = template.suggestedTools
+      .map(toolId => availableToolsById[toolId])
+      .filter((tool): tool is Tool => Boolean(tool)); // 过滤掉不存在的工具
+    
+    setSelectedTools(suggestedToolObjects);
+    setTemplateDialogOpen(false);
+  };
+  
   // 主要UI渲染
   return (
     <PageContainer>
@@ -304,7 +389,7 @@ const AgentBuilder = () => {
               }}
             >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#6366f1', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#6366f1', display: 'flex', alignItems: 'center' }}>
                   <SmartToyIcon sx={{ mr: 1 }} />
                   智能助手配置
                 </Typography>
