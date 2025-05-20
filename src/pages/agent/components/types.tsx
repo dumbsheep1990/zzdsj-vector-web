@@ -40,3 +40,31 @@ export interface AgentConfig {
     presencePenalty?: number;
   };
 }
+
+// 提示词模板类别枚举
+export enum PromptCategory {
+  GENERAL = 'general',
+  CODING = 'coding',
+  ANALYSIS = 'analysis',
+  WRITING = 'writing',
+  ROLEPLAY = 'roleplay'
+}
+
+// 提示词变量接口
+export interface PromptVariable {
+  name: string;
+  description: string;
+  defaultValue?: string;
+  required: boolean;
+}
+
+// 提示词模板接口
+export interface PromptTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: PromptCategory;
+  content: string;
+  isSystem: boolean;
+  variables?: PromptVariable[];
+}

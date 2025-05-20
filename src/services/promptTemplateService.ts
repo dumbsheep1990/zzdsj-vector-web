@@ -1,4 +1,4 @@
-import { PromptTemplate, PromptCategory } from "../pages/agent/components/types.tsx";
+import { PromptTemplate, PromptCategory } from "../pages/agent/components/types";
 
 // 系统提示词模板列表
 const systemPromptTemplates: PromptTemplate[] = [

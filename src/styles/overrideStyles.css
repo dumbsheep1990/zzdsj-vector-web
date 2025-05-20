@@ -1,0 +1,30 @@
+/* 系统提示词卡片特定样式覆盖 - 非常精确的选择器 */
+
+/* 修复卡片顶部标题栏按钮悬停样式 */
+.header-button.MuiIconButton-root:hover {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  color: white !important;
+}
+
+/* 系统提示词卡片文本区域 - 删除其滚动条 */
+.system-prompt-card .MuiInputBase-root {
+  overflow: hidden !important;
+}
+
+.system-prompt-card textarea {
+  overflow: hidden !important;
+}
+
+/* 很具体地删除提示词卡片的滚动条 */
+.system-prompt-card *::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.system-prompt-card * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* 不影响其他组件的滚动行为 */

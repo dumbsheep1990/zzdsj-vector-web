@@ -15,7 +15,23 @@ const SystemPromptStep: React.FC<SystemPromptStepProps> = ({
 }) => {
   return (
     <Fade in={true}>
-      <Box>
+      <Box className="prompt-card-container" sx={{ 
+        position: 'relative',
+        '& textarea': {
+          overflow: 'hidden !important'
+        },
+        '& .MuiInputBase-root': {
+          overflow: 'hidden !important'
+        },
+        '& *::-webkit-scrollbar': {
+          width: '0px !important',
+          display: 'none !important'
+        },
+        '& .header-button:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.3) !important',
+          color: '#ffffff !important'
+        }
+      }}>
         <SystemPromptCard 
           value={value}
           onChange={onChange}
