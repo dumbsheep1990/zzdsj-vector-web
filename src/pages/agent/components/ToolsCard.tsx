@@ -1,189 +1,308 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  Chip,
-  Avatar,
-  Paper,
-  Grid,
-  Divider,
-  IconButton
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import BuildIcon from '@mui/icons-material/Build';
-import { SectionCard, CardTitle, CardBody } from './StyledComponents';
-import { Tool, CategoryColorType, categoryColors, categoryLabels, availableTools } from './types.tsx';
+import { Tool, ToolCategory } from './types';
+import { Card, Badge, Chip, Box, Typography, Tabs, Tab, Switch, Divider, Paper } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+// Styled components
+const CategoryBadge = styled(Badge)(() => ({
+  '& .MuiBadge-badge': {
+    right: -6,
+    top: 6,
+    padding: '0 4px',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    fontSize: '0.65rem',
+    minWidth: '16px',
+    height: '16px',
+  },
+}));
 
 interface ToolsCardProps {
   selectedTools: Tool[];
   toggleToolSelection: (tool: Tool) => void;
-  renderToolChips: () => React.ReactNode;
+  renderToolChips?: () => React.ReactNode;
 }
 
-const ToolsCard: React.FC<ToolsCardProps> = ({
-  selectedTools,
+const ToolsCard: React.FC<ToolsCardProps> = ({ 
+  selectedTools, 
   toggleToolSelection,
-  renderToolChips
+  renderToolChips 
 }) => {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [currentCategory, setCurrentCategory] = useState<ToolCategory | 'all'>('all');
   
-  // 按类别过滤工具
-  const filteredTools = activeCategory === 'all' 
-    ? availableTools 
-    : availableTools.filter(tool => tool.category === activeCategory);
+  // 工具列表示例数据
+  const availableTools: Tool[] = [
+    { 
+      id: '1', 
+      name: '网页浏览器', 
+      description: '访问网页内容，搜索信息，抓取网页数据', 
+      category: ToolCategory.WEB,
+      tags: ['浏览器', '搜索']
+    },
+    { 
+      id: '2', 
+      name: '代码解释器', 
+      description: '执行Python代码，进行数据分析和可视化', 
+      category: ToolCategory.DEVELOPMENT,
+      tags: ['Python', '数据分析']
+    },
+    { 
+      id: '3', 
+      name: '文档阅读器', 
+      description: '读取PDF、Word等文档的内容和结构', 
+      category: ToolCategory.DOCUMENT,
+      tags: ['PDF', 'Word']
+    },
+    { 
+      id: '4', 
+      name: '图像分析', 
+      description: '分析图像内容，识别对象和文本', 
+      category: ToolCategory.MULTIMEDIA,
+      tags: ['图像', '识别']
+    },
+    { 
+      id: '5', 
+      name: 'API调用', 
+      description: '连接第三方API获取数据和功能', 
+      category: ToolCategory.DEVELOPMENT,
+      tags: ['API', '集成']
+    },
+    { 
+      id: '6', 
+      name: '文件管理器', 
+      description: '管理和操作文件系统', 
+      category: ToolCategory.DOCUMENT,
+      tags: ['文件', '管理']
+    }
+  ];
 
+  // 获取不同类别的工具数量
+  const getCategoryCount = (category: ToolCategory | 'all') => {
+    if (category === 'all') return availableTools.length;
+    return availableTools.filter(tool => tool.category === category).length;
+  };
+
+  // 根据当前类别筛选工具
+  const filteredTools = currentCategory === 'all' 
+    ? availableTools 
+    : availableTools.filter(tool => tool.category === currentCategory);
+
+  // 检查工具是否被选中
+  const isToolSelected = (id: string) => {
+    return selectedTools.some(tool => tool.id === id);
+  };
+  
   return (
-    <SectionCard sx={{
-      height: '100%',
-      display: 'flex', 
-      flexDirection: 'column',
-      borderLeft: '4px solid #8b5cf6',
-      backgroundImage: 'linear-gradient(120deg, rgba(139, 92, 246, 0.03) 0%, rgba(255, 255, 255, 0) 100%)',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.05)',
-    }}>
-      <CardTitle 
-        color="purple"
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        boxShadow: 'none',
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px'
+      }}
+    >
+      <Box
         sx={{
+          p: 2.5,
+          bgcolor: '#f8fafc',
+          borderBottom: '1px solid #e5e7eb',
+          color: '#111827',
           display: 'flex',
           justifyContent: 'space-between',
-          backgroundImage: 'linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%)'
+          alignItems: 'center',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <BuildIcon sx={{ mr: 1 }} /> 
-          工具选择
-        </Box>
-      </CardTitle>
-      <CardBody sx={{ overflowY: 'auto', height: '100%' }}>
-        <Box sx={{ mb: 2 }}>
-          <Tabs
-            value={activeCategory}
-            onChange={(_, newValue) => setActiveCategory(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            TabIndicatorProps={{
-              style: {
-                backgroundColor: '#6366f1'
+        <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600, fontSize: '1rem' }}>工具组件</Typography>
+        <Chip
+          size="small"
+          label={selectedTools.length > 0 ? `已选择 ${selectedTools.length} 个` : '可选择多个'}
+          sx={{
+            bgcolor: selectedTools.length > 0 ? '#ebf5ff' : '#f1f5f9',
+            color: selectedTools.length > 0 ? '#3b82f6' : '#64748b',
+            fontWeight: 500,
+            fontSize: '0.75rem',
+            height: '24px'
+          }}
+        />
+      </Box>
+      
+      <Box sx={{ px: 2, pt: 1.5, pb: 0.5, bgcolor: 'white' }}>
+        <Tabs
+          value={currentCategory}
+          onChange={(_, newValue) => setCurrentCategory(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ 
+            minHeight: '40px',
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#3b82f6',
+              height: '2px',
+              borderRadius: '2px'
+            },
+            '& .MuiTabs-scrollButtons': {
+              color: '#64748b'
+            },
+            '& .MuiTab-root': {
+              minHeight: '40px',
+              fontSize: '0.875rem',
+              textTransform: 'none',
+              fontWeight: 500,
+              color: '#64748b',
+              transition: 'all 0.2s ease',
+              borderRadius: '4px',
+              mr: 1,
+              '&.Mui-selected': {
+                color: '#3b82f6',
+                fontWeight: 600
+              },
+              '&:hover': {
+                backgroundColor: '#f1f5f9',
+                color: '#334155'
               }
-            }}
-            sx={{
-              '& .MuiTab-root': {
-                minWidth: 'auto',
-                px: 3,
-                fontWeight: 500,
-                fontSize: '0.9rem',
-                textTransform: 'none',
-                color: 'rgba(0, 0, 0, 0.7)',
-                '&.Mui-selected': {
-                  color: '#6366f1',
-                  fontWeight: 600
+            }
+          }}
+        >
+          <Tab 
+            label={
+              <CategoryBadge badgeContent={getCategoryCount('all')}>
+                <Box sx={{ pr: 2 }}>全部</Box>
+              </CategoryBadge>
+            } 
+            value="all" 
+          />
+          <Tab 
+            label={
+              <CategoryBadge badgeContent={getCategoryCount(ToolCategory.WEB)}>
+                <Box sx={{ pr: 2 }}>网页工具</Box>
+              </CategoryBadge>
+            } 
+            value={ToolCategory.WEB} 
+          />
+          <Tab 
+            label={
+              <CategoryBadge badgeContent={getCategoryCount(ToolCategory.DEVELOPMENT)}>
+                <Box sx={{ pr: 2 }}>开发工具</Box>
+              </CategoryBadge>
+            } 
+            value={ToolCategory.DEVELOPMENT} 
+          />
+          <Tab 
+            label={
+              <CategoryBadge badgeContent={getCategoryCount(ToolCategory.DOCUMENT)}>
+                <Box sx={{ pr: 2 }}>文档工具</Box>
+              </CategoryBadge>
+            } 
+            value={ToolCategory.DOCUMENT} 
+          />
+          <Tab 
+            label={
+              <CategoryBadge badgeContent={getCategoryCount(ToolCategory.MULTIMEDIA)}>
+                <Box sx={{ pr: 2 }}>多媒体工具</Box>
+              </CategoryBadge>
+            } 
+            value={ToolCategory.MULTIMEDIA} 
+          />
+        </Tabs>
+      </Box>
+      
+      <Divider />
+      
+      <Box sx={{ 
+        py: 2,
+        px: 2, 
+        flexGrow: 1, 
+        overflow: 'auto', 
+        bgcolor: 'white'
+      }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 2 }}>
+          {filteredTools.map((tool) => (
+            <Paper
+              key={tool.id}
+              sx={{
+                cursor: 'pointer',
+                border: '1px solid',
+                borderColor: isToolSelected(tool.id) ? '#bfdbfe' : '#e5e7eb',
+                borderRadius: 1,
+                transition: 'all 0.2s ease',
+                bgcolor: isToolSelected(tool.id) ? '#f0f9ff' : 'white',
+                boxShadow: isToolSelected(tool.id) ? '0 1px 2px rgba(59, 130, 246, 0.1)' : 'none',
+                '&:hover': {
+                  borderColor: '#bfdbfe',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  bgcolor: '#fafafa'
                 }
-              }
-            }}
-          >
-            <Tab label="全部" value="all" />
-            {Object.entries(categoryLabels).map(([key, label]) => (
-              <Tab key={key} label={label} value={key} />
-            ))}
-          </Tabs>
-        </Box>
-        
-        <Divider sx={{ mb: 3 }} />
-        
-        <Grid container spacing={2}>
-          {filteredTools.map(tool => {
-            const isSelected = selectedTools.some(t => t.id === tool.id);
-            const category = tool.category;
-            const color = categoryColors[category] || categoryColors.utility;
-            
-            return (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={tool.id}>
-                <Paper 
-                  elevation={0} 
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: isSelected ? color.border : 'rgba(0, 0, 0, 0.08)',
-                    backgroundColor: isSelected ? `${color.bg}10` : 'rgba(0, 0, 0, 0.01)',
-                    transition: 'all 0.2s ease',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: color.border,
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
-                    }
-                  }}
-                  onClick={() => toggleToolSelection(tool)}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      {tool.icon && (
-                        <Avatar 
-                          sx={{ 
-                            width: 36, 
-                            height: 36, 
-                            bgcolor: isSelected ? color.bg : 'rgba(0,0,0,0.04)',
-                            color: isSelected ? '#fff' : 'rgba(0,0,0,0.7)',
-                            mr: 1.5 
-                          }}
-                        >
-                          {tool.icon}
-                        </Avatar>
-                      )}
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          {tool.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                          {categoryLabels[tool.category]}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <IconButton 
-                      size="small" 
-                      sx={{ 
-                        color: isSelected ? color.bg : 'rgba(0,0,0,0.4)',
-                        bgcolor: isSelected ? 'rgba(255,255,255,0.9)' : 'transparent',
-                        '&:hover': { bgcolor: isSelected ? 'rgba(255,255,255,1)' : 'rgba(0,0,0,0.05)' }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleToolSelection(tool);
-                      }}
-                    >
-                      {isSelected ? <RemoveIcon fontSize="small" /> : <AddIcon fontSize="small" />}
-                    </IconButton>
-                  </Box>
-                  
+              }}
+              onClick={() => toggleToolSelection(tool)}
+            >
+              <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      fontSize: '0.875rem',
+                      mb: 0.5
+                    }}
+                  >
+                    {tool.name}
+                  </Typography>
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      mt: 1.5, 
-                      fontSize: '0.8rem',
-                      color: 'text.secondary',
-                      height: 40,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical'
+                      color: '#64748b',
+                      fontSize: '0.75rem',
+                      lineHeight: 1.4,
+                      maxWidth: '85%'
                     }}
                   >
                     {tool.description}
                   </Typography>
-                </Paper>
-              </Grid>
-            );
-          })}
-        </Grid>
-      </CardBody>
-    </SectionCard>
+                </Box>
+                
+                <Switch 
+                  size="small" 
+                  checked={isToolSelected(tool.id)} 
+                  onChange={() => toggleToolSelection(tool)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#3b82f6',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#3b82f6',
+                    },
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ px: 2, pb: 2, pt: 0 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mt: 0.5 }}>
+                  {tool.tags?.map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      sx={{ 
+                        fontSize: '0.7rem',
+                        height: '22px',
+                        color: '#475569',
+                        bgcolor: '#f1f5f9',
+                        border: 'none'
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
+      </Box>
+      
+      {renderToolChips && renderToolChips()}
+    </Card>
   );
 };
 

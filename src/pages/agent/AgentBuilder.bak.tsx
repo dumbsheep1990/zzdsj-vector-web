@@ -308,11 +308,9 @@ const AgentBuilder: React.FC = () => {
                 bottom: 20,
                 left: 16,
                 width: 2,
-                background: 'linear-gradient(to bottom, #e2e8f0 10%, #cbd5e1 50%, #e2e8f0 90%)',
+                background: 'linear-gradient(to bottom, #e2e8f0 0%, #e2e8f0 100%)',
                 zIndex: 0,
-                borderRadius: '4px',
-                boxShadow: '0 0 4px rgba(0,0,0,0.05)',
-                opacity: 0.8
+                borderRadius: '2px'
               }
             }}>
               {/* 基本信息 */}
@@ -329,13 +327,9 @@ const AgentBuilder: React.FC = () => {
                   cursor: 'pointer',
                   borderRadius: 1.5,
                   bgcolor: activeStep === 0 ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: activeStep === 0 ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                  transform: 'translateY(0)',
+                  transition: 'all 0.2s ease',
                   '&:hover': {
                     bgcolor: activeStep === 0 ? 'rgba(59, 130, 246, 0.12)' : 'rgba(203, 213, 225, 0.2)',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                    transform: 'translateY(-1px)',
                     '& .step-title': {
                       color: activeStep === 0 ? '#1e40af' : '#475569'
                     }
@@ -372,12 +366,7 @@ const AgentBuilder: React.FC = () => {
                       fontSize: '12px',
                       fontWeight: 600,
                       transition: 'all 0.2s ease',
-                      boxShadow: activeStep === 0 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none',
-                      transform: 'scale(1)',
-                      '&:hover': {
-                        transform: activeStep !== 0 && !isStepComplete(0) ? 'scale(1.05)' : 'scale(1)',
-                        boxShadow: activeStep !== 0 && !isStepComplete(0) ? '0 0 0 3px rgba(148, 163, 184, 0.15)' : activeStep === 0 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none'
-                      }
+                      boxShadow: activeStep === 0 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none'
                     }}
                   >
                     {isStepComplete(0) ? (
@@ -416,9 +405,7 @@ const AgentBuilder: React.FC = () => {
                         height: 8,
                         borderRadius: '50%',
                         bgcolor: agentConfig.name ? '#10b981' : '#f59e0b',
-                        mr: 1,
-                        boxShadow: `0 0 0 2px ${agentConfig.name ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)'}`,
-                        transition: 'all 0.3s ease'
+                        mr: 1
                       }}
                     />
                     <Typography 
@@ -488,12 +475,7 @@ const AgentBuilder: React.FC = () => {
                       fontSize: '12px',
                       fontWeight: 600,
                       transition: 'all 0.2s ease',
-                      boxShadow: activeStep === 1 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none',
-                      transform: 'scale(1)',
-                      '&:hover': {
-                        transform: activeStep !== 1 && !isStepComplete(1) ? 'scale(1.05)' : 'scale(1)',
-                        boxShadow: activeStep !== 1 && !isStepComplete(1) ? '0 0 0 3px rgba(148, 163, 184, 0.15)' : activeStep === 1 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none'
-                      }
+                      boxShadow: activeStep === 1 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none'
                     }}
                   >
                     {isStepComplete(1) ? (
@@ -532,9 +514,7 @@ const AgentBuilder: React.FC = () => {
                         height: 8,
                         borderRadius: '50%',
                         bgcolor: agentConfig.systemPrompt ? '#10b981' : '#64748b',
-                        mr: 1,
-                        boxShadow: `0 0 0 2px ${agentConfig.systemPrompt ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.15)'}`,
-                        transition: 'all 0.3s ease'
+                        mr: 1
                       }}
                     />
                     <Typography 
@@ -604,12 +584,7 @@ const AgentBuilder: React.FC = () => {
                       fontSize: '12px',
                       fontWeight: 600,
                       transition: 'all 0.2s ease',
-                      boxShadow: activeStep === 2 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none',
-                      transform: 'scale(1)',
-                      '&:hover': {
-                        transform: activeStep !== 2 && !isStepComplete(2) ? 'scale(1.05)' : 'scale(1)',
-                        boxShadow: activeStep !== 2 && !isStepComplete(2) ? '0 0 0 3px rgba(148, 163, 184, 0.15)' : activeStep === 2 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none'
-                      }
+                      boxShadow: activeStep === 2 ? '0 0 0 4px rgba(59, 130, 246, 0.25)' : 'none'
                     }}
                   >
                     {isStepComplete(2) ? (
@@ -648,9 +623,7 @@ const AgentBuilder: React.FC = () => {
                         height: 8,
                         borderRadius: '50%',
                         bgcolor: '#64748b',
-                        mr: 1,
-                        boxShadow: '0 0 0 2px rgba(100, 116, 139, 0.15)',
-                        transition: 'all 0.3s ease'
+                        mr: 1
                       }}
                     />
                     <Typography 
@@ -949,4 +922,3 @@ const AgentBuilder: React.FC = () => {
   );
 };
 
-export default AgentBuilder;

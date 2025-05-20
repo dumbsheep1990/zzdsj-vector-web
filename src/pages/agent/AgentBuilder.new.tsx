@@ -942,7 +942,6 @@ const AgentBuilder: React.FC = () => {
                 </Box>
               )}
             </Box>
-          </Paper>
         </Box>
       </Box>
     </Box>

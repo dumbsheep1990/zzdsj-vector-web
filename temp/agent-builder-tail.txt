@@ -1,0 +1,50 @@
+                          >
+                            {extensions.length > 0 ? '编辑' : '添加'}
+                          </Button>
+                        </Box>
+                      </Paper>
+                    </Box>
+                  </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ borderTop: '1px solid rgba(0, 0, 0, 0.1)', px: 3, py: 2 }}>
+          <Button onClick={() => setTemplateDialogOpen(false)}>取消</Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* 在移动端显示底部按钮栏 */}
+      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+        <Box sx={{ 
+          position: 'fixed', 
+          bottom: 0, 
+          left: 0, 
+          width: '100%', 
+          p: 2, 
+          backgroundColor: '#fff',
+          borderTop: '1px solid rgba(0,0,0,0.1)',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          zIndex: 10
+        }}>
+          <Button variant="outlined" onClick={() => navigate('/agent')}>
+            取消
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={handleSave} 
+            color="primary"
+          >
+            保存智能助手
+          </Button>
+        </Box>
+      </Box>
+    </PageContainer>
+  );
+};
+
+export default AgentBuilder;

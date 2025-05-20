@@ -148,7 +148,7 @@ export const useKnowledgeBaseFilter = (knowledgeBases: KnowledgeBaseItem[]) => {
     } = filterOptions;
 
     // 首先应用所有筛选条件
-    let result = knowledgeBases.filter(kb => {
+    const result = knowledgeBases.filter(kb => {
       // 搜索文本匹配
       const matchesSearch = !searchText || 
         kb.name.toLowerCase().includes(searchText.toLowerCase()) ||

@@ -89,7 +89,7 @@ export const useAssistantFilter = (assistants: ModifiedAssistant[]) => {
     const { searchText, capabilities, sortBy, sortDirection } = filterOptions;
     
     // 首先应用搜索文本和能力筛选
-    let result = assistants.filter(assistant => {
+    const result = assistants.filter(assistant => {
       // 搜索文本匹配
       const matchesSearch = !searchText || 
         assistant.name.toLowerCase().includes(searchText.toLowerCase()) ||

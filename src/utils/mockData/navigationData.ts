@@ -119,11 +119,6 @@ export const navigationItems: NavItem[] = [
         id: 'agent-template',
         label: '智能体模板',
         iconType: 'Copy'
-      },
-      {
-        id: 'agent-deployment',
-        label: '智能体部署',
-        iconType: 'Send'
       }
     ]
   },

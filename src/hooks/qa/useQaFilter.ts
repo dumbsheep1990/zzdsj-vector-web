@@ -59,7 +59,7 @@ export const useQaFilter = (questions: Question[]) => {
   // 根据时间范围获取日期范围
   const getDateRangeFromTimeRange = useCallback((timeRange: TimeRange, customRange: [Date, Date] | null): [Date, Date] => {
     const endDate = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
     
     switch (timeRange) {
       case 'today':
@@ -100,7 +100,7 @@ export const useQaFilter = (questions: Question[]) => {
     const [startDate, endDate] = getDateRangeFromTimeRange(timeRange, customTimeRange);
     
     // 应用筛选条件
-    let result = questions.filter(question => {
+    const result = questions.filter(question => {
       const lowerSearchText = searchText.toLowerCase();
       
       // 搜索文本匹配
