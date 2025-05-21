@@ -31,8 +31,9 @@ export interface QuickConfigOptions {
   autoSave: boolean;
   responseTimeout: number;
   responseLength: 'short' | 'medium' | 'long';
-  modelVersion: string;
-  customModelParams?: string;
+  temperature: number;
+  creativityLevel: 'low' | 'balanced' | 'high';
+  maxTokens: number;
 }
 
 interface QuickConfigPanelProps {
@@ -46,7 +47,9 @@ export const defaultQuickConfig: QuickConfigOptions = {
   autoSave: true,
   responseTimeout: 30,
   responseLength: 'medium',
-  modelVersion: 'latest'
+  temperature: 0.7,
+  creativityLevel: 'balanced',
+  maxTokens: 2048
 };
 
 // 响应长度选项
@@ -56,12 +59,11 @@ const responseLengthOptions = [
   { value: 'long', label: '详细', description: '回复全面深入，包含更多细节和解释' }
 ];
 
-// 模型版本选项
-const modelVersionOptions = [
-  { value: 'latest', label: '最新版本' },
-  { value: 'stable', label: '稳定版本' },
-  { value: 'legacy', label: '传统版本' },
-  { value: 'custom', label: '自定义参数' }
+// 创造力级别选项
+const creativityLevelOptions = [
+  { value: 'low', label: '保守', description: '生成的内容更加精确、可预测、严谨' },
+  { value: 'balanced', label: '平衡', description: '在准确性和创造力之间保持平衡' },
+  { value: 'high', label: '创造', description: '生成更多样化、独特和有想象力的内容' }
 ];
 
 const QuickConfigPanel: React.FC<QuickConfigPanelProps> = ({
@@ -94,9 +96,19 @@ const QuickConfigPanel: React.FC<QuickConfigPanelProps> = ({
     handleConfigChange('responseLength', event.target.value);
   };
   
-  // 处理模型版本变更
-  const handleModelVersionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleConfigChange('modelVersion', event.target.value);
+  // 处理创造力级别变更
+  const handleCreativityLevelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleConfigChange('creativityLevel', event.target.value);
+  };
+  
+  // 处理温度变更
+  const handleTemperatureChange = (_event: Event, newValue: number | number[]) => {
+    handleConfigChange('temperature', newValue);
+  };
+  
+  // 处理最大Token变更
+  const handleMaxTokensChange = (_event: Event, newValue: number | number[]) => {
+    handleConfigChange('maxTokens', newValue);
   };
 
   return (
@@ -218,49 +230,124 @@ const QuickConfigPanel: React.FC<QuickConfigPanelProps> = ({
           </FormControl>
         </Box>
         
-        {/* 模型版本设置 */}
+        {/* 创造力级别设置 */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center' }}>
-            模型版本
-            <Tooltip title="选择使用的模型版本">
+            创造力级别
+            <Tooltip title="选择智能体生成内容的创造力程度">
               <QuestionCircleOutlined style={{ marginLeft: '4px', color: theme.palette.text.secondary, fontSize: '14px' }} />
             </Tooltip>
           </Typography>
           
           <FormControl component="fieldset" fullWidth>
             <RadioGroup
-              value={config.modelVersion}
-              onChange={handleModelVersionChange}
+              value={config.creativityLevel}
+              onChange={handleCreativityLevelChange}
             >
-              {modelVersionOptions.map(option => (
+              {creativityLevelOptions.map(option => (
                 <FormControlLabel
                   key={option.value}
                   value={option.value}
                   control={<Radio size="small" color="warning" />}
-                  label={option.label}
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {option.label}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.description}
+                      </Typography>
+                    </Box>
+                  }
                   sx={{ mb: 0.5 }}
                 />
               ))}
             </RadioGroup>
           </FormControl>
+        </Box>
+        
+        {/* 温度设置 */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center' }}>
+            模型温度
+            <Tooltip title="控制生成内容的多样性。较低的值生成更可预测的结果，较高的值产生更多样化的输出">
+              <QuestionCircleOutlined style={{ marginLeft: '4px', color: theme.palette.text.secondary, fontSize: '14px' }} />
+            </Tooltip>
+          </Typography>
           
-          {config.modelVersion === 'custom' && (
-            <TextField
-              fullWidth
-              placeholder="输入自定义模型参数"
-              size="small"
-              value={config.customModelParams || ''}
-              onChange={(e) => handleConfigChange('customModelParams', e.target.value)}
-              sx={{ mt: 1 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <ClockCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
-                  </InputAdornment>
-                )
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Slider
+              value={config.temperature}
+              onChange={handleTemperatureChange}
+              step={0.1}
+              min={0}
+              max={1}
+              marks={[
+                { value: 0, label: '0' },
+                { value: 0.5, label: '0.5' },
+                { value: 1, label: '1' }
+              ]}
+              valueLabelDisplay="auto"
+              sx={{ 
+                color: theme.palette.warning.main,
+                flex: 1,
+                mr: 2
               }}
             />
-          )}
+            <Box sx={{ 
+              minWidth: 50, 
+              textAlign: 'center',
+              bgcolor: alpha(theme.palette.warning.main, 0.1),
+              borderRadius: 1,
+              p: 0.5
+            }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {config.temperature.toFixed(1)}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        
+        {/* 最大Token设置 */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center' }}>
+            最大输出长度
+            <Tooltip title="设置智能体单次生成内容的最大长度">
+              <QuestionCircleOutlined style={{ marginLeft: '4px', color: theme.palette.text.secondary, fontSize: '14px' }} />
+            </Tooltip>
+          </Typography>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Slider
+              value={config.maxTokens}
+              onChange={handleMaxTokensChange}
+              step={512}
+              min={512}
+              max={8192}
+              marks={[
+                { value: 1024, label: '1K' },
+                { value: 4096, label: '4K' },
+                { value: 8192, label: '8K' }
+              ]}
+              valueLabelDisplay="auto"
+              sx={{ 
+                color: theme.palette.warning.main,
+                flex: 1,
+                mr: 2
+              }}
+            />
+            <Box sx={{ 
+              minWidth: 60, 
+              textAlign: 'center',
+              bgcolor: alpha(theme.palette.warning.main, 0.1),
+              borderRadius: 1,
+              p: 0.5
+            }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {Math.floor(config.maxTokens / 1024)}K
+              </Typography>
+            </Box>
+          </Box>
         </Box>
         
         {/* 保存为模板按钮 */}
