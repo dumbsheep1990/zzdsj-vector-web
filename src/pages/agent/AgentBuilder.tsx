@@ -51,6 +51,12 @@ const AgentBuilder: React.FC = () => {
   const [agentConfig, setAgentConfig] = useState<AgentConfig>({
     name: '',
     description: '',
+    // 添加新增字段
+    agentType: 'chat',
+    icon: 'robot',
+    tags: [],
+    language: 'zh-CN',
+    isPublic: false,
     systemPrompt: '你是一个由向量数据库支持的智能助手，拥有以下能力：\n1. 可以回答用户关于向量数据库的问题\n2. 可以进行代码解释和分析\n3. 可以连接网络搜索和获取最新信息\n4. 可以处理各种文档和数据',
     selectedTools: [],
     selectedKnowledgeBases: [],
@@ -76,6 +82,46 @@ const AgentBuilder: React.FC = () => {
     setAgentConfig({
       ...agentConfig,
       description: event.target.value
+    });
+  };
+  
+  // 处理智能体类型变更
+  const handleAgentTypeChange = (value: string) => {
+    setAgentConfig({
+      ...agentConfig,
+      agentType: value
+    });
+  };
+  
+  // 处理图标变更
+  const handleIconChange = (icon: string) => {
+    setAgentConfig({
+      ...agentConfig,
+      icon: icon
+    });
+  };
+  
+  // 处理标签变更
+  const handleTagsChange = (tags: string[]) => {
+    setAgentConfig({
+      ...agentConfig,
+      tags: tags
+    });
+  };
+  
+  // 处理语言变更
+  const handleLanguageChange = (language: string) => {
+    setAgentConfig({
+      ...agentConfig,
+      language: language
+    });
+  };
+  
+  // 处理可见性变更
+  const handleVisibilityChange = (isPublic: boolean) => {
+    setAgentConfig({
+      ...agentConfig,
+      isPublic: isPublic
     });
   };
   
@@ -290,6 +336,17 @@ const AgentBuilder: React.FC = () => {
               description={agentConfig.description}
               onNameChange={handleNameChange}
               onDescriptionChange={handleDescriptionChange}
+              // 新增属性
+              agentType={agentConfig.agentType}
+              onAgentTypeChange={handleAgentTypeChange}
+              icon={agentConfig.icon}
+              onIconChange={handleIconChange}
+              tags={agentConfig.tags}
+              onTagsChange={handleTagsChange}
+              language={agentConfig.language}
+              onLanguageChange={handleLanguageChange}
+              isPublic={agentConfig.isPublic}
+              onVisibilityChange={handleVisibilityChange}
             />
           )}
           

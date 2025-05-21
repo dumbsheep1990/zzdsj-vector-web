@@ -29,15 +29,22 @@ export interface AgentConfig {
   id?: string;
   name: string;
   description: string;
+  // 新增基础信息字段
+  agentType: string; // 智能体类型（chat、knowledge、code等）
+  icon: string; // 图标类型
+  tags: string[]; // 标签列表
+  language: string; // 主要语言
+  isPublic: boolean; // 可见性设置
+  // 系统提示词、工具和知识库设置
   systemPrompt: string;
   selectedTools: Tool[];
   selectedKnowledgeBases: KnowledgeBase[];
-  advanced?: {
-    temperature?: number;
-    maxTokens?: number;
-    topP?: number;
-    frequencyPenalty?: number;
-    presencePenalty?: number;
+  advanced: {
+    temperature: number;
+    maxTokens: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
   };
 }
 

@@ -437,79 +437,78 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
         <Typography variant="h6" component="h2" sx={{ fontWeight: 600, letterSpacing: '0.3px' }}>
           系统提示词
         </Typography>
-        <Box sx={{ display: 'flex', gap: 0.8 }}>
-          <Tooltip title="导入提示词模板" placement="top">
-            <IconButton 
-              size="small" 
-              onClick={handleTemplateMenuOpen}
-              className="header-button"
-              sx={{ 
-                color: 'white', 
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  bgcolor: 'rgba(0, 0, 0, 0.3)', 
-                  color: '#e2e8f0' 
-                }
-              }}
-            >
-              <ImportOutlined />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="插入变量" placement="top">
-            <IconButton 
-              size="small" 
-              onClick={handleVariableMenuOpen}
-              className="header-button"
-              sx={{ 
-                color: 'white', 
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  bgcolor: 'rgba(0, 0, 0, 0.3)', 
-                  color: '#e2e8f0' 
-                }
-              }}
-            >
-              <TagsOutlined />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={copied ? "已复制!" : "复制提示词"} placement="top">
-            <IconButton 
-              size="small" 
-              onClick={copySystemPrompt}
-              className="header-button"
-              sx={{ 
-                color: 'white', 
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  bgcolor: 'rgba(0, 0, 0, 0.3)', 
-                  color: '#e2e8f0' 
-                }
-              }}
-            >
-              <CopyOutlined />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="重置提示词" placement="top">
-            <IconButton 
-              size="small" 
-              onClick={onReset}
-              className="header-button"
-              sx={{ 
-                color: 'white', 
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  bgcolor: 'rgba(0, 0, 0, 0.3)', 
-                  color: '#e2e8f0' 
-                }
-              }}
-            >
-              <ReloadOutlined />
-            </IconButton>
-          </Tooltip>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box
+            onClick={handleTemplateMenuOpen}
+            sx={{ 
+              color: '#0c4a2c', 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '4px',
+              fontWeight: 600,
+              padding: '4px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            <ImportOutlined style={{ marginRight: '4px' }} />
+            <span>导入</span>
+          </Box>
+          
+          <Box
+            onClick={handleVariableMenuOpen}
+            sx={{ 
+              color: '#0c4a2c', 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '4px',
+              fontWeight: 600,
+              padding: '4px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            <TagsOutlined style={{ marginRight: '4px' }} />
+            <span>变量</span>
+          </Box>
+          
+          <Box
+            onClick={copySystemPrompt}
+            sx={{ 
+              color: '#0c4a2c', 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '4px',
+              fontWeight: 600,
+              padding: '4px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            <CopyOutlined style={{ marginRight: '4px' }} />
+            <span>{copied ? "已复制" : "复制"}</span>
+          </Box>
+          
+          <Box
+            onClick={onReset}
+            sx={{ 
+              color: '#0c4a2c', 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '4px',
+              fontWeight: 600,
+              padding: '4px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            <ReloadOutlined style={{ marginRight: '4px' }} />
+            <span>重置</span>
+          </Box>
         </Box>
       </Box>
       

@@ -1,9 +1,14 @@
 /* 系统提示词卡片特定样式覆盖 - 非常精确的选择器 */
 
 /* 修复卡片顶部标题栏按钮悬停样式 */
-.header-button.MuiIconButton-root:hover {
-  background-color: rgba(0, 0, 0, 0.4) !important;
-  color: white !important;
+.system-prompt-card .header-button.MuiIconButton-root:hover,
+.header-button.MuiIconButton-root:hover,
+body .header-button.MuiIconButton-root:hover {
+  background-color: #155e3e !important; /* 深绿色背景 */
+  color: #ffff00 !important; /* 黄色文字 */
+  box-shadow: 0 0 0 2px rgba(255, 255, 0, 0.5) !important;
+  border: none !important;
+  opacity: 1 !important;
 }
 
 /* 系统提示词卡片文本区域 - 删除其滚动条 */
