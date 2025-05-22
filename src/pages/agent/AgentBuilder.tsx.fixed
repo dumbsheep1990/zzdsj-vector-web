@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { SaveOutlined, LeftOutlined } from '@ant-design/icons';
 import { styled } from '@mui/material/styles';
 
 // 导入布局组件
+import PageHeader from '../../components/layout/PageHeader';
 import SidebarContainer from './components/SidebarContainer';
-import BuilderHeader from './components/BuilderHeader';
-// 不再使用ContentContainer，直接使用Box组件
+import ContentContainer from './components/ContentContainer';
 import CompleteButton from './components/CompleteButton';
 
 // 导入步骤组件
@@ -36,16 +38,10 @@ const defaultAdvancedSettings: AdvancedSettings = {
 
 // 定义磨砂背景容器
 const GlassmorphismBackground = styled(Box)(({ theme }) => ({
-  position: 'fixed', // 修改为fixed定位，覆盖整个视口
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  position: 'relative',
   width: '100%',
-  height: '100%',
-  zIndex: -1, // 改为-1，确保完全在内容下层且不影响用户交互
+  minHeight: '100vh',
   background: `linear-gradient(135deg, ${theme.palette.primary.light}30, ${theme.palette.secondary.light}40, ${theme.palette.info.light}30)`,
-  pointerEvents: 'none', // 不拦截任何鼠标事件
   '&:before': {
     content: '""',
     position: 'absolute',
@@ -55,9 +51,9 @@ const GlassmorphismBackground = styled(Box)(({ theme }) => ({
     height: '400px',
     background: `radial-gradient(circle, ${theme.palette.primary.main}30 0%, transparent 70%)`,
     borderRadius: '50%',
+    zIndex: 0,
     transform: 'translate(20%, -20%)',
     filter: 'blur(40px)',
-    pointerEvents: 'none'
   },
   '&:after': {
     content: '""',
@@ -68,26 +64,14 @@ const GlassmorphismBackground = styled(Box)(({ theme }) => ({
     height: '500px',
     background: `radial-gradient(circle, ${theme.palette.secondary.main}30 0%, transparent 70%)`,
     borderRadius: '50%',
+    zIndex: 0,
     transform: 'translate(-20%, 20%)',
     filter: 'blur(40px)',
-    pointerEvents: 'none'
   }
 }));
 
-// 内容容器组件
-const ContentWrapper = styled(Box)(() => ({
-  position: 'relative',
-  zIndex: 1,
-  minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden'
-}));
-
 const AgentBuilder: React.FC = () => {
-  // 当前未使用导航功能，但将来可能添加返回按钮等功能
-  // const navigate = useNavigate();
-  // const { state } = useAppContext();
+  const navigate = useNavigate();
   
   // 活动步骤状态
   const [activeStep, setActiveStep] = useState(0);
@@ -326,39 +310,41 @@ const AgentBuilder: React.FC = () => {
   ];
   
   return (
-    <>
-      {/* 固定底层背景 */}
-      <GlassmorphismBackground />
-      
-      {/* 内容容器 */}
-      <ContentWrapper>
-        {/* 顶部灵动岛 */}
-        <BuilderHeader
+    <GlassmorphismBackground>
+      <Box sx={{ width: '100%', minHeight: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+        {/* 顶部页面头部 */}
+        <PageHeader
           title="创建智能体"
-          agentName={agentConfig.name}
-          pageName="智能体管理"
-          canSave={canSave}
-          onSave={handleSave}
-          currentStep={activeStep}
-          totalSteps={stepTitles.length}
-          isMainHeader={true}
+          parentTitle="智能体管理"
+          secondaryActions={[
+            {
+              icon: <LeftOutlined />,
+              label: '返回列表',
+              onClick: () => navigate('/agent-list')
+            }
+          ]}
+          primaryActions={[
+            {
+              icon: <SaveOutlined />,
+              label: '保存智能体',
+              onClick: handleSave,
+              disabled: !canSave
+            }
+          ]}
         />
+        
+        {/* 主体内容 */}
         <Box sx={{ 
           display: 'flex', 
-          flexGrow: 1,
+          flexGrow: 1, 
+          overflow: 'hidden',
           background: 'rgba(255, 255, 255, 0.65)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
           borderRadius: '16px',
           margin: 2,
-          marginTop: 4, // 增加与顶部灵动岛的间距
-          marginBottom: 3,
           border: '1px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)',
-          height: 'calc(100vh - 160px)', // 调整高度，留出更多空间给顶部灵动岛
-          overflow: 'auto',
-          position: 'relative',
-          zIndex: 2
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)'
         }}>
           {/* 左侧步骤导航 */}
           <SidebarContainer
@@ -368,11 +354,16 @@ const AgentBuilder: React.FC = () => {
             onStepChange={handleStepChange}
             onSave={handleSave}
             canSave={canSave}
-            collapsed={false /* 内容区步骤栏始终展开，不跟随全局导航折叠 */}
           />
           
-          {/* 右侧内容区域 - 直接显示内容，不使用ContentContainer */}
-          <Box sx={{ flex: 1, p: 2, overflow: 'auto' }}>
+          {/* 右侧内容区域 */}
+          <ContentContainer
+            activeStep={activeStep}
+            canContinue={canContinue(activeStep)}
+            onBack={handleBack}
+            onNext={handleNext}
+            titles={stepTitles}
+          >
             {/* 基本信息页 */}
             {activeStep === 0 && (
               <BasicInfoStep
@@ -425,30 +416,10 @@ const AgentBuilder: React.FC = () => {
                 />
               </>
             )}
-            
-            {/* 底部导航按钮 */}
-            {activeStep > 0 && (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                <Button onClick={handleBack} variant="outlined" size="small">
-                  上一步
-                </Button>
-                {activeStep < stepTitles.length - 1 && (
-                  <Button 
-                    onClick={handleNext} 
-                    variant="contained" 
-                    color="primary" 
-                    size="small"
-                    disabled={!canContinue(activeStep)}
-                  >
-                    下一步
-                  </Button>
-                )}
-              </Box>
-            )}
-          </Box>
+          </ContentContainer>
         </Box>
-      </ContentWrapper>
-    </>
+      </Box>
+    </GlassmorphismBackground>
   );
 };
 

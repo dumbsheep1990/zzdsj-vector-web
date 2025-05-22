@@ -46,6 +46,7 @@ export interface AgentTemplateType {
   tags: string[];
   language: string;
   isPublic: boolean;
+  agentCategory?: string; // 智能体类别: 'base' | 'application'
   systemPrompt: string;
   selectedTools: any[];
   selectedKnowledgeBases: any[];

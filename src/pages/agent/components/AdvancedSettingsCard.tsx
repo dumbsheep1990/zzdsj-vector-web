@@ -44,21 +44,25 @@ const AdvancedSettingsCard: React.FC<AdvancedSettingsCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-        borderRadius: '12px'
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+        borderRadius: '16px',
+        background: 'rgba(150, 150, 150, 0.08)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        border: '1px solid rgba(150, 150, 150, 0.2)',
       }}
     >
       <Box
         sx={{
           p: 2,
-          background: 'linear-gradient(135deg, #3f51b5 0%, #2196f3 100%)',
-          color: 'white',
+          borderBottom: '1px solid rgba(150, 150, 150, 0.1)',
+          color: '#64748b',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        <Typography variant="h6" component="h2">高级设置</Typography>
+        <Typography variant="h6" component="h2" sx={{ fontWeight: 500 }}>高级设置</Typography>
       </Box>
       
       <Box sx={{ 

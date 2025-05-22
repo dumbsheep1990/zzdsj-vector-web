@@ -1,0 +1,10 @@
+/* PageHeader自定义样式 - 智能体构建页面 */
+.custom-page-header-container .bg-white {
+  background-color: #f3f4f6 !important;
+  border-bottom: none !important;
+}
+
+.custom-page-header-container .bg-gradient-to-r {
+  background: #f3f4f6 !important;
+  background-image: none !important;
+}

@@ -19,7 +19,52 @@ code {
 
 /* 自定义渐变样式 */
 .bg-gradient-blue-purple {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: #64748b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.bg-gradient-blue-purple:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 原来的紫色渐变样式（已被覆盖） */
+.bg-gradient-blue-purple-original {
   background: linear-gradient(135deg, #4338ca 0%, #7e22ce 100%);
+}
+
+/* 精确针对紫色展开高级配置按钮 */
+[style*="linear-gradient(45deg, #9c27b0, #7b1fa2)"],
+button[style*="#9c27b0"],
+.MuiButton-containedSecondary,
+.MuiButton-root[style*="background: linear-gradient"] {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: #64748b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border: 2px solid rgba(255, 255, 255, 0.6) !important;
+  border-bottom: 2px solid rgba(220, 220, 220, 0.8) !important;
+  border-right: 2px solid rgba(220, 220, 220, 0.8) !important;
+  --variant-containedBg: rgba(255, 255, 255, 0.8) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+[style*="linear-gradient(45deg, #9c27b0, #7b1fa2)"]:hover,
+button[style*="#9c27b0"]:hover,
+.MuiButton-containedSecondary:hover,
+.MuiButton-root[style*="background: linear-gradient"]:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 2px solid rgba(200, 200, 200, 0.9) !important;
+  border-right: 2px solid rgba(200, 200, 200, 0.9) !important;
+  transform: translateY(-2px) !important;
 }
 
 .bg-gradient-indigo-blue {
@@ -28,6 +73,103 @@ code {
 
 .bg-gradient-green-blue {
   background: linear-gradient(135deg, #047857 0%, #0891b2 100%);
+}
+
+/* 全局UI卡片样式覆盖 */
+.MuiCard-root, 
+.MuiPaper-root {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 2px solid rgba(255, 255, 255, 0.7) !important;
+  border-right: 2px solid rgba(230, 230, 230, 0.6) !important;
+  border-bottom: 2px solid rgba(230, 230, 230, 0.6) !important;
+  overflow: visible !important;
+  transform: translateY(0) !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiCard-root:hover, 
+.MuiPaper-root:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* 按类型为卡片添加不同颜色背景 */
+.MuiCard-root[color="primary"] {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(229, 243, 255, 0.85)) !important;
+  border-left-color: rgba(63, 137, 255, 0.3) !important;
+  border-top-color: rgba(63, 137, 255, 0.3) !important;
+}
+
+.MuiCard-root[color="secondary"] {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(241, 235, 255, 0.85)) !important;
+  border-left-color: rgba(156, 39, 176, 0.3) !important;
+  border-top-color: rgba(156, 39, 176, 0.3) !important;
+}
+
+.MuiCard-root[color="warning"] {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(255, 247, 235, 0.85)) !important;
+  border-left-color: rgba(255, 152, 0, 0.3) !important;
+  border-top-color: rgba(255, 152, 0, 0.3) !important;
+}
+
+.MuiCard-root[color="info"] {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(235, 248, 255, 0.85)) !important;
+  border-left-color: rgba(33, 150, 243, 0.3) !important;
+  border-top-color: rgba(33, 150, 243, 0.3) !important;
+}
+
+.MuiCard-root[color="success"] {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(235, 255, 243, 0.85)) !important;
+  border-left-color: rgba(76, 175, 80, 0.3) !important;
+  border-top-color: rgba(76, 175, 80, 0.3) !important;
+}
+
+.MuiCard-root[color="error"] {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(255, 235, 238, 0.85)) !important;
+  border-left-color: rgba(244, 67, 54, 0.3) !important;
+  border-top-color: rgba(244, 67, 54, 0.3) !important;
+}
+
+/* 移除卡片顶部预设的色条 */
+.MuiCard-root::before {
+  display: none !important;
+}
+
+/* 卡片标题区样式 */
+.MuiCard-root .MuiCardContent-root:first-child h2,
+.MuiCard-root .MuiCardContent-root:first-child h3,
+.MuiCard-root .MuiCardContent-root:first-child h6,
+.MuiCard-root .MuiBox-root:first-child h2,
+.MuiCard-root .MuiBox-root:first-child h3,
+.MuiCard-root .MuiBox-root:first-child h6 {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+/* 设置按钮样式 */
+.MuiButton-containedSecondary {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: #64748b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border: 2px solid rgba(255, 255, 255, 0.6) !important;
+  border-bottom: 2px solid rgba(220, 220, 220, 0.8) !important;
+  border-right: 2px solid rgba(220, 220, 220, 0.8) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+.MuiButton-containedSecondary:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-2px) !important;
 }
 
 /* 定制滚动条样式 */

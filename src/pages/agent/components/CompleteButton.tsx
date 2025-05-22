@@ -16,16 +16,20 @@ const CompleteButton: React.FC<CompleteButtonProps> = ({ onComplete, disabled })
         disabled={disabled}
         endIcon={<CheckCircleOutlined />}
         sx={{
-          bgcolor: '#5c6bc0',
-          color: 'white',
+          bgcolor: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          color: '#64748b',
           textTransform: 'none',
           fontWeight: 500,
           borderRadius: 1.5,
           px: 3,
           py: 1,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
           '&:hover': {
-            bgcolor: '#3f51b5',
+            bgcolor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.08)'
           }
         }}
       >

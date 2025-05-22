@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AgentTemplateSelector, { AgentTemplateType } from './AgentTemplateSelector';
 import AdvancedAgentSettings, { AdvancedAgentSettings as AdvancedSettings, defaultAdvancedAgentSettings } from './AdvancedAgentSettings';
 import QuickConfigPanel, { QuickConfigOptions, defaultQuickConfig } from './QuickConfigPanel';
-import { ColorCard, ColorAvatar, GradientButton, BorderTextField, ColorDivider, AnimatedContentBox, TypeCard } from './AgentBuilderStyles';
+import { ColorCard, ColorAvatar, BorderTextField, ColorDivider, TypeCard } from './AgentBuilderStyles';
 import { 
   Box, 
   Typography, 
@@ -60,6 +60,15 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   }
 }));
 
+// 模型配置接口
+interface ModelConfig {
+  modelId: string;     // 模型标识符
+  provider: string;    // 模型提供商
+  temperature?: number; // 温度
+  topP?: number;       // 采样参数
+  maxTokens?: number;  // 最大token数
+}
+
 // 接口定义
 interface BasicInfoStepProps {
   name: string;
@@ -77,6 +86,12 @@ interface BasicInfoStepProps {
   onLanguageChange?: (language: string) => void;
   isPublic?: boolean;
   onVisibilityChange?: (isPublic: boolean) => void;
+  // 智能体类别
+  agentCategory?: string;
+  onAgentCategoryChange?: (category: string) => void;
+  // 模型配置
+  modelConfig?: ModelConfig;
+  onModelConfigChange?: (config: ModelConfig) => void;
   // 高级设置属性
   advancedSettings?: AdvancedSettings;
   onAdvancedSettingsChange?: (settings: AdvancedSettings) => void;
@@ -145,6 +160,81 @@ const languageOptions = [
   { value: 'multilingual', label: '多语言' }
 ];
 
+// 智能体类别选项
+const agentCategoryOptions = [
+  { 
+    value: 'base', 
+    label: '系统基础Agent', 
+    description: '可被其他Agent继承，也可独立使用的基础智能体'
+  },
+  { 
+    value: 'application', 
+    label: '场景应用Agent', 
+    description: '针对固定场景下的智能体，一般独立使用'
+  }
+];
+
+// 模型选项
+const modelOptions = [
+  { 
+    id: 'gpt-4-turbo', 
+    name: 'GPT-4 Turbo', 
+    description: '强大的多功能模型，擅长复杂任务和多轮对话',
+    provider: 'OpenAI',
+    maxContext: 128000,
+    icon: '🤖' // 机器人表情符号
+  },
+  { 
+    id: 'gpt-4', 
+    name: 'GPT-4', 
+    description: '高级理解和推理能力，适合复杂任务',
+    provider: 'OpenAI',
+    maxContext: 8192,
+    icon: '💬' // 对话气泡表情符号
+  },
+  { 
+    id: 'gpt-3.5-turbo-16k', 
+    name: 'GPT-3.5 Turbo (16K)', 
+    description: '快速高效，具备更长的上下文窗口',
+    provider: 'OpenAI',
+    maxContext: 16384,
+    icon: '🚀' // 火箭表情符号
+  },
+  { 
+    id: 'claude-3-opus', 
+    name: 'Claude 3 Opus', 
+    description: '人类级别的智能和理解力，处理复杂任务',
+    provider: 'Anthropic',
+    maxContext: 200000,
+    icon: '🌎' // 地球表情符号
+  },
+  { 
+    id: 'claude-3-sonnet', 
+    name: 'Claude 3 Sonnet', 
+    description: '高效平衡型模型，价格优势明显',
+    provider: 'Anthropic',
+    maxContext: 180000,
+    icon: '🎤' // 麦克风表情符号
+  },
+  { 
+    id: 'gemini-pro', 
+    name: 'Gemini Pro', 
+    description: '谷歌的多模态通用智能模型',
+    provider: 'Google',
+    maxContext: 32000,
+    icon: '🔍' // 放大镜表情符号
+  }
+];
+
+// 默认模型配置
+const defaultModelConfig: ModelConfig = {
+  modelId: 'gpt-4-turbo',
+  provider: 'OpenAI',
+  temperature: 0.7,
+  topP: 0.95,
+  maxTokens: 4096
+};
+
 // 预定义标签
 const predefinedTags = [
   '生产力', '创意', '专业', '学习', '娱乐', 
@@ -168,6 +258,12 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
   onLanguageChange = () => {},
   isPublic = false,
   onVisibilityChange = () => {},
+  // 智能体类别默认值
+  agentCategory = 'application',
+  onAgentCategoryChange = () => {},
+  // 模型配置默认值
+  modelConfig = defaultModelConfig,
+  onModelConfigChange = () => {},
   // 高级设置默认值
   advancedSettings = defaultAdvancedAgentSettings,
   onAdvancedSettingsChange = () => {},
@@ -280,6 +376,19 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
     if (onVisibilityChange) {
       onVisibilityChange(template.isPublic);
     }
+    
+    // 处理智能体类别
+    if (onAgentCategoryChange && template.agentCategory) {
+      onAgentCategoryChange(template.agentCategory);
+    }
+    
+    // 处理模型配置
+    if (onModelConfigChange && template.modelConfig) {
+      onModelConfigChange({
+        ...defaultModelConfig,
+        ...template.modelConfig
+      });
+    }
   };
   
   // 获取当前选中图标
@@ -310,21 +419,13 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             mb: 2, 
             flex: 1, 
             borderRadius: '16px', 
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)', 
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)', 
             overflow: 'visible',
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
             position: 'relative',
-            '&:before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '6px',
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-              borderTopLeftRadius: '16px',
-              borderTopRightRadius: '16px',
-            }
+            background: alpha(theme.palette.primary.main, 0.08),
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
           }}>
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -355,23 +456,28 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                   </Box>
                   智能体基础信息
                 </Typography>
-                <GradientButton
+                <Button
                   size="small"
-                  color="primary"
-                  startIcon={<ImportOutlined />}
+                  variant="outlined"
+                  startIcon={<ImportOutlined style={{ color: theme.palette.primary.main }} />}
                   onClick={openTemplateDialog}
                   sx={{
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                     fontWeight: 500,
                     borderRadius: '8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    color: theme.palette.primary.main,
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
                     '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
-                      transform: 'translateY(-2px)'
+                      transform: 'translateY(-2px)',
+                      border: `1px solid ${theme.palette.primary.main}`
                     }
                   }}
                 >
                   导入模板
-                </GradientButton>
+                </Button>
               </Box>
               
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '3fr 9fr' }, gap: 3 }}>
@@ -519,97 +625,388 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             </CardContent>
           </ColorCard>
           
-          {/* 智能体类型选择 */}
+          {/* 智能体类型选择卡片 */}
           <ColorCard color={sectionColors.type as any} sx={{ 
-            flex: 1, 
+            mb: 3,
             borderRadius: '16px', 
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)', 
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)', 
             overflow: 'visible',
-            border: `1px solid ${alpha(theme.palette.secondary.main, 0.15)}`,
+            border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
             position: 'relative',
-            '&:before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '6px',
-              background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.secondary.light})`,
-              borderTopLeftRadius: '16px',
-              borderTopRightRadius: '16px',
-            }
+            background: alpha(theme.palette.secondary.main, 0.08),
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
           }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 3, color: theme.palette.secondary.main }}>
-                智能体类型
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: theme.palette.secondary.main }}>
+                  智能体类型
+                </Typography>
+                <Tooltip title="选择智能体的类型，不同类型适用于不同的使用场景">
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <QuestionCircleOutlined style={{ color: theme.palette.secondary.main, opacity: 0.7 }} />
+                  </Box>
+                </Tooltip>
+              </Box>
               
-              <FormControl component="fieldset" sx={{ width: '100%' }}>
-                <RadioGroup 
-                  aria-label="agent-type" 
-                  name="agent-type-group" 
-                  value={agentType} 
-                  onChange={(e) => onAgentTypeChange(e.target.value)}
-                >
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-                    {agentTypeOptions.map((option) => (
-                      <Box key={option.value}>
-                        <TypeCard 
-                          selected={agentType === option.value}
-                          color={option.color}
-                          onClick={() => onAgentTypeChange(option.value)}
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <Select
+                  value={agentType}
+                  onChange={(e) => onAgentTypeChange(e.target.value as string)}
+                  sx={{ 
+                    borderRadius: '10px',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(theme.palette.secondary.main, 0.3),
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.secondary.main,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.secondary.main,
+                    }
+                  }}
+                  renderValue={(selected) => {
+                    const option = agentTypeOptions.find(opt => opt.value === selected);
+                    if (!option) return '';
+                    return (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar
                           sx={{ 
-                            borderRadius: '10px', 
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.08)'
-                            } 
+                            width: 28, 
+                            height: 28,
+                            bgcolor: option.color,
+                            fontSize: '0.875rem'
                           }}
                         >
-                          <CardContent sx={{ p: 2 }}>
-                            <FormControlLabel 
-                              value={option.value} 
-                              control={<Radio />} 
-                              sx={{ width: '100%', m: 0 }}
-                              label={
-                                <Box sx={{ ml: 1 }}>
-                                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <Avatar 
-                                      sx={{ 
-                                        width: 32, 
-                                        height: 32, 
-                                        mr: 1, 
-                                        bgcolor: agentType === option.value ? 
-                                          theme.palette.primary.main : 
-                                          alpha(theme.palette.text.secondary, 0.1)
-                                      }}
-                                    >
-                                      {option.icon}
-                                    </Avatar>
-                                    <Typography variant="subtitle2" fontWeight={600}>
-                                      {option.label}
-                                    </Typography>
-                                  </Box>
-                                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                    {option.description}
-                                  </Typography>
-                                </Box>
-                              } 
-                            />
-                          </CardContent>
-                        </TypeCard>
+                          {option.icon}
+                        </Avatar>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {option.label}
+                        </Typography>
                       </Box>
-                    ))}
-                  </Box>
-                </RadioGroup>
+                    );
+                  }}
+                >
+                  {agentTypeOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar 
+                            sx={{ 
+                              width: 32, 
+                              height: 32, 
+                              mr: 2,
+                              bgcolor: option.color
+                            }}
+                          >
+                            {option.icon}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {option.label}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {option.description}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.secondary.main }}>
+                  当前类型信息
+                </Typography>
+              </Box>
+              
+              {/* 显示当前选中类型的详细信息 */}
+              {(() => {
+                const selectedType = agentTypeOptions.find(opt => opt.value === agentType);
+                if (!selectedType) return null;
+                
+                return (
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 2, 
+                      mb: 2,
+                      border: `1px solid ${alpha(selectedType.color, 0.3)}`,
+                      backgroundColor: alpha(selectedType.color, 0.05),
+                      borderRadius: '10px'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Avatar 
+                        sx={{ 
+                          width: 36, 
+                          height: 36, 
+                          mr: 2,
+                          bgcolor: selectedType.color
+                        }}
+                      >
+                        {selectedType.icon}
+                      </Avatar>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: selectedType.color }}>
+                        {selectedType.label}
+                      </Typography>
+                    </Box>
+                    
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                      {selectedType.description}
+                    </Typography>
+                  </Paper>
+                );
+              })()}
+            </CardContent>
+          </ColorCard>
+          
+          {/* 模型选择卡片 */}
+          <ColorCard color="info" sx={{ 
+            mb: 3,
+            borderRadius: '16px', 
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)', 
+            overflow: 'visible',
+            border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+            position: 'relative',
+            background: alpha(theme.palette.info.main, 0.08),
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: theme.palette.info.main }}>
+                  大语言模型
+                </Typography>
+                <Tooltip title="选择智能体使用的大语言模型，不同模型有不同的能力和特点">
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <QuestionCircleOutlined style={{ color: theme.palette.info.main, opacity: 0.7 }} />
+                  </Box>
+                </Tooltip>
+              </Box>
+              
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <Select
+                  value={modelConfig.modelId}
+                  onChange={(e) => {
+                    const selectedModel = modelOptions.find(m => m.id === e.target.value);
+                    if (selectedModel) {
+                      onModelConfigChange({
+                        ...modelConfig,
+                        modelId: selectedModel.id,
+                        provider: selectedModel.provider
+                      });
+                    }
+                  }}
+                  sx={{ 
+                    borderRadius: '10px',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(theme.palette.info.main, 0.3),
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.info.main,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.info.main,
+                    }
+                  }}
+                  renderValue={(selected) => {
+                    const model = modelOptions.find(m => m.id === selected);
+                    if (!model) return '';
+                    return (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ fontSize: '18px' }}>{model.icon}</Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {model.name}
+                        </Typography>
+                        <Chip 
+                          size="small" 
+                          label={model.provider} 
+                          sx={{ 
+                            ml: 'auto',
+                            height: 20, 
+                            fontSize: '0.65rem',
+                            bgcolor: alpha(theme.palette.info.main, 0.1),
+                            color: theme.palette.info.main,
+                            fontWeight: 600
+                          }} 
+                        />
+                      </Box>
+                    );
+                  }}
+                >
+                  {modelOptions.map((model) => (
+                    <MenuItem key={model.id} value={model.id}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ fontSize: '18px', mr: 1 }}>{model.icon}</Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {model.name}
+                            </Typography>
+                          </Box>
+                          <Chip 
+                            size="small" 
+                            label={model.provider} 
+                            sx={{ 
+                              height: 20, 
+                              fontSize: '0.65rem',
+                              bgcolor: alpha(theme.palette.info.main, 0.1),
+                              color: theme.palette.info.main,
+                              fontWeight: 600
+                            }} 
+                          />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                          {model.description}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+                            上下文窗口：
+                          </Typography>
+                          <Chip 
+                            size="small" 
+                            label={`${model.maxContext.toLocaleString()} tokens`} 
+                            sx={{ 
+                              height: 18, 
+                              fontSize: '0.625rem',
+                              bgcolor: alpha(theme.palette.success.main, 0.1),
+                              color: theme.palette.success.main
+                            }} 
+                          />
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.info.main }}>
+                  当前模型信息
+                </Typography>
+              </Box>
+              
+              {/* 显示当前选中模型的详细信息 */}
+              {(() => {
+                const selectedModel = modelOptions.find(m => m.id === modelConfig.modelId);
+                if (!selectedModel) return null;
+                
+                return (
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 2, 
+                      mb: 2,
+                      border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                      backgroundColor: alpha(theme.palette.info.main, 0.05),
+                      borderRadius: '10px'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Box sx={{ fontSize: '20px', mr: 1.5 }}>{selectedModel.icon}</Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        {selectedModel.name}
+                      </Typography>
+                      <Chip 
+                        size="small" 
+                        label={selectedModel.provider} 
+                        sx={{ 
+                          ml: 'auto',
+                          height: 20, 
+                          fontSize: '0.65rem',
+                          bgcolor: alpha(theme.palette.info.main, 0.1),
+                          color: theme.palette.info.main,
+                          fontWeight: 600
+                        }} 
+                      />
+                    </Box>
+                    
+                    <Typography variant="caption" sx={{ display: 'block', mb: 1, color: theme.palette.text.secondary }}>
+                      {selectedModel.description}
+                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Chip 
+                        size="small" 
+                        label={`上下文窗口: ${selectedModel.maxContext.toLocaleString()} tokens`} 
+                        sx={{ 
+                          height: 20, 
+                          fontSize: '0.7rem',
+                          bgcolor: alpha(theme.palette.success.main, 0.1),
+                          color: theme.palette.success.main,
+                          mr: 1
+                        }} 
+                      />
+                    </Box>
+                  </Paper>
+                );
+              })()}
+              
+              {/* 模型参数设置 */}
+              <Box sx={{ mt: 2, pt: 2, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, color: theme.palette.info.main }}>
+                  模型参数设置
+                </Typography>
+                
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                  {/* 温度设置 */}
+                  <Box>
+                    <Typography variant="caption" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <span>温度</span>
+                      <span>{modelConfig.temperature}</span>
+                    </Typography>
+                    <Box sx={{ px: 1 }}>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="1" 
+                        step="0.01" 
+                        value={modelConfig.temperature} 
+                        onChange={(e) => onModelConfigChange({
+                          ...modelConfig,
+                          temperature: parseFloat(e.target.value)
+                        })}
+                        style={{ width: '100%' }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary">精确</Typography>
+                      <Typography variant="caption" color="text.secondary">创意</Typography>
+                    </Box>
+                  </Box>
+                  
+                  {/* 采样参数 */}
+                  <Box>
+                    <Typography variant="caption" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <span>Top P</span>
+                      <span>{modelConfig.topP}</span>
+                    </Typography>
+                    <Box sx={{ px: 1 }}>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="1" 
+                        step="0.01" 
+                        value={modelConfig.topP} 
+                        onChange={(e) => onModelConfigChange({
+                          ...modelConfig,
+                          topP: parseFloat(e.target.value)
+                        })}
+                        style={{ width: '100%' }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
             </CardContent>
           </ColorCard>
         </Box>
         
-        {/* 右侧快速配置区域 */}
-        <Box sx={{ height: '100%' }}>
+        {/* 右侧模型参数配置区域 */}
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <QuickConfigPanel
             config={quickConfig}
             onConfigChange={onQuickConfigChange}
@@ -618,154 +1015,212 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         </Box>
       </Box>
       
-      {/* 高级设置按钮区域 - 占据全宽 */}
-      <Box sx={{ width: '100%', mb: 8, mt: 2, px: 1, pb: 4 }}>
-        <GradientButton 
+
+      {/* 高级设置按钮 */}
+      <Box sx={{ width: '100%', mb: 3, mt: 2 }}>
+        <Button 
           startIcon={showAdvanced ? null : <SettingOutlined />}
           endIcon={showAdvanced ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           onClick={() => setShowAdvanced(!showAdvanced)}
-          variant="contained"
+          variant="outlined"
           size="medium"
-          color="secondary"
-          fullWidth
+          disableElevation
           sx={{
-            borderRadius: '10px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-            background: showAdvanced ? 
-              `linear-gradient(45deg, ${theme.palette.secondary.light}, ${theme.palette.secondary.main})` : 
-              `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.secondary.dark})`,
-            py: 1.5,
-            fontWeight: 600,
-            letterSpacing: '0.5px',
-            fontSize: '0.95rem',
+            width: '100%',
+            mb: 3,
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.7))',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            color: '#64748b',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            borderBottom: '1px solid rgba(220, 220, 220, 0.9)',
+            borderRight: '1px solid rgba(220, 220, 220, 0.9)',
+            borderRadius: '12px',
+            padding: '8px 16px',
+            fontWeight: 500,
+            letterSpacing: '0.3px',
+            transform: 'translateY(-1px)',
+            transition: 'all 0.2s ease',
             '&:hover': {
-              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
-              background: showAdvanced ? 
-                `linear-gradient(45deg, ${theme.palette.secondary.light}, ${theme.palette.secondary.main})` : 
-                `linear-gradient(45deg, ${theme.palette.purple?.main || '#9c27b0'}, ${theme.palette.secondary.dark})`
+              background: 'rgba(255, 255, 255, 0.9)',
+              boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08)',
+              transform: 'translateY(-2px)'
+            },
+            '&:active': {
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              transform: 'translateY(0)'
             }
           }}
         >
-          {showAdvanced ? '收起高级设置' : '展开高级设置'}
-        </GradientButton>
+          {showAdvanced ? '收起高级配置' : '展开高级配置'}
+        </Button>
       </Box>
       
-      {/* 高级设置区域 - 展开时显示 */}
+      {/* 高级设置区域 */}
       {showAdvanced && (
-        <AnimatedContentBox sx={{ width: '100%' }}>
-          {/* 基础配置 - 三列布局 */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 3, mb: 3 }}>
-            {/* 标签设置 */}
-            <ColorCard color={sectionColors.settings as any} sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <Box sx={{ mb: 4 }}>
+          {/* 高级设置卡片区域 */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3, mb: 3 }}>
+            {/* 多功能配置卡片 - 标签和语言等 */}
+            <ColorCard color="info" sx={{ 
+              borderRadius: '16px', 
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)', 
+              overflow: 'visible',
+              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              background: alpha(theme.palette.info.main, 0.08),
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+            }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: theme.palette.info.main }}>
-                  智能体标签
+                  拓展设置
                 </Typography>
                 
-                <Box sx={{ mb: 2 }}>
-                  <Autocomplete
-                    freeSolo
-                    options={predefinedTags.filter(tag => !tags.includes(tag))}
-                    inputValue={tagInput}
-                    onInputChange={(event, value) => setTagInput(value)}
-                    onChange={(event, value) => {
-                      if (value && typeof value === 'string') {
-                        handleAddTag(value);
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField 
-                        {...params} 
-                        variant="outlined" 
-                        size="small"
-                        placeholder="添加标签"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && tagInput) {
-                            e.preventDefault();
-                            handleAddTag(tagInput);
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
+                  {/* 左侧 - 标签设置 */}
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: theme.palette.info.main }}>
+                      智能体标签
+                    </Typography>
+                    
+                    <Box sx={{ mb: 2 }}>
+                      <Autocomplete
+                        freeSolo
+                        options={predefinedTags.filter(tag => !tags.includes(tag))}
+                        inputValue={tagInput}
+                        onInputChange={(event, value) => setTagInput(value)}
+                        onChange={(event, value) => {
+                          if (value && typeof value === 'string') {
+                            handleAddTag(value);
                           }
                         }}
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <React.Fragment>
-                              {params.InputProps.endAdornment}
-                              <InputAdornment position="end">
-                                <TagsOutlined />
-                              </InputAdornment>
-                            </React.Fragment>
-                          )
-                        }}
+                        renderInput={(params) => (
+                          <TextField 
+                            {...params} 
+                            variant="outlined" 
+                            size="small"
+                            placeholder="添加标签"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && tagInput) {
+                                e.preventDefault();
+                                handleAddTag(tagInput);
+                              }
+                            }}
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <React.Fragment>
+                                  {params.InputProps.endAdornment}
+                                  <InputAdornment position="end">
+                                    <TagsOutlined />
+                                  </InputAdornment>
+                                </React.Fragment>
+                              )
+                            }}
+                          />
+                        )}
                       />
-                    )}
-                  />
-                </Box>
-                
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {tags.map((tag) => (
-                    <Chip
-                      key={tag}
-                      label={tag}
-                      onDelete={() => handleDeleteTag(tag)}
-                      color="primary"
-                      variant="outlined"
-                      size="small"
-                    />
-                  ))}
-                  {tags.length === 0 && (
-                    <Typography variant="caption" color="text.secondary">
-                      添加标签以更好地分类和检索智能体
-                    </Typography>
-                  )}
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {tags.map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          onDelete={() => handleDeleteTag(tag)}
+                          color="primary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      ))}
+                      {tags.length === 0 && (
+                        <Typography variant="caption" color="text.secondary">
+                          添加标签以更好地分类和检索智能体
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                  
+                  {/* 右侧 - 其他设置 */}
+                  <Box>
+                    {/* 语言设置 */}
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: theme.palette.info.main }}>
+                        主要语言
+                      </Typography>
+                      
+                      <FormControl fullWidth size="small">
+                        <Select
+                          value={language}
+                          onChange={(e) => onLanguageChange(e.target.value as string)}
+                          size="small"
+                        >
+                          {languageOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    
+                    {/* 可见性设置已移除 */}
+                  </Box>
                 </Box>
               </CardContent>
             </ColorCard>
             
-            {/* 语言设置 */}
-            <ColorCard color="secondary" sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: theme.palette.secondary.main }}>
-                  主要语言
-                </Typography>
-                
-                <FormControl fullWidth size="small">
-                  <Select
-                    value={language}
-                    onChange={(e) => onLanguageChange(e.target.value as string)}
-                    size="small"
-                  >
-                    {languageOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </CardContent>
-            </ColorCard>
-            
-            {/* 可见性设置 */}
-            <ColorCard color="success" sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
+            {/* 智能体类别设置 */}
+            <ColorCard color="success" sx={{ 
+              borderRadius: '16px', 
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)', 
+              overflow: 'visible',
+              border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+              background: alpha(theme.palette.success.main, 0.08),
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+            }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: theme.palette.success.main }}>
-                  可见性
+                  智能体类别
                 </Typography>
                 
-                <FormControl component="fieldset">
+                <FormControl component="fieldset" sx={{ width: '100%' }}>
                   <RadioGroup 
-                    value={isPublic ? 'public' : 'private'}
-                    onChange={(e) => onVisibilityChange(e.target.value === 'public')}
+                    value={agentCategory}
+                    onChange={(e) => onAgentCategoryChange(e.target.value)}
                   >
-                    <FormControlLabel 
-                      value="private" 
-                      control={<Radio size="small" />} 
-                      label="私有（仅自己可见）" 
-                    />
-                    <FormControlLabel 
-                      value="public" 
-                      control={<Radio size="small" />} 
-                      label="公开（所有人可见）" 
-                    />
+                    {agentCategoryOptions.map((option) => (
+                      <Box key={option.value} sx={{ mb: 1 }}>
+                        <Paper 
+                          elevation={0} 
+                          sx={{ 
+                            p: 1.5, 
+                            backgroundColor: agentCategory === option.value ? alpha(theme.palette.success.light, 0.2) : 'transparent',
+                            border: `1px solid ${agentCategory === option.value ? theme.palette.success.main : alpha(theme.palette.divider, 0.1)}`,
+                            borderRadius: '10px',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <FormControlLabel 
+                            value={option.value} 
+                            control={<Radio size="small" />} 
+                            label={
+                              <Box>
+                                <Typography variant="subtitle2" fontWeight={600}>
+                                  {option.label}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                  {option.description}
+                                </Typography>
+                              </Box>
+                            }
+                            sx={{ width: '100%', m: 0 }}
+                          />
+                        </Paper>
+                      </Box>
+                    ))}
                   </RadioGroup>
                 </FormControl>
               </CardContent>
@@ -773,16 +1228,13 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
           </Box>
           
           {/* 高级设置组件 */}
-          <Box>
+          <Box sx={{ mb: 3 }}>
             <AdvancedAgentSettings
               settings={advancedSettings}
               onSettingsChange={onAdvancedSettingsChange}
             />
           </Box>
-          
-          {/* 底部留白空间 */}
-          <Box sx={{ height: 40 }}></Box>
-        </AnimatedContentBox>
+        </Box>
       )}
       
       {/* 智能体模板选择对话框 */}

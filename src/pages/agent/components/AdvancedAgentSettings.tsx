@@ -18,7 +18,8 @@ import {
   Chip,
   FormControl,
   FormGroup,
-  InputLabel
+  InputLabel,
+  Autocomplete
 } from '@mui/material';
 import { 
   QuestionCircleOutlined,
@@ -40,6 +41,9 @@ export interface AdvancedAgentSettings {
   allowUserFeedback: boolean;
   allowExternalResources: boolean;
   canBeCalledByOtherAgents: boolean;
+  enableSensitiveWordFilter: boolean;
+  sensitiveWordFilterLevel: 'low' | 'medium' | 'high';
+  enableQuestionSplitting: boolean;
 }
 
 interface AdvancedAgentSettingsProps {
@@ -57,7 +61,10 @@ export const defaultAdvancedAgentSettings: AdvancedAgentSettings = {
   restrictedDomains: [],
   allowUserFeedback: true,
   allowExternalResources: true,
-  canBeCalledByOtherAgents: false
+  canBeCalledByOtherAgents: false,
+  enableSensitiveWordFilter: false,
+  sensitiveWordFilterLevel: 'medium',
+  enableQuestionSplitting: false
 };
 
 const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
@@ -117,30 +124,53 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
     { value: 'medium', label: '中', color: theme.palette.warning.main, description: '标准安全措施' },
     { value: 'high', label: '高', color: theme.palette.error.main, description: '严格安全限制' }
   ];
+  
+  // 敏感词过滤级别
+  const sensitiveWordFilterLevels = [
+    { value: 'low', label: '低', color: theme.palette.success.main, description: '仅过滤基本敏感词' },
+    { value: 'medium', label: '中', color: theme.palette.warning.main, description: '过滤常见敏感词和不良内容' },
+    { value: 'high', label: '高', color: theme.palette.error.main, description: '严格过滤所有潜在敏感内容' }
+  ];
 
   return (
     <Box>
-      <Card sx={{ 
-        mb: 3,
-        border: '1px solid',
-        borderColor: alpha(theme.palette.primary.main, 0.2),
-        borderRadius: '12px',
-        bgcolor: alpha(theme.palette.primary.main, 0.02)
+      {/* 两个卡片并排布局 */}
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: { xs: '1fr', sm: '1fr', md: '1fr 1fr' }, 
+        gap: 3,
+        mb: 3
       }}>
-        <CardContent>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            mb: 2,
-            color: theme.palette.primary.main
-          }}>
-            <ToolOutlined style={{ marginRight: 8, fontSize: '18px' }} />
-            <Typography variant="subtitle1" fontWeight={600}>
-              工具调用设置
-            </Typography>
-          </Box>
+        {/* 工具调用设置卡片 */}
+        <Card sx={{ 
+          height: '100%',
+          border: '1px solid',
+          borderColor: alpha(theme.palette.primary.main, 0.2),
+          borderRadius: '16px',
+          bgcolor: alpha(theme.palette.primary.main, 0.03),
+          boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.08)}`,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: `0 12px 28px ${alpha(theme.palette.primary.main, 0.12)}`,
+            transform: 'translateY(-2px)'
+          },
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)'
+        }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              mb: 2,
+              color: theme.palette.primary.main
+            }}>
+              <ToolOutlined style={{ marginRight: 8, fontSize: '18px' }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                工具调用设置
+              </Typography>
+            </Box>
           
-          <FormGroup>
+            <FormGroup>
             <Box sx={{ mb: 3 }}>
               <FormControlLabel
                 control={
@@ -148,6 +178,22 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
                     checked={settings.autonomousToolCalling}
                     onChange={handleSwitchChange('autonomousToolCalling')}
                     color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        '&.Mui-checked': {
+                          '& + .MuiSwitch-track': {
+                            backgroundColor: theme.palette.primary.main,
+                            opacity: 0.8
+                          }
+                        }
+                      },
+                      '& .MuiSwitch-track': {
+                        borderRadius: 10
+                      },
+                      '& .MuiSwitch-thumb': {
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
+                      }
+                    }}
                   />
                 }
                 label={
@@ -179,7 +225,36 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
                       sx={{ 
                         maxWidth: 300, 
                         mr: 2,
-                        color: theme.palette.primary.main
+                        color: theme.palette.primary.main,
+                        height: 8,
+                        '& .MuiSlider-thumb': {
+                          width: 20,
+                          height: 20,
+                          boxShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.3)}`,
+                          '&:hover, &.Mui-focusVisible': {
+                            boxShadow: `0 0 0 8px ${alpha(theme.palette.primary.main, 0.16)}`
+                          }
+                        },
+                        '& .MuiSlider-valueLabel': {
+                          backgroundColor: theme.palette.primary.main,
+                          borderRadius: '8px',
+                          padding: '4px 8px'
+                        },
+                        '& .MuiSlider-track': {
+                          height: 8,
+                          borderRadius: 4
+                        },
+                        '& .MuiSlider-rail': {
+                          height: 8,
+                          borderRadius: 4,
+                          opacity: 0.3
+                        },
+                        '& .MuiSlider-mark': {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.5),
+                          width: 4,
+                          height: 4,
+                          borderRadius: '50%'
+                        }
                       }}
                     />
                     <Typography variant="body2" color="text.secondary">
@@ -197,6 +272,22 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
                     checked={settings.allowExternalResources}
                     onChange={handleSwitchChange('allowExternalResources')}
                     color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        '&.Mui-checked': {
+                          '& + .MuiSwitch-track': {
+                            backgroundColor: theme.palette.primary.main,
+                            opacity: 0.8
+                          }
+                        }
+                      },
+                      '& .MuiSwitch-track': {
+                        borderRadius: 10
+                      },
+                      '& .MuiSwitch-thumb': {
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
+                      }
+                    }}
                   />
                 }
                 label={
@@ -220,232 +311,439 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
                     </Tooltip>
                   </Typography>
                   
-                  <Box component="form" onSubmit={(e) => {
-                    e.preventDefault();
-                    const input = e.currentTarget.elements.namedItem('domain') as HTMLInputElement;
-                    handleAddRestrictedDomain(input.value);
-                    input.value = '';
-                  }} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <TextField
-                      name="domain"
-                      placeholder="输入域名，如 example.com"
-                      size="small"
-                      sx={{ maxWidth: 300, mr: 1 }}
-                    />
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {settings.restrictedDomains.map((domain) => (
-                      <Chip
-                        key={domain}
-                        label={domain}
+                  <Autocomplete<string, true, undefined, true>
+                    multiple
+                    freeSolo
+                    id="restricted-domains-tags"
+                    options={[]}
+                    value={settings.restrictedDomains}
+                    renderTags={(value: string[], getTagProps) =>
+                      value.map((domain: string, index: number) => (
+                        <Chip
+                          {...getTagProps({ index })}
+                          key={domain}
+                          label={domain}
+                          size="small"
+                          onDelete={() => handleDeleteRestrictedDomain(domain)}
+                          color="error"
+                          variant="outlined"
+                          sx={{
+                            borderRadius: '8px',
+                            transition: 'all 0.2s ease',
+                            height: '28px',
+                            margin: '2px',
+                            '& .MuiChip-deleteIcon': {
+                              color: alpha(theme.palette.error.main, 0.7),
+                              '&:hover': {
+                                color: theme.palette.error.main
+                              }
+                            }
+                          }}
+                        />
+                      ))
+                    }
+                    onChange={(_: React.SyntheticEvent, newValue: string[]) => {
+                      handleSettingChange('restrictedDomains', newValue);
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const input = e.currentTarget.querySelector('input') as HTMLInputElement;
+                        if (input.value && !settings.restrictedDomains.includes(input.value)) {
+                          handleAddRestrictedDomain(input.value);
+                          input.value = '';
+                        }
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={settings.restrictedDomains.length > 0 ? "" : "输入域名，如 example.com"}
                         size="small"
-                        onDelete={() => handleDeleteRestrictedDomain(domain)}
-                        color="error"
-                        variant="outlined"
+                        fullWidth
+                        sx={{ 
+                          width: '100%',
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '10px',
+                            transition: 'all 0.2s ease',
+                            paddingLeft: 1,
+                            '&:hover': {
+                              boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
+                            }
+                          },
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: alpha(theme.palette.primary.main, 0.3)
+                          }
+                        }}
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {params.InputProps.endAdornment}
+                              <InputAdornment position="end">
+                                <Box 
+                                  component="button" 
+                                  type="button"
+                                  onClick={() => {
+                                    const input = document.querySelector('#restricted-domains-tags input') as HTMLInputElement;
+                                    if (input && input.value && !settings.restrictedDomains.includes(input.value)) {
+                                      handleAddRestrictedDomain(input.value);
+                                      input.value = '';
+                                    }
+                                  }}
+                                  sx={{
+                                    border: 'none',
+                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                    color: theme.palette.primary.main,
+                                    borderRadius: '8px',
+                                    p: '4px 8px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    marginRight: '8px',
+                                    '&:hover': {
+                                      bgcolor: alpha(theme.palette.primary.main, 0.2)
+                                    }
+                                  }}
+                                >
+                                  添加
+                                </Box>
+                              </InputAdornment>
+                            </>
+                          )
+                        }}
                       />
-                    ))}
-                    {settings.restrictedDomains.length === 0 && (
-                      <Typography variant="caption" color="text.secondary">
-                        未添加任何受限域名
-                      </Typography>
                     )}
-                  </Box>
+                  />
+                  
+                  {settings.restrictedDomains.length === 0 && (
+                    <Typography variant="caption" color="text.secondary" sx={{ width: '100%', padding: '6px 0', display: 'block' }}>
+                      未添加任何受限域名
+                    </Typography>
+                  )}
                 </Box>
               )}
             </Box>
-          </FormGroup>
-        </CardContent>
-      </Card>
+            </FormGroup>
+          </CardContent>
+        </Card>
       
-      <Card sx={{ 
-        mb: 3,
-        border: '1px solid',
-        borderColor: alpha(theme.palette.secondary.main, 0.2),
-        borderRadius: '12px',
-        bgcolor: alpha(theme.palette.secondary.main, 0.02)
-      }}>
-        <CardContent>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            mb: 2,
-            color: theme.palette.secondary.main
-          }}>
-            <RobotOutlined style={{ marginRight: 8, fontSize: '18px' }} />
-            <Typography variant="subtitle1" fontWeight={600}>
-              记忆和上下文设置
-            </Typography>
-          </Box>
-          
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" gutterBottom display="flex" alignItems="center">
-              记忆选项
-              <Tooltip title="设置智能体如何记住过去的交互信息">
-                <QuestionCircleOutlined style={{ ml: 0.5, color: theme.palette.text.secondary, fontSize: '14px' }} />
-              </Tooltip>
-            </Typography>
-            
-            <FormControl size="small" fullWidth sx={{ maxWidth: 300 }}>
-              <Select
-                value={settings.memoryOption}
-                onChange={handleSelectChange('memoryOption') as any}
-              >
-                {memoryOptions.map(option => (
-                  <MenuItem key={option.value} value={option.value}>
-                    <Typography variant="body2">
-                      {option.label}
-                    </Typography>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              {memoryOptions.find(o => o.value === settings.memoryOption)?.description}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" gutterBottom display="flex" alignItems="center">
-              上下文窗口大小
-              <Tooltip title="决定智能体能够参考的历史对话量，较大的窗口允许记住更多内容">
-                <QuestionCircleOutlined style={{ ml: 0.5, color: theme.palette.text.secondary, fontSize: '14px' }} />
-              </Tooltip>
-            </Typography>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Slider
-                value={settings.contextWindow}
-                onChange={handleSliderChange('contextWindow')}
-                step={1024}
-                min={1024}
-                max={16384}
-                marks={[
-                  { value: 1024, label: '1K' },
-                  { value: 4096, label: '4K' },
-                  { value: 8192, label: '8K' },
-                  { value: 16384, label: '16K' }
-                ]}
-                valueLabelDisplay="auto"
-                sx={{ 
-                  maxWidth: 300, 
-                  mr: 2,
-                  color: theme.palette.secondary.main
-                }}
-              />
-              <Typography variant="body2" color="text.secondary">
-                {(settings.contextWindow / 1024).toFixed(0)}K tokens
+        {/* 安全与隐私设置卡片 */}
+        <Card sx={{ 
+          height: '100%',
+          border: '1px solid',
+          borderColor: alpha(theme.palette.error.main, 0.2),
+          borderRadius: '16px',
+          bgcolor: alpha(theme.palette.error.main, 0.03),
+          boxShadow: `0 8px 32px ${alpha(theme.palette.error.main, 0.08)}`,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: `0 12px 28px ${alpha(theme.palette.error.main, 0.12)}`,
+            transform: 'translateY(-2px)'
+          },
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)'
+        }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              mb: 2,
+              color: theme.palette.error.main
+            }}>
+              <SafetyCertificateOutlined style={{ marginRight: 8, fontSize: '18px' }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                安全与隐私设置
               </Typography>
             </Box>
-          </Box>
-        </CardContent>
-      </Card>
-      
-      <Card sx={{ 
-        mb: 3,
-        border: '1px solid',
-        borderColor: alpha(theme.palette.error.main, 0.2),
-        borderRadius: '12px',
-        bgcolor: alpha(theme.palette.error.main, 0.02)
-      }}>
-        <CardContent>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            mb: 2,
-            color: theme.palette.error.main
-          }}>
-            <SafetyCertificateOutlined style={{ marginRight: 8, fontSize: '18px' }} />
-            <Typography variant="subtitle1" fontWeight={600}>
-              安全与隐私设置
-            </Typography>
-          </Box>
           
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" gutterBottom display="flex" alignItems="center">
-              安全级别
-              <Tooltip title="设置智能体的安全防护级别，较高级别可能会限制部分功能">
-                <QuestionCircleOutlined style={{ ml: 0.5, color: theme.palette.text.secondary, fontSize: '14px' }} />
-              </Tooltip>
-            </Typography>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body2" gutterBottom display="flex" alignItems="center">
+                安全级别
+                <Tooltip title="设置智能体的安全防护级别，较高级别可能会限制部分功能">
+                  <QuestionCircleOutlined style={{ ml: 0.5, color: theme.palette.text.secondary, fontSize: '14px' }} />
+                </Tooltip>
+              </Typography>
+              
+              <FormControl size="small" fullWidth sx={{ width: '100%' }}>
+                <Select
+                  value={settings.safetyLevel}
+                  onChange={handleSelectChange('safetyLevel') as any}
+                  sx={{ 
+                    borderRadius: '10px',
+                    width: '100%',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(theme.palette.error.main, 0.3),
+                      transition: 'all 0.2s ease'
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.error.main,
+                      boxShadow: `0 0 0 2px ${alpha(theme.palette.error.main, 0.1)}`
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.error.main,
+                      boxShadow: `0 0 0 3px ${alpha(theme.palette.error.main, 0.2)}`
+                    }
+                  }}
+                >
+                  {safetyLevels.map(level => (
+                    <MenuItem key={level.value} value={level.value}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box 
+                          sx={{ 
+                            width: 12, 
+                            height: 12, 
+                            borderRadius: '50%', 
+                            bgcolor: level.color,
+                            mr: 1
+                          }} 
+                        />
+                        <Typography variant="body2">
+                          {level.label}
+                        </Typography>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <Typography variant="caption" color="text.secondary" sx={{ 
+                display: 'block', 
+                mt: 0.5,
+                width: '100%',
+                bgcolor: alpha(theme.palette.info.main, 0.05),
+                p: 1,
+                borderRadius: '8px',
+                border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                boxSizing: 'border-box'
+              }}>
+                {safetyLevels.find(l => l.value === settings.safetyLevel)?.description}
+              </Typography>
+            </Box>
             
-            <FormControl size="small" fullWidth sx={{ maxWidth: 300 }}>
-              <Select
-                value={settings.safetyLevel}
-                onChange={handleSelectChange('safetyLevel') as any}
-              >
-                {safetyLevels.map(level => (
-                  <MenuItem key={level.value} value={level.value}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box 
-                        sx={{ 
-                          width: 12, 
-                          height: 12, 
-                          borderRadius: '50%', 
-                          bgcolor: level.color,
-                          mr: 1
-                        }} 
-                      />
-                      <Typography variant="body2">
-                        {level.label}
-                      </Typography>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.enableSensitiveWordFilter}
+                    onChange={handleSwitchChange('enableSensitiveWordFilter')}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        '&.Mui-checked': {
+                          '& + .MuiSwitch-track': {
+                            backgroundColor: theme.palette.info.main,
+                            opacity: 0.7
+                          }
+                        }
+                      },
+                      '& .MuiSwitch-track': {
+                        borderRadius: 10
+                      },
+                      '& .MuiSwitch-thumb': {
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ mr: 0.5 }}>
+                      开启敏感词前置过滤
+                    </Typography>
+                    <Tooltip title="启用后，系统会在模型响应前先过滤敏感词和不良内容">
+                      <QuestionCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
+                    </Tooltip>
+                  </Box>
+                }
+              />
+              
+              {settings.enableSensitiveWordFilter && (
+                <Box sx={{ ml: 4, mt: 2 }}>
+                  <Typography variant="body2" gutterBottom display="flex" alignItems="center">
+                    过滤级别
+                    <Tooltip title="设置敏感词过滤的严格程度，较高级别可能会过滤更多内容">
+                      <QuestionCircleOutlined style={{ ml: 0.5, color: theme.palette.text.secondary, fontSize: '14px' }} />
+                    </Tooltip>
+                  </Typography>
+                  
+                  <FormControl size="small" fullWidth sx={{ width: '100%' }}>
+                    <Select
+                      value={settings.sensitiveWordFilterLevel}
+                      onChange={handleSelectChange('sensitiveWordFilterLevel') as any}
+                      sx={{ 
+                        borderRadius: '10px',
+                        width: '100%',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: alpha(theme.palette.error.main, 0.3),
+                          transition: 'all 0.2s ease'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.error.main,
+                          boxShadow: `0 0 0 2px ${alpha(theme.palette.error.main, 0.1)}`
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.error.main,
+                          boxShadow: `0 0 0 3px ${alpha(theme.palette.error.main, 0.2)}`
+                        }
+                      }}
+                    >
+                      {sensitiveWordFilterLevels.map(level => (
+                        <MenuItem key={level.value} value={level.value}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box 
+                              sx={{ 
+                                width: 12, 
+                                height: 12, 
+                                borderRadius: '50%', 
+                                bgcolor: level.color,
+                                mr: 1
+                              }} 
+                            />
+                            <Typography variant="body2">
+                              {level.label}
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <Typography variant="caption" color="text.secondary" sx={{ 
+                    display: 'block', 
+                    mt: 0.5,
+                    width: '100%',
+                    bgcolor: alpha(theme.palette.info.main, 0.05),
+                    p: 1,
+                    borderRadius: '8px',
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                    boxSizing: 'border-box'
+                  }}>
+                    {sensitiveWordFilterLevels.find(l => l.value === settings.sensitiveWordFilterLevel)?.description}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
             
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              {safetyLevels.find(l => l.value === settings.safetyLevel)?.description}
-            </Typography>
-          </Box>
-          
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.canBeCalledByOtherAgents}
-                  onChange={handleSwitchChange('canBeCalledByOtherAgents')}
-                  color="primary"
-                />
-              }
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography variant="body2" sx={{ mr: 0.5 }}>
-                    允许被其他智能体调用
-                  </Typography>
-                  <Tooltip title="启用后，允许其他智能体调用此智能体的能力和知识">
-                    <QuestionCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
-                  </Tooltip>
-                </Box>
-              }
-            />
-          </FormGroup>
-          
-          <FormGroup sx={{ mt: 2 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.allowUserFeedback}
-                  onChange={handleSwitchChange('allowUserFeedback')}
-                  color="primary"
-                />
-              }
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography variant="body2" sx={{ mr: 0.5 }}>
-                    允许用户反馈
-                  </Typography>
-                  <Tooltip title="启用后，用户可以对智能体的回答进行评价和反馈">
-                    <QuestionCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
-                  </Tooltip>
-                </Box>
-              }
-            />
-          </FormGroup>
-        </CardContent>
-      </Card>
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.enableQuestionSplitting}
+                    onChange={handleSwitchChange('enableQuestionSplitting')}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        '&.Mui-checked': {
+                          '& + .MuiSwitch-track': {
+                            backgroundColor: theme.palette.info.main,
+                            opacity: 0.7
+                          }
+                        }
+                      },
+                      '& .MuiSwitch-track': {
+                        borderRadius: 10
+                      },
+                      '& .MuiSwitch-thumb': {
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ mr: 0.5 }}>
+                      启用问答拆分
+                    </Typography>
+                    <Tooltip title="启用后，复杂问题会被拆分为多个子问题分步解决">
+                      <QuestionCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
+                    </Tooltip>
+                  </Box>
+                }
+              />
+            </Box>
+            
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.canBeCalledByOtherAgents}
+                    onChange={handleSwitchChange('canBeCalledByOtherAgents')}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        '&.Mui-checked': {
+                          '& + .MuiSwitch-track': {
+                            backgroundColor: theme.palette.info.main,
+                            opacity: 0.7
+                          }
+                        }
+                      },
+                      '& .MuiSwitch-track': {
+                        borderRadius: 10
+                      },
+                      '& .MuiSwitch-thumb': {
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ mr: 0.5 }}>
+                      允许被其他智能体调用
+                    </Typography>
+                    <Tooltip title="启用后，允许其他智能体调用此智能体的能力和知识">
+                      <QuestionCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
+                    </Tooltip>
+                  </Box>
+                }
+              />
+            </Box>
+            
+            <Box sx={{ mb: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.allowUserFeedback}
+                    onChange={handleSwitchChange('allowUserFeedback')}
+                    color="primary"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        '&.Mui-checked': {
+                          '& + .MuiSwitch-track': {
+                            backgroundColor: theme.palette.info.main,
+                            opacity: 0.7
+                          }
+                        }
+                      },
+                      '& .MuiSwitch-track': {
+                        borderRadius: 10
+                      },
+                      '& .MuiSwitch-thumb': {
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ mr: 0.5 }}>
+                      允许用户反馈
+                    </Typography>
+                    <Tooltip title="启用后，用户可以对智能体的回答进行评价和反馈">
+                      <QuestionCircleOutlined style={{ color: theme.palette.text.secondary, fontSize: '14px' }} />
+                    </Tooltip>
+                  </Box>
+                }
+              />
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 };
