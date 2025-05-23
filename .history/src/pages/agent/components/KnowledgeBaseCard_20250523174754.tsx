@@ -13,6 +13,7 @@ import {
   Select,
   MenuItem,
   FormControl,
+  InputLabel,
   Slider,
   FormControlLabel,
   Checkbox,
@@ -577,103 +578,91 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
       >
         {/* 配置面板头部 */}
         <Box sx={{ 
-          p: 1.5,
+          p: 2,
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
           animation: 'fadeInDown 0.5s ease-out 0.1s both',
-          background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.03)}, ${alpha(theme.palette.info.main, 0.01)})`,
-          minHeight: '48px',
-          display: 'flex',
-          alignItems: 'center'
+          background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.03)}, ${alpha(theme.palette.info.main, 0.01)})`
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
             <Box
               sx={{
-                width: 28,
-                height: 28,
-                borderRadius: '6px',
+                width: 32,
+                height: 32,
+                borderRadius: '8px',
                 background: `linear-gradient(135deg, ${theme.palette.info.main}, ${alpha(theme.palette.info.main, 0.8)})`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.25)}`,
-                flexShrink: 0
+                boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.25)}`
               }}
             >
-              <SettingOutlined style={{ fontSize: '14px', color: 'white' }} />
+              <SettingOutlined style={{ fontSize: '16px', color: 'white' }} />
             </Box>
-            
-            <Typography variant="subtitle2" sx={{ 
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              color: theme.palette.text.primary,
-              flexShrink: 0
-            }}>
-              检索参数配置
-            </Typography>
-            
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              px: 1,
-              py: 0.25,
-              borderRadius: '6px',
-              background: alpha(theme.palette.info.main, 0.08),
-              border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`,
-              flexShrink: 0
-            }}>
-              <DatabaseOutlined style={{ fontSize: '11px', color: theme.palette.info.main }} />
-              <Typography variant="caption" sx={{ 
-                color: theme.palette.info.main, 
-                fontWeight: 600,
-                fontSize: '0.65rem'
-              }}>
-                {configPanelKb.name}
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.9rem', mb: 0.2 }}>
+                检索参数配置
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: '6px',
+                  background: alpha(theme.palette.info.main, 0.08),
+                  border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`
+                }}>
+                  <DatabaseOutlined style={{ fontSize: '12px', color: theme.palette.info.main }} />
+                  <Typography variant="caption" sx={{ 
+                    color: theme.palette.info.main, 
+                    fontWeight: 600,
+                    fontSize: '0.7rem'
+                  }}>
+                    {configPanelKb.name}
+                  </Typography>
+                </Box>
+                {hasUnsavedChanges && (
+                  <Chip 
+                    size="small" 
+                    label="未保存" 
+                    sx={{ 
+                      height: '18px', 
+                      fontSize: '0.6rem', 
+                      backgroundColor: 'rgba(245, 158, 11, 0.15)', 
+                      color: '#f59e0b',
+                      fontWeight: 600,
+                      animation: 'pulse 2s infinite',
+                      '@keyframes pulse': {
+                        '0%, 100%': { opacity: 1 },
+                        '50%': { opacity: 0.7 }
+                      }
+                    }} 
+                  />
+                )}
+              </Box>
             </Box>
-            
-            {hasUnsavedChanges && (
-              <Chip 
-                size="small" 
-                label="未保存" 
-                sx={{ 
-                  height: '18px', 
-                  fontSize: '0.6rem', 
-                  backgroundColor: 'rgba(245, 158, 11, 0.15)', 
-                  color: '#f59e0b',
-                  fontWeight: 600,
-                  animation: 'pulse 2s infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.7 }
-                  },
-                  flexShrink: 0
-                }} 
-              />
-            )}
+            <Button 
+              onClick={exitConfigMode}
+              sx={{ 
+                minWidth: 'auto',
+                p: 0.75,
+                borderRadius: '6px',
+                color: alpha(theme.palette.text.secondary, 0.7),
+                transition: 'all 0.2s ease',
+                '&:hover': { 
+                  backgroundColor: alpha(theme.palette.text.secondary, 0.08),
+                  transform: 'rotate(90deg) scale(1.05)',
+                  color: theme.palette.text.secondary
+                },
+                '&:active': {
+                  transform: 'rotate(90deg) scale(0.95)'
+                }
+              }}
+            >
+              <Box sx={{ fontSize: '14px', fontWeight: 'bold' }}>✕</Box>
+            </Button>
           </Box>
-          
-          <Button 
-            onClick={exitConfigMode}
-            sx={{ 
-              minWidth: 'auto',
-              p: 0.5,
-              borderRadius: '6px',
-              color: alpha(theme.palette.text.secondary, 0.7),
-              transition: 'all 0.2s ease',
-              flexShrink: 0,
-              '&:hover': { 
-                backgroundColor: alpha(theme.palette.text.secondary, 0.08),
-                transform: 'rotate(90deg) scale(1.05)',
-                color: theme.palette.text.secondary
-              },
-              '&:active': {
-                transform: 'rotate(90deg) scale(0.95)'
-              }
-            }}
-          >
-            <Box sx={{ fontSize: '12px', fontWeight: 'bold' }}>✕</Box>
-          </Button>
         </Box>
 
         {/* 配置面板内容 */}
@@ -703,30 +692,34 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             }
           }
         }}>
-          <Alert 
-            severity="info" 
-            sx={{ 
-              mb: 2,
-              borderRadius: '12px',
-              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-              backgroundColor: alpha(theme.palette.info.main, 0.04),
-              '& .MuiAlert-icon': {
-                color: theme.palette.info.main,
-                fontSize: '18px'
-              }
-            }}
-          >
-            <Typography variant="body2" sx={{ 
-              fontSize: '0.75rem',
-              color: alpha(theme.palette.info.main, 0.9)
-            }}>
-              配置知识库的检索参数，这些设置将影响智能体的检索性能和准确性。
-            </Typography>
-          </Alert>
-
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {/* 检索策略选择 */}
-            <Box sx={{ 
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 0,
+                borderRadius: '12px',
+                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                backgroundColor: alpha(theme.palette.info.main, 0.04),
+                '& .MuiAlert-icon': {
+                  color: theme.palette.info.main,
+                  fontSize: '18px'
+                },
+                '& .MuiAlert-message': {
+                  padding: 0
+                }
+              }}
+            >
+              <Typography variant="body2" sx={{ 
+                fontSize: '0.75rem',
+                color: alpha(theme.palette.info.main, 0.9),
+                lineHeight: 1.4
+              }}>
+                配置知识库的检索参数，这些设置将影响智能体的检索性能和准确性。
+              </Typography>
+            </Alert>
+
+            <Box sx={{
               p: 2,
               borderRadius: '12px',
               border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
@@ -881,7 +874,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                           topK: value as number
                         }
                       })}
-                      sx={{ 
+                      sx={{
                         '& .MuiSlider-track': {
                           backgroundColor: theme.palette.info.main,
                           height: 4

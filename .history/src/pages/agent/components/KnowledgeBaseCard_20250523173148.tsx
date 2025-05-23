@@ -13,6 +13,7 @@ import {
   Select,
   MenuItem,
   FormControl,
+  InputLabel,
   Slider,
   FormControlLabel,
   Checkbox,
@@ -577,110 +578,98 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
       >
         {/* 配置面板头部 */}
         <Box sx={{ 
-          p: 1.5,
+          p: 2,
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
           animation: 'fadeInDown 0.5s ease-out 0.1s both',
-          background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.03)}, ${alpha(theme.palette.info.main, 0.01)})`,
-          minHeight: '48px',
-          display: 'flex',
-          alignItems: 'center'
+          background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.03)}, ${alpha(theme.palette.info.main, 0.01)})`
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
             <Box
               sx={{
-                width: 28,
-                height: 28,
-                borderRadius: '6px',
+                width: 32,
+                height: 32,
+                borderRadius: '8px',
                 background: `linear-gradient(135deg, ${theme.palette.info.main}, ${alpha(theme.palette.info.main, 0.8)})`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.25)}`,
-                flexShrink: 0
+                boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.25)}`
               }}
             >
-              <SettingOutlined style={{ fontSize: '14px', color: 'white' }} />
+              <SettingOutlined style={{ fontSize: '16px', color: 'white' }} />
             </Box>
-            
-            <Typography variant="subtitle2" sx={{ 
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              color: theme.palette.text.primary,
-              flexShrink: 0
-            }}>
-              检索参数配置
-            </Typography>
-            
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              px: 1,
-              py: 0.25,
-              borderRadius: '6px',
-              background: alpha(theme.palette.info.main, 0.08),
-              border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`,
-              flexShrink: 0
-            }}>
-              <DatabaseOutlined style={{ fontSize: '11px', color: theme.palette.info.main }} />
-              <Typography variant="caption" sx={{ 
-                color: theme.palette.info.main, 
-                fontWeight: 600,
-                fontSize: '0.65rem'
-              }}>
-                {configPanelKb.name}
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.9rem', mb: 0.2 }}>
+                检索参数配置
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: '6px',
+                  background: alpha(theme.palette.info.main, 0.08),
+                  border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`
+                }}>
+                  <DatabaseOutlined style={{ fontSize: '12px', color: theme.palette.info.main }} />
+                  <Typography variant="caption" sx={{ 
+                    color: theme.palette.info.main, 
+                    fontWeight: 600,
+                    fontSize: '0.7rem'
+                  }}>
+                    {configPanelKb.name}
+                  </Typography>
+                </Box>
+                {hasUnsavedChanges && (
+                  <Chip 
+                    size="small" 
+                    label="未保存" 
+                    sx={{ 
+                      height: '18px', 
+                      fontSize: '0.6rem', 
+                      backgroundColor: 'rgba(245, 158, 11, 0.15)', 
+                      color: '#f59e0b',
+                      fontWeight: 600,
+                      animation: 'pulse 2s infinite',
+                      '@keyframes pulse': {
+                        '0%, 100%': { opacity: 1 },
+                        '50%': { opacity: 0.7 }
+                      }
+                    }} 
+                  />
+                )}
+              </Box>
             </Box>
-            
-            {hasUnsavedChanges && (
-              <Chip 
-                size="small" 
-                label="未保存" 
-                sx={{ 
-                  height: '18px', 
-                  fontSize: '0.6rem', 
-                  backgroundColor: 'rgba(245, 158, 11, 0.15)', 
-                  color: '#f59e0b',
-                  fontWeight: 600,
-                  animation: 'pulse 2s infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.7 }
-                  },
-                  flexShrink: 0
-                }} 
-              />
-            )}
+            <Button 
+              onClick={exitConfigMode}
+              sx={{ 
+                minWidth: 'auto',
+                p: 0.75,
+                borderRadius: '6px',
+                color: alpha(theme.palette.text.secondary, 0.7),
+                transition: 'all 0.2s ease',
+                '&:hover': { 
+                  backgroundColor: alpha(theme.palette.text.secondary, 0.08),
+                  transform: 'rotate(90deg) scale(1.05)',
+                  color: theme.palette.text.secondary
+                },
+                '&:active': {
+                  transform: 'rotate(90deg) scale(0.95)'
+                }
+              }}
+            >
+              <Box sx={{ fontSize: '14px', fontWeight: 'bold' }}>✕</Box>
+            </Button>
           </Box>
-          
-          <Button 
-            onClick={exitConfigMode}
-            sx={{ 
-              minWidth: 'auto',
-              p: 0.5,
-              borderRadius: '6px',
-              color: alpha(theme.palette.text.secondary, 0.7),
-              transition: 'all 0.2s ease',
-              flexShrink: 0,
-              '&:hover': { 
-                backgroundColor: alpha(theme.palette.text.secondary, 0.08),
-                transform: 'rotate(90deg) scale(1.05)',
-                color: theme.palette.text.secondary
-              },
-              '&:active': {
-                transform: 'rotate(90deg) scale(0.95)'
-              }
-            }}
-          >
-            <Box sx={{ fontSize: '12px', fontWeight: 'bold' }}>✕</Box>
-          </Button>
         </Box>
 
         {/* 配置面板内容 */}
         <Box sx={{ 
           flex: 1, 
           overflow: 'auto', 
-          p: 2,
+          p: 3,
           animation: 'fadeInUp 0.6s ease-out 0.2s both',
           '@keyframes fadeInUp': {
             '0%': {
@@ -703,177 +692,50 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             }
           }
         }}>
-          <Alert 
-            severity="info" 
-            sx={{ 
-              mb: 2,
-              borderRadius: '12px',
-              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-              backgroundColor: alpha(theme.palette.info.main, 0.04),
-              '& .MuiAlert-icon': {
-                color: theme.palette.info.main,
-                fontSize: '18px'
-              }
-            }}
-          >
-            <Typography variant="body2" sx={{ 
-              fontSize: '0.75rem',
-              color: alpha(theme.palette.info.main, 0.9)
-            }}>
-              配置知识库的检索参数，这些设置将影响智能体的检索性能和准确性。
-            </Typography>
-          </Alert>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* 检索策略选择 */}
-            <Box sx={{ 
-              p: 2,
-              borderRadius: '12px',
-              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 0.4)})`,
-              backdropFilter: 'blur(10px)'
-            }}>
-              <Typography variant="subtitle2" sx={{ 
-                fontWeight: 600, 
-                mb: 1.5, 
-                fontSize: '0.8rem',
-                color: alpha(theme.palette.text.primary, 0.9),
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5
-              }}>
-                <Box sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  backgroundColor: theme.palette.info.main
-                }} />
-                检索策略
+            <Alert severity="info" sx={{ mb: 1 }}>
+              <Typography variant="body2">
+                配置知识库的检索参数，这些设置将影响智能体的检索性能和准确性。
               </Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  value={retrievalConfig.strategy}
-                  onChange={(e) => updateConfig({
-                    ...retrievalConfig,
-                    strategy: e.target.value as 'vector' | 'keyword' | 'hybrid'
-                  })}
-                  sx={{
-                    borderRadius: '8px',
-                    backgroundColor: alpha(theme.palette.background.paper, 0.6),
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: alpha(theme.palette.divider, 0.2)
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: alpha(theme.palette.info.main, 0.4)
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.info.main,
-                      borderWidth: '1px'
-                    }
-                  }}
-                >
-                  <MenuItem value="vector">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#8b5cf6' }} />
-                      向量检索
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="keyword">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10b981' }} />
-                      关键词检索
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="hybrid">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3b82f6' }} />
-                      混合检索 
-                      <Chip size="small" label="推荐" sx={{ 
-                        height: '16px', 
-                        fontSize: '0.6rem',
-                        backgroundColor: alpha(theme.palette.success.main, 0.15),
-                        color: theme.palette.success.main
-                      }} />
-                    </Box>
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+            </Alert>
+
+            <FormControl fullWidth size="small">
+              <InputLabel>检索策略</InputLabel>
+              <Select
+                value={retrievalConfig.strategy}
+                label="检索策略"
+                onChange={(e) => updateConfig({
+                  ...retrievalConfig,
+                  strategy: e.target.value as 'vector' | 'keyword' | 'hybrid'
+                })}
+              >
+                <MenuItem value="vector">向量检索</MenuItem>
+                <MenuItem value="keyword">关键词检索</MenuItem>
+                <MenuItem value="hybrid">混合检索 (推荐)</MenuItem>
+              </Select>
+            </FormControl>
 
             {/* 向量检索参数 */}
-            <Accordion 
-              defaultExpanded
-              sx={{
-                borderRadius: '12px !important',
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 0.4)})`,
-                backdropFilter: 'blur(10px)',
-                boxShadow: 'none',
-                '&:before': { display: 'none' },
-                '& .MuiAccordionSummary-root': {
-                  minHeight: '48px',
-                  '&.Mui-expanded': {
-                    minHeight: '48px'
-                  }
-                }
-              }}
-            >
-              <AccordionSummary 
-                expandIcon={<DownOutlined style={{ fontSize: '14px' }} />}
-                sx={{
-                  borderRadius: '12px',
-                  '& .MuiAccordionSummary-content': {
-                    margin: '8px 0'
-                  }
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: '6px',
-                    background: `linear-gradient(135deg, ${alpha('#8b5cf6', 0.2)}, ${alpha('#8b5cf6', 0.1)})`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Box sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: '#8b5cf6'
-                    }} />
-                  </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
-                    向量检索参数
-                  </Typography>
-                </Box>
+            <Accordion defaultExpanded>
+              <AccordionSummary expandIcon={<DownOutlined />}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  向量检索参数
+                </Typography>
               </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0, pb: 2 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <AccordionDetails>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                        TopK
-                      </Typography>
-                      <Chip 
-                        size="small" 
-                        label={retrievalConfig.vectorParams.topK} 
-                        sx={{ 
-                          height: '20px', 
-                          fontSize: '0.65rem',
-                          backgroundColor: alpha(theme.palette.info.main, 0.1),
-                          color: theme.palette.info.main,
-                          fontWeight: 600
-                        }} 
-                      />
-                    </Box>
+                    <Typography gutterBottom variant="body2">
+                      TopK: {retrievalConfig.vectorParams.topK}
+                    </Typography>
                     <Slider
                       value={retrievalConfig.vectorParams.topK}
                       min={1}
                       max={20}
                       step={1}
                       size="small"
+                      valueLabelDisplay="auto"
                       onChange={(_, value) => updateConfig({
                         ...retrievalConfig,
                         vectorParams: {
@@ -881,48 +743,19 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                           topK: value as number
                         }
                       })}
-                      sx={{ 
-                        '& .MuiSlider-track': {
-                          backgroundColor: theme.palette.info.main,
-                          height: 4
-                        },
-                        '& .MuiSlider-thumb': {
-                          backgroundColor: theme.palette.info.main,
-                          boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.3)}`,
-                          '&:hover, &.Mui-focusVisible': {
-                            boxShadow: `0 0 0 8px ${alpha(theme.palette.info.main, 0.16)}`
-                          }
-                        },
-                        '& .MuiSlider-rail': {
-                          backgroundColor: alpha(theme.palette.divider, 0.2),
-                          height: 4
-                        }
-                      }}
                     />
                   </Box>
                   <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                        相似度阈值
-                      </Typography>
-                      <Chip 
-                        size="small" 
-                        label={retrievalConfig.vectorParams.scoreThreshold} 
-                        sx={{ 
-                          height: '20px', 
-                          fontSize: '0.65rem',
-                          backgroundColor: alpha(theme.palette.info.main, 0.1),
-                          color: theme.palette.info.main,
-                          fontWeight: 600
-                        }} 
-                      />
-                    </Box>
+                    <Typography gutterBottom variant="body2">
+                      相似度阈值: {retrievalConfig.vectorParams.scoreThreshold}
+                    </Typography>
                     <Slider
                       value={retrievalConfig.vectorParams.scoreThreshold}
                       min={0}
                       max={1}
                       step={0.05}
-                      size="small" 
+                      size="small"
+                      valueLabelDisplay="auto"
                       onChange={(_, value) => updateConfig({
                         ...retrievalConfig,
                         vectorParams: {
@@ -930,23 +763,6 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                           scoreThreshold: value as number
                         }
                       })}
-                      sx={{
-                        '& .MuiSlider-track': {
-                          backgroundColor: theme.palette.info.main,
-                          height: 4
-                        },
-                        '& .MuiSlider-thumb': {
-                          backgroundColor: theme.palette.info.main,
-                          boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.3)}`,
-                          '&:hover, &.Mui-focusVisible': {
-                            boxShadow: `0 0 0 8px ${alpha(theme.palette.info.main, 0.16)}`
-                          }
-                        },
-                        '& .MuiSlider-rail': {
-                          backgroundColor: alpha(theme.palette.divider, 0.2),
-                          height: 4
-                        }
-                      }}
                     />
                   </Box>
                   <FormControlLabel
@@ -961,19 +777,9 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                             includeMetadata: e.target.checked
                           }
                         })}
-                        sx={{
-                          color: alpha(theme.palette.info.main, 0.6),
-                          '&.Mui-checked': {
-                            color: theme.palette.info.main
-                          }
-                        }}
                       />
                     }
-                    label={
-                      <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                        包含文档元数据
-                      </Typography>
-                    }
+                    label={<Typography variant="body2">包含文档元数据</Typography>}
                   />
                 </Box>
               </AccordionDetails>
@@ -981,55 +787,14 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
 
             {/* RRF参数 */}
             {retrievalConfig.strategy === 'hybrid' && (
-              <Accordion
-                sx={{
-                  borderRadius: '12px !important',
-                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                  background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 0.4)})`,
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: 'none',
-                  '&:before': { display: 'none' },
-                  '& .MuiAccordionSummary-root': {
-                    minHeight: '48px',
-                    '&.Mui-expanded': {
-                      minHeight: '48px'
-                    }
-                  }
-                }}
-              >
-                <AccordionSummary 
-                  expandIcon={<DownOutlined style={{ fontSize: '14px' }} />}
-                  sx={{
-                    borderRadius: '12px',
-                    '& .MuiAccordionSummary-content': {
-                      margin: '8px 0'
-                    }
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '6px',
-                      background: `linear-gradient(135deg, ${alpha('#3b82f6', 0.2)}, ${alpha('#3b82f6', 0.1)})`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <Box sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: '#3b82f6'
-                      }} />
-                    </Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
-                      RRF 混合检索参数
-                    </Typography>
-                  </Box>
+              <Accordion>
+                <AccordionSummary expandIcon={<DownOutlined />}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    RRF 混合检索参数
+                  </Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{ pt: 0, pb: 2 }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -1042,68 +807,35 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                               enabled: e.target.checked
                             }
                           })}
-                          sx={{
-                            color: alpha(theme.palette.info.main, 0.6),
-                            '&.Mui-checked': {
-                              color: theme.palette.info.main
-                            }
-                          }}
                         />
                       }
-                      label={<Typography variant="body2" sx={{ fontSize: '0.75rem' }}>启用 RRF</Typography>}
+                      label={<Typography variant="body2">启用 RRF</Typography>}
                     />
                     
                     {retrievalConfig.rrfParams.enabled && (
-                      <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                            向量权重
+                      <>
+                        <Box>
+                          <Typography gutterBottom variant="body2">
+                            向量权重: {retrievalConfig.rrfParams.vectorWeight}
                           </Typography>
-                          <Chip 
-                            size="small" 
-                            label={retrievalConfig.rrfParams.vectorWeight} 
-                            sx={{ 
-                              height: '20px', 
-                              fontSize: '0.65rem',
-                              backgroundColor: alpha(theme.palette.info.main, 0.1),
-                              color: theme.palette.info.main,
-                              fontWeight: 600
-                            }} 
+                          <Slider
+                            value={retrievalConfig.rrfParams.vectorWeight}
+                            min={0.1}
+                            max={0.9}
+                            step={0.1}
+                            size="small"
+                            valueLabelDisplay="auto"
+                            onChange={(_, value) => updateConfig({
+                              ...retrievalConfig,
+                              rrfParams: {
+                                ...retrievalConfig.rrfParams,
+                                vectorWeight: value as number,
+                                keywordWeight: 1 - (value as number)
+                              }
+                            })}
                           />
                         </Box>
-                        <Slider
-                          value={retrievalConfig.rrfParams.vectorWeight}
-                          min={0.1}
-                          max={0.9}
-                          step={0.1}
-                          size="small"
-                          onChange={(_, value) => updateConfig({
-                            ...retrievalConfig,
-                            rrfParams: {
-                              ...retrievalConfig.rrfParams,
-                              vectorWeight: value as number,
-                              keywordWeight: 1 - (value as number)
-                            }
-                          })}
-                          sx={{
-                            '& .MuiSlider-track': {
-                              backgroundColor: theme.palette.info.main,
-                              height: 4
-                            },
-                            '& .MuiSlider-thumb': {
-                              backgroundColor: theme.palette.info.main,
-                              boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.3)}`,
-                              '&:hover, &.Mui-focusVisible': {
-                                boxShadow: `0 0 0 8px ${alpha(theme.palette.info.main, 0.16)}`
-                              }
-                            },
-                            '& .MuiSlider-rail': {
-                              backgroundColor: alpha(theme.palette.divider, 0.2),
-                              height: 4
-                            }
-                          }}
-                        />
-                      </Box>
+                      </>
                     )}
                   </Box>
                 </AccordionDetails>
@@ -1111,215 +843,78 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             )}
 
             {/* 索引配置 */}
-            <Accordion
-              sx={{
-                borderRadius: '12px !important',
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 0.4)})`,
-                backdropFilter: 'blur(10px)',
-                boxShadow: 'none',
-                '&:before': { display: 'none' },
-                '& .MuiAccordionSummary-root': {
-                  minHeight: '48px',
-                  '&.Mui-expanded': {
-                    minHeight: '48px'
-                  }
-                }
-              }}
-            >
-              <AccordionSummary 
-                expandIcon={<DownOutlined style={{ fontSize: '14px' }} />}
-                sx={{
-                  borderRadius: '12px',
-                  '& .MuiAccordionSummary-content': {
-                    margin: '8px 0'
-                  }
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: '6px',
-                    background: `linear-gradient(135deg, ${alpha('#10b981', 0.2)}, ${alpha('#10b981', 0.1)})`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <DatabaseOutlined style={{ fontSize: '12px', color: '#10b981' }} />
-                  </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
-                    索引配置
-                  </Typography>
-                </Box>
+            <Accordion>
+              <AccordionSummary expandIcon={<DownOutlined />}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  索引配置
+                </Typography>
               </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0, pb: 2 }}>
+              <AccordionDetails>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box sx={{
-                    p: 1.5,
-                    borderRadius: '8px',
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                    background: alpha(theme.palette.background.paper, 0.5)
-                  }}>
-                    <Typography variant="caption" sx={{ 
-                      fontWeight: 500, 
-                      mb: 1, 
-                      fontSize: '0.7rem',
-                      color: alpha(theme.palette.text.primary, 0.8),
-                      display: 'block'
-                    }}>
-                      索引类型
-                    </Typography>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={retrievalConfig.indexConfig.type}
-                        onChange={(e) => updateConfig({
-                          ...retrievalConfig,
-                          indexConfig: {
-                            ...retrievalConfig.indexConfig,
-                            type: e.target.value as 'IVF_PQ' | 'HNSW' | 'IVF_FLAT' | 'FLAT'
-                          }
-                        })}
-                        sx={{
-                          borderRadius: '6px',
-                          fontSize: '0.75rem',
-                          backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: alpha(theme.palette.divider, 0.2)
-                          }
-                        }}
-                      >
-                        <MenuItem value="HNSW">
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#10b981' }} />
-                            HNSW (推荐)
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="IVF_PQ">IVF_PQ</MenuItem>
-                        <MenuItem value="IVF_FLAT">IVF_FLAT</MenuItem>
-                        <MenuItem value="FLAT">FLAT</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                  <Box sx={{
-                    p: 1.5,
-                    borderRadius: '8px',
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                    background: alpha(theme.palette.background.paper, 0.5)
-                  }}>
-                    <Typography variant="caption" sx={{ 
-                      fontWeight: 500, 
-                      mb: 1, 
-                      fontSize: '0.7rem',
-                      color: alpha(theme.palette.text.primary, 0.8),
-                      display: 'block'
-                    }}>
-                      距离度量
-                    </Typography>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={retrievalConfig.indexConfig.metric}
-                        onChange={(e) => updateConfig({
-                          ...retrievalConfig,
-                          indexConfig: {
-                            ...retrievalConfig.indexConfig,
-                            metric: e.target.value as 'cosine' | 'euclidean' | 'dot_product'
-                          }
-                        })}
-                        sx={{
-                          borderRadius: '6px',
-                          fontSize: '0.75rem',
-                          backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: alpha(theme.palette.divider, 0.2)
-                          }
-                        }}
-                      >
-                        <MenuItem value="cosine">余弦相似度</MenuItem>
-                        <MenuItem value="euclidean">欧几里得距离</MenuItem>
-                        <MenuItem value="dot_product">点积</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>索引类型</InputLabel>
+                    <Select
+                      value={retrievalConfig.indexConfig.type}
+                      label="索引类型"
+                      onChange={(e) => updateConfig({
+                        ...retrievalConfig,
+                        indexConfig: {
+                          ...retrievalConfig.indexConfig,
+                          type: e.target.value as 'IVF_PQ' | 'HNSW' | 'IVF_FLAT' | 'FLAT'
+                        }
+                      })}
+                    >
+                      <MenuItem value="HNSW">HNSW (推荐)</MenuItem>
+                      <MenuItem value="IVF_PQ">IVF_PQ</MenuItem>
+                      <MenuItem value="IVF_FLAT">IVF_FLAT</MenuItem>
+                      <MenuItem value="FLAT">FLAT</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>距离度量</InputLabel>
+                    <Select
+                      value={retrievalConfig.indexConfig.metric}
+                      label="距离度量"
+                      onChange={(e) => updateConfig({
+                        ...retrievalConfig,
+                        indexConfig: {
+                          ...retrievalConfig.indexConfig,
+                          metric: e.target.value as 'cosine' | 'euclidean' | 'dot_product'
+                        }
+                      })}
+                    >
+                      <MenuItem value="cosine">余弦相似度</MenuItem>
+                      <MenuItem value="euclidean">欧几里得距离</MenuItem>
+                      <MenuItem value="dot_product">点积</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Box>
               </AccordionDetails>
             </Accordion>
 
             {/* 配置预览 */}
-            <Alert 
-              severity="success"
-              sx={{
-                borderRadius: '12px',
-                border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                backgroundColor: alpha(theme.palette.success.main, 0.04),
-                '& .MuiAlert-icon': {
-                  color: theme.palette.success.main,
-                  fontSize: '18px'
-                },
-                '& .MuiAlert-message': {
-                  padding: 0
-                }
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.75rem' }}>
-                当前配置预览
+            <Alert severity="success">
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                当前配置:
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                <Chip 
-                  size="small" 
-                  label={retrievalConfig.strategy === 'hybrid' ? '混合检索' : 
-                         retrievalConfig.strategy === 'vector' ? '向量检索' : '关键词检索'} 
-                  sx={{ 
-                    height: '18px', 
-                    fontSize: '0.6rem',
-                    backgroundColor: alpha(theme.palette.success.main, 0.15),
-                    color: theme.palette.success.main,
-                    fontWeight: 600
-                  }} 
-                />
-                <Chip 
-                  size="small" 
-                  label={`TopK: ${retrievalConfig.vectorParams.topK}`} 
-                  sx={{ 
-                    height: '18px', 
-                    fontSize: '0.6rem',
-                    backgroundColor: alpha(theme.palette.info.main, 0.15),
-                    color: theme.palette.info.main
-                  }} 
-                />
-                <Chip 
-                  size="small" 
-                  label={`阈值: ${retrievalConfig.vectorParams.scoreThreshold}`} 
-                  sx={{ 
-                    height: '18px', 
-                    fontSize: '0.6rem',
-                    backgroundColor: alpha(theme.palette.info.main, 0.15),
-                    color: theme.palette.info.main
-                  }} 
-                />
-                <Chip 
-                  size="small" 
-                  label={`索引: ${retrievalConfig.indexConfig.type}`} 
-                  sx={{ 
-                    height: '18px', 
-                    fontSize: '0.6rem',
-                    backgroundColor: alpha('#10b981', 0.15),
-                    color: '#10b981'
-                  }} 
-                />
-              </Box>
+              <Typography variant="body2">
+                {retrievalConfig.strategy === 'hybrid' ? '混合检索' : 
+                 retrievalConfig.strategy === 'vector' ? '向量检索' : '关键词检索'} · 
+                TopK: {retrievalConfig.vectorParams.topK} · 
+                阈值: {retrievalConfig.vectorParams.scoreThreshold} · 
+                索引: {retrievalConfig.indexConfig.type}
+              </Typography>
             </Alert>
           </Box>
         </Box>
 
         {/* 配置面板底部按钮 */}
         <Box sx={{ 
-          p: 2,
-          borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-          animation: 'fadeInUp 0.5s ease-out 0.3s both',
-          background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.02)}, ${alpha(theme.palette.info.main, 0.01)})`
+          p: 3, 
+          borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          animation: 'fadeInUp 0.5s ease-out 0.3s both'
         }}>
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
             <Button 
               onClick={exitConfigMode}
               sx={{ 
@@ -1327,13 +922,9 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                 borderRadius: '8px',
                 textTransform: 'none',
                 transition: 'all 0.2s ease',
-                fontSize: '0.8rem',
-                py: 1,
-                border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
                 '&:hover': {
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  borderColor: alpha(theme.palette.text.secondary, 0.3)
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                 },
                 '&:active': {
                   transform: 'translateY(0)'
@@ -1349,11 +940,8 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                 flex: 1,
                 borderRadius: '8px',
                 textTransform: 'none',
-                fontSize: '0.8rem',
-                py: 1,
                 background: `linear-gradient(135deg, ${theme.palette.info.main}, ${alpha(theme.palette.info.main, 0.8)})`,
                 transition: 'all 0.2s ease',
-                boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.3)}`,
                 '&:hover': {
                   transform: 'translateY(-1px)',
                   boxShadow: `0 6px 20px ${alpha(theme.palette.info.main, 0.4)}`,
@@ -1387,29 +975,19 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
       }}
     >
       {/* 头部区域 */}
-      <Box sx={{ 
-        p: 2, 
-        background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.08)}, ${alpha(theme.palette.info.main, 0.04)})`,
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`
-      }}>
+      <Box sx={{ p: 2, background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.08)}, ${alpha(theme.palette.info.main, 0.04)})` }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ 
-              width: 32, 
-              height: 32, 
-              borderRadius: '10px',
+              width: 32, height: 32, borderRadius: '10px',
               background: `linear-gradient(135deg, ${theme.palette.info.main}, ${alpha(theme.palette.info.main, 0.8)})`,
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.3)}`
             }}>
               <DatabaseOutlined style={{ fontSize: '16px', color: 'white' }} />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem', mb: 0.2 }}>
-                知识库
-              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem', mb: 0.2 }}>知识库</Typography>
               <Typography variant="body2" sx={{ color: alpha(theme.palette.text.secondary, 0.8), fontSize: '0.75rem' }}>
                 高效检索的智能知识库
               </Typography>
@@ -1422,9 +1000,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             sx={{
               bgcolor: selectedKnowledgeBases.length > 0 ? alpha(theme.palette.success.main, 0.15) : alpha(theme.palette.text.secondary, 0.08),
               color: selectedKnowledgeBases.length > 0 ? theme.palette.success.main : theme.palette.text.secondary,
-              fontWeight: 600, 
-              fontSize: '0.75rem', 
-              height: '24px'
+              fontWeight: 600, fontSize: '0.75rem', height: '24px'
             }}
           />
         </Box>
@@ -1434,35 +1010,10 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
       {layoutMode === 'grid' && (
         <Box sx={{ px: 2, py: 1 }}>
           <TextField
-            fullWidth 
-            placeholder="搜索知识库..." 
-            variant="outlined" 
-            size="small"
-            value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{ 
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined />
-                </InputAdornment>
-              )
-            }}
-            sx={{ 
-              '& .MuiOutlinedInput-root': { 
-                borderRadius: '12px', 
-                backgroundColor: alpha(theme.palette.background.paper, 0.6),
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: alpha(theme.palette.divider, 0.2)
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: alpha(theme.palette.info.main, 0.4)
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: theme.palette.info.main,
-                  borderWidth: '1px'
-                }
-              }
-            }}
+            fullWidth placeholder="搜索知识库..." variant="outlined" size="small"
+            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlined /></InputAdornment> }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', backgroundColor: alpha(theme.palette.background.paper, 0.6) } }}
           />
         </Box>
       )}
@@ -1487,7 +1038,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             <Box sx={{ 
               px: 2, 
               py: 1, 
-              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               animation: 'slideInLeft 0.4s ease-out',
               '@keyframes slideInLeft': {
                 '0%': {
@@ -1501,28 +1052,10 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
               }
             }}>
               <TextField
-                fullWidth 
-                placeholder="搜索知识库..." 
-                variant="outlined" 
-                size="small"
-                value={searchQuery} 
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{ 
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchOutlined />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{ 
-                  '& .MuiOutlinedInput-root': { 
-                    borderRadius: '12px', 
-                    backgroundColor: alpha(theme.palette.background.paper, 0.6),
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: alpha(theme.palette.divider, 0.2)
-                    }
-                  }
-                }}
+                fullWidth placeholder="搜索知识库..." variant="outlined" size="small"
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlined /></InputAdornment> }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', backgroundColor: alpha(theme.palette.background.paper, 0.6) } }}
               />
             </Box>
           )}
@@ -1558,14 +1091,8 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
         onClose={cancelSwitchKb}
         maxWidth="sm"
         fullWidth
-        sx={{
-          '& .MuiDialog-paper': {
-            borderRadius: '16px',
-            boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.1)}`
-          }
-        }}
       >
-        <DialogTitle sx={{ pb: 1 }}>
+        <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
@@ -1575,25 +1102,21 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                 background: `linear-gradient(135deg, ${theme.palette.warning.main}, ${alpha(theme.palette.warning.main, 0.8)})`,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: `0 4px 12px ${alpha(theme.palette.warning.main, 0.3)}`
+                justifyContent: 'center'
               }}
             >
               ⚠️
             </Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
               放弃未保存的配置？
             </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ pb: 2 }}>
-          <Typography variant="body1" sx={{ mb: 2, fontSize: '0.9rem' }}>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
             当前知识库 <strong>{configPanelKb?.name}</strong> 的配置尚未保存，切换到其他知识库将丢失这些更改。
           </Typography>
-          <Typography variant="body2" sx={{ 
-            color: alpha(theme.palette.text.secondary, 0.8),
-            fontSize: '0.8rem'
-          }}>
+          <Typography variant="body2" sx={{ color: alpha(theme.palette.text.secondary, 0.8) }}>
             您可以选择保存当前配置，或者放弃更改并继续切换。
           </Typography>
         </DialogContent>
@@ -1602,8 +1125,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             onClick={cancelSwitchKb}
             sx={{ 
               borderRadius: '8px',
-              textTransform: 'none',
-              fontSize: '0.8rem'
+              textTransform: 'none'
             }}
           >
             取消
@@ -1613,8 +1135,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             variant="outlined"
             sx={{ 
               borderRadius: '8px',
-              textTransform: 'none',
-              fontSize: '0.8rem'
+              textTransform: 'none'
             }}
           >
             保存并切换
@@ -1625,8 +1146,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             color="warning"
             sx={{ 
               borderRadius: '8px',
-              textTransform: 'none',
-              fontSize: '0.8rem'
+              textTransform: 'none'
             }}
           >
             放弃更改
