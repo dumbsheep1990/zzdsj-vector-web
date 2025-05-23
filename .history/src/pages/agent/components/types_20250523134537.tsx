@@ -16,7 +16,9 @@ export interface Tool {
   documentation?: string; // 文档链接
   isEnabled?: boolean; // 是否启用
   // 配置参数
-  config?: Record<string, unknown>;
+  config?: {
+    [key: string]: any;
+  };
   // 权限要求
   permissions?: string[];
   // 依赖关系

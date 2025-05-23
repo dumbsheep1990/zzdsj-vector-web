@@ -425,13 +425,14 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
       <Box
         sx={{
           p: 2,
-          background: 'linear-gradient(135deg, #4ade80 0%, #16a34a 100%)',
-          color: 'white',
+          background: 'linear-gradient(120deg, #e0f2fe 0%, #93c5fd 40%, #818cf8 100%)',
+          color: '#1e3a8a',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           borderTopLeftRadius: '12px',
           borderTopRightRadius: '12px',
+          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.15)'
         }}
       >
         <Typography variant="h6" component="h2" sx={{ fontWeight: 600, letterSpacing: '0.3px' }}>
@@ -441,15 +442,16 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
           <Box
             onClick={handleTemplateMenuOpen}
             sx={{ 
-              color: '#0c4a2c', 
+              color: '#1e40af', 
               bgcolor: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '4px',
+              borderRadius: '6px',
               fontWeight: 600,
               padding: '4px 10px',
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)'
             }}
           >
             <ImportOutlined style={{ marginRight: '4px' }} />
@@ -459,15 +461,16 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
           <Box
             onClick={handleVariableMenuOpen}
             sx={{ 
-              color: '#0c4a2c', 
+              color: '#1e40af', 
               bgcolor: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '4px',
+              borderRadius: '6px',
               fontWeight: 600,
               padding: '4px 10px',
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)'
             }}
           >
             <TagsOutlined style={{ marginRight: '4px' }} />
@@ -477,15 +480,16 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
           <Box
             onClick={copySystemPrompt}
             sx={{ 
-              color: '#0c4a2c', 
+              color: '#1e40af', 
               bgcolor: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '4px',
+              borderRadius: '6px',
               fontWeight: 600,
               padding: '4px 10px',
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)'
             }}
           >
             <CopyOutlined style={{ marginRight: '4px' }} />
@@ -495,15 +499,16 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
           <Box
             onClick={onReset}
             sx={{ 
-              color: '#0c4a2c', 
+              color: '#1e40af', 
               bgcolor: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '4px',
+              borderRadius: '6px',
               fontWeight: 600,
               padding: '4px 10px',
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)'
             }}
           >
             <ReloadOutlined style={{ marginRight: '4px' }} />
@@ -515,14 +520,14 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
       <Box sx={{ 
         py: 1.5,
         px: 2, 
-        bgcolor: 'rgba(16, 185, 129, 0.05)',
+        bgcolor: 'rgba(59, 130, 246, 0.05)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: '1px solid rgba(226, 232, 240, 0.8)'
       }}>
-        <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: '#047857', fontSize: '0.85rem' }}>
-          <QuestionCircleOutlined style={{ marginRight: 8, color: '#059669' }} />
+        <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: '#2563eb', fontSize: '0.85rem' }}>
+          <QuestionCircleOutlined style={{ marginRight: 8, color: '#3b82f6' }} />
           定义智能体的基本行为和能力，支持<strong>变量{'{{'}变量名{'}}'}</strong>格式
         </Typography>
         
@@ -533,14 +538,12 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
             startIcon={<RobotOutlined />}
             onClick={() => handleAIGenerate('basic')}
             sx={{
-              borderColor: 'rgba(16, 185, 129, 0.5)',
-              color: '#059669',
+              borderColor: 'rgba(59, 130, 246, 0.5)',
+              color: '#2563eb',
               fontSize: '0.75rem',
               textTransform: 'none',
-              '&:hover': {
-                borderColor: '#059669',
-                bgcolor: 'rgba(16, 185, 129, 0.05)'
-              }
+              borderRadius: '6px',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)'
             }}
           >
             AI生成
@@ -552,14 +555,12 @@ const SystemPromptCard: React.FC<SystemPromptCardProps> = ({
             startIcon={<BarChartOutlined />}
             onClick={() => handleAIGenerate('knowledge')}
             sx={{
-              borderColor: 'rgba(79, 70, 229, 0.5)',
+              borderColor: 'rgba(99, 102, 241, 0.5)',
               color: '#4f46e5',
               fontSize: '0.75rem',
               textTransform: 'none',
-              '&:hover': {
-                borderColor: '#4f46e5',
-                bgcolor: 'rgba(79, 70, 229, 0.05)'
-              }
+              borderRadius: '6px',
+              boxShadow: '0 2px 4px rgba(99, 102, 241, 0.1)'
             }}
           >
             知识库提示词

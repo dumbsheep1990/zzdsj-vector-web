@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 import SidebarContainer from './components/SidebarContainer';
 import BuilderHeader from './components/BuilderHeader';
 // 不再使用ContentContainer，直接使用Box组件
+import CompleteButton from './components/CompleteButton';
 
 // 导入步骤组件
 import BasicInfoStep from './components/BasicInfoStep';

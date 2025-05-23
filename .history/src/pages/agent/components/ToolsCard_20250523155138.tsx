@@ -8,6 +8,7 @@ import {
   Tabs, 
   Tab, 
   Switch, 
+  Paper,
   alpha,
   useTheme,
   Chip
@@ -264,7 +265,7 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
       {/* 工具网格区域 - 可滚动内容区 */}
       <Box sx={{ 
         py: 2,
-        px: 2, 
+        px: 2,
         overflow: 'auto', // 只允许内容区域滚动
         flex: 1, // 占据剩余空间
         backgroundColor: 'transparent', // 确保背景透明
@@ -274,10 +275,9 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
       }}>
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, 300px)', // 固定卡片宽度为300px
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', // 修改为auto-fit和减小最小宽度
           gap: 2.5,
           alignContent: 'start',
-          justifyContent: 'center', // 居中对齐
           minHeight: filteredTools.length > 0 ? 'auto' : '300px',
           width: '100%', // 确保宽度不超出容器
           maxWidth: '100%' // 限制最大宽度
@@ -285,27 +285,14 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
           {filteredTools.length > 0 ? filteredTools.map((tool) => {
             const categoryColor = (() => {
               switch(tool.category.toLowerCase()) {
-                case 'search': return 'linear-gradient(135deg, rgba(24, 144, 255, 0.15), rgba(24, 144, 255, 0.08))'; // 蓝色
-                case 'retrieval': return 'linear-gradient(135deg, rgba(22, 119, 255, 0.15), rgba(22, 119, 255, 0.08))'; // 深蓝色
-                case 'reasoning': return 'linear-gradient(135deg, rgba(114, 46, 209, 0.15), rgba(114, 46, 209, 0.08))'; // 紫色
-                case 'knowledge': return 'linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08))'; // 绿色
-                case 'integration': return 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08))'; // 橙色
-                case 'development': return 'linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.08))'; // 紫色
-                case 'multimodal': return 'linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.08))'; // 粉色
-                default: return 'linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(100, 116, 139, 0.08))'; // 默认灰色
-              }
-            })();
-            
-            const borderColor = (() => {
-              switch(tool.category.toLowerCase()) {
-                case 'search': return '#1890ff'; // 蓝色
-                case 'retrieval': return '#1677ff'; // 深蓝色
-                case 'reasoning': return '#722ed1'; // 紫色
-                case 'knowledge': return '#22c55e'; // 绿色
-                case 'integration': return '#f59e0b'; // 橙色
-                case 'development': return '#7c3aed'; // 紫色
-                case 'multimodal': return '#ec4899'; // 粉色
-                default: return '#64748b'; // 默认灰色
+                case 'search': return 'rgba(24, 144, 255, 0.8)'; // 蓝色
+                case 'retrieval': return 'rgba(22, 119, 255, 0.8)'; // 深蓝色
+                case 'reasoning': return 'rgba(114, 46, 209, 0.8)'; // 紫色
+                case 'knowledge': return 'rgba(34, 197, 94, 0.8)'; // 绿色
+                case 'integration': return 'rgba(245, 158, 11, 0.8)'; // 橙色
+                case 'development': return 'rgba(124, 58, 237, 0.8)'; // 紫色
+                case 'multimodal': return 'rgba(236, 72, 153, 0.8)'; // 粉色
+                default: return 'rgba(100, 116, 139, 0.7)'; // 默认灰色
               }
             })();
             
@@ -317,22 +304,27 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                   cursor: 'pointer',
                   border: '1px solid',
                   borderColor: isToolSelected(tool.id) 
-                    ? borderColor
-                    : alpha(theme.palette.divider, 0.15),
+                    ? tool.category === 'search' ? '#1890ff' : 
+                      tool.category === 'retrieval' ? '#1677ff' :
+                      tool.category === 'reasoning' ? '#722ed1' :
+                      tool.category === 'knowledge' ? '#22c55e' :
+                      tool.category === 'integration' ? '#f59e0b' :
+                      tool.category === 'development' ? '#7c3aed' :
+                      tool.category === 'multimodal' ? '#ec4899' : '#64748b'
+                    : alpha(theme.palette.divider, 0.2),
                   borderRadius: '16px',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   position: 'relative',
                   overflow: 'hidden',
+                  backgroundColor: categoryColor,
                   background: categoryColor,
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
                   boxShadow: isToolSelected(tool.id)
-                    ? `0 8px 20px ${alpha(borderColor, 0.15)}`
-                    : `0 4px 14px ${alpha(theme.palette.common.black, 0.03)}`,
+                    ? '0 8px 32px rgba(0, 0, 0, 0.2)'
+                    : '0 4px 16px rgba(0, 0, 0, 0.08)',
                   '&:hover': {
-                    borderColor: alpha(borderColor, 0.5),
-                    boxShadow: `0 10px 25px ${alpha(borderColor, 0.18)}`,
-                    transform: 'translateY(-3px)'
+                    borderColor: '#1890ff',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)',
+                    transform: 'translateY(-4px)'
                   }
                 }}
               >

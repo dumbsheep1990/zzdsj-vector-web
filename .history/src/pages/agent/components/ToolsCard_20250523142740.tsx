@@ -3,17 +3,21 @@ import { Tool, ToolCategory } from './types';
 import { getToolCountByCategory, getToolsByCategory, toolCategoryLabels } from './advancedTools';
 import { 
   Card, 
+  Badge, 
+  Chip, 
   Box, 
   Typography, 
   Tabs, 
   Tab, 
   Switch, 
+  Paper,
+  Tooltip,
   alpha,
-  useTheme,
-  Chip
+  useTheme
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { 
+  CrownOutlined, 
   ThunderboltOutlined, 
   CheckCircleOutlined,
   StarOutlined,
@@ -21,6 +25,19 @@ import {
 } from '@ant-design/icons';
 
 // Styled components
+const CategoryBadge = styled(Badge)(() => ({
+  '& .MuiBadge-badge': {
+    right: -6,
+    top: 6,
+    padding: '0 4px',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    fontSize: '0.65rem',
+    minWidth: '16px',
+    height: '16px',
+  },
+}));
+
 const ComplexityIndicator = styled(Box)<{ isAdvanced: boolean }>(
   ({ theme, isAdvanced }) => {
     return {
@@ -39,6 +56,61 @@ const ComplexityIndicator = styled(Box)<{ isAdvanced: boolean }>(
       color: isAdvanced ? theme.palette.primary.main : theme.palette.success.main
     };
   }
+);
+
+const ToolCardContainer = styled(Paper)<{ isSelected: boolean; isAdvanced?: boolean; isPremium?: boolean }>(
+  ({ theme, isSelected, isAdvanced, isPremium }) => ({
+    cursor: 'pointer',
+    border: '1px solid',
+    borderColor: isSelected ? theme.palette.primary.main : alpha(theme.palette.divider, 0.3),
+    borderRadius: '16px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    overflow: 'hidden',
+    // 根据是否为高级工具设置不同的背景
+    background: isAdvanced
+      ? `linear-gradient(135deg, 
+          ${alpha(theme.palette.primary.main, 0.03)}, 
+          ${alpha(theme.palette.secondary.main, 0.02)}, 
+          ${alpha(theme.palette.info.main, 0.02)})`
+      : `linear-gradient(135deg, 
+          ${alpha(theme.palette.success.main, 0.03)}, 
+          ${alpha(theme.palette.background.paper, 0.95)})`,
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    boxShadow: isSelected 
+      ? `0 8px 32px ${alpha(theme.palette.primary.main, 0.15)}` 
+      : isAdvanced
+        ? `0 4px 20px ${alpha(theme.palette.primary.main, 0.08)}`
+        : '0 2px 12px rgba(0,0,0,0.06)',
+    ...(isPremium && {
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: '24px',
+        height: '24px',
+        background: 'linear-gradient(45deg, #FFD700, #FFA500)',
+        borderRadius: '50%',
+        opacity: 0.9,
+        zIndex: 1
+      }
+    }),
+    '&:hover': {
+      borderColor: theme.palette.primary.main,
+      boxShadow: `0 12px 40px ${alpha(theme.palette.primary.main, 0.15)}`,
+      transform: 'translateY(-4px)',
+      background: isAdvanced
+        ? `linear-gradient(135deg, 
+            ${alpha(theme.palette.primary.main, 0.06)}, 
+            ${alpha(theme.palette.secondary.main, 0.04)}, 
+            ${alpha(theme.palette.info.main, 0.04)})`
+        : `linear-gradient(135deg, 
+            ${alpha(theme.palette.success.main, 0.06)}, 
+            ${alpha(theme.palette.background.paper, 0.98)})`
+    }
+  })
 );
 
 interface ToolsCardProps {
@@ -63,14 +135,19 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
     return selectedTools.some(tool => tool.id === id);
   };
 
+  // 判断工具是否为高级工具（将medium归类为advanced）
+  const isAdvancedTool = (tool: Tool) => {
+    return tool.isAdvanced || tool.complexity === 'high' || tool.complexity === 'medium';
+  };
+
   // 复杂度标签映射（简化为两种）
   const getComplexityLabel = (tool: Tool) => {
-    return tool.complexity === 'high' || tool.complexity === 'medium' ? '高级工具' : '基础工具';
+    return isAdvancedTool(tool) ? '高级工具' : '基础工具';
   };
 
   // 复杂度图标映射（使用更合适的图标）
   const getComplexityIcon = (tool: Tool) => {
-    return tool.complexity === 'high' || tool.complexity === 'medium'
+    return isAdvancedTool(tool) 
       ? <RocketOutlined style={{ fontSize: '10px', marginRight: '4px' }} />
       : <StarOutlined style={{ fontSize: '10px', marginRight: '4px' }} />;
   };
@@ -78,38 +155,33 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
   return (
     <Card
       sx={{
+        height: '500px', // 设置固定高度
         display: 'flex',
         flexDirection: 'column',
         boxShadow: 'none',
         border: '1px solid',
         borderColor: alpha(theme.palette.divider, 0.1),
         borderRadius: '16px',
-        background: 'transparent',
-        bgcolor: 'transparent',
-        backgroundColor: 'transparent',
-        backdropFilter: 'blur(20px)',
-        position: 'relative',
-        overflow: 'hidden',
-        height: '100%'
+        bgcolor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: 'blur(20px)'
       }}
     >
-      {/* 头部区域 - 固定在顶部 */}
+      {/* 头部区域 - 固定 */}
       <Box
         sx={{
-          p: 2,
+          p: 3,
           background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)}, ${alpha(theme.palette.primary.main, 0.04)})`,
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-          position: 'sticky',
-          top: 0,
-          zIndex: 10
+          position: 'relative',
+          flexShrink: 0
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 borderRadius: '10px',
                 background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(theme.palette.primary.main, 0.8)})`,
                 display: 'flex',
@@ -118,20 +190,20 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                 boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`
               }}
             >
-              <ThunderboltOutlined style={{ fontSize: '16px', color: 'white' }} />
+              <ThunderboltOutlined style={{ fontSize: '18px', color: 'white' }} />
             </Box>
             <Box>
               <Typography variant="h6" sx={{ 
                 fontWeight: 700, 
-                fontSize: '1rem',
+                fontSize: '1.1rem',
                 color: theme.palette.text.primary,
-                mb: 0.2
+                mb: 0.5
               }}>
                 智能工具库
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: alpha(theme.palette.text.secondary, 0.8),
-                fontSize: '0.75rem'
+                fontSize: '0.8rem'
               }}>
                 高级AI驱动的智能工具集合
               </Typography>
@@ -155,195 +227,121 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                   : alpha(theme.palette.text.secondary, 0.2)}`,
                 fontWeight: 600,
                 fontSize: '0.75rem',
-                height: '24px'
+                height: '28px'
               }}
             />
           </Box>
         </Box>
       </Box>
       
-      {/* 类别标签页 - 固定在顶部，位于头部下方 */}
+      {/* 类别标签页 - 固定 */}
       <Box sx={{ 
         px: 2, 
-        pt: 1, 
+        pt: 2, 
         pb: 1, 
-        bgcolor: 'transparent',
+        bgcolor: alpha(theme.palette.background.paper, 0.6),
         borderBottom: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
-        position: 'sticky',
-        top: '66px', // 顶部区域的高度，确保其下方固定
-        zIndex: 9
+        flexShrink: 0
       }}>
         <Tabs
           value={currentCategory}
           onChange={(_, newValue) => setCurrentCategory(newValue)}
           variant="scrollable"
           scrollButtons="auto"
-          TabIndicatorProps={{ style: { display: 'none' } }} // 隐藏底部指示器，使用胶囊样式代替
           sx={{ 
-            minHeight: '36px',
+            minHeight: '44px',
+            '& .MuiTabs-indicator': {
+              backgroundColor: theme.palette.primary.main,
+              height: '3px',
+              borderRadius: '3px'
+            },
             '& .MuiTabs-scrollButtons': {
-              color: alpha(theme.palette.text.secondary, 0.5),
-              width: '20px',
+              color: alpha(theme.palette.text.secondary, 0.6),
               '&.Mui-disabled': {
-                opacity: 0.2
+                opacity: 0.3
               }
             },
-            '& .MuiTabs-flexContainer': {
-              gap: '6px' // 标签之间的间距加大，突出胶囊效果
-            },
             '& .MuiTab-root': {
-              minHeight: '28px',
-              fontSize: '0.7rem',
+              minHeight: '44px',
+              fontSize: '0.875rem',
               textTransform: 'none',
-              fontWeight: 400,
+              fontWeight: 500,
               color: alpha(theme.palette.text.secondary, 0.8),
               transition: 'all 0.2s ease',
-              borderRadius: '14px', // 胶囊形状
-              mx: 0.2,
-              px: 1.2,
-              py: 0.2,
-              minWidth: 0,
-              border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
-              backgroundColor: alpha(theme.palette.background.paper, 0.5),
+              borderRadius: '8px',
+              mr: 0.5,
+              px: 2,
               '&.Mui-selected': {
                 color: theme.palette.primary.main,
-                fontWeight: 600,
-                backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                boxShadow: `0 1px 2px ${alpha(theme.palette.primary.main, 0.1)}`
+                fontWeight: 700,
+                backgroundColor: alpha(theme.palette.primary.main, 0.08)
               },
               '&:hover': {
-                backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                color: theme.palette.primary.main
+                backgroundColor: alpha(theme.palette.text.secondary, 0.04),
+                color: theme.palette.text.primary
               }
             }
           }}
         >
-          {Object.entries(toolCategoryLabels).map(([key, label]) => {
-            const count = getToolCountByCategory(key as ToolCategory | 'all');
-            return (
-              <Tab 
-                key={key}
-                label={
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    gap: 0.5 
-                  }}>
-                    <span>{label}</span>
-                    {count > 0 && (
-                      <Box component="span" sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '14px',
-                        height: '14px',
-                        fontSize: '0.6rem',
-                        fontWeight: 500,
-                        lineHeight: 1,
-                        borderRadius: '7px',
-                        padding: '0 3px',
-                        backgroundColor: '#3b82f6',
-                        color: 'white'
-                      }}>
-                        {count}
-                      </Box>
-                    )}
-                  </Box>
-                } 
-                value={key} 
-                disableRipple 
-              />
-            );
-          })}
+          {Object.entries(toolCategoryLabels).map(([key, label]) => (
+            <Tab 
+              key={key}
+              label={
+                <CategoryBadge badgeContent={getToolCountByCategory(key as ToolCategory | 'all')}>
+                  <Box sx={{ pr: 2 }}>{label}</Box>
+                </CategoryBadge>
+              } 
+              value={key} 
+            />
+          ))}
         </Tabs>
       </Box>
       
-      {/* 工具网格区域 - 可滚动内容区 */}
+      {/* 工具网格区域 - 可滚动 */}
       <Box sx={{ 
-        py: 2,
-        px: 2, 
-        overflow: 'auto', // 只允许内容区域滚动
-        flex: 1, // 占据剩余空间
-        backgroundColor: 'transparent', // 确保背景透明
-        '.MuiPaper-root': { // 直接覆盖Paper组件的样式
-          backgroundImage: 'none !important' // 确保没有背景图像
+        flex: 1,
+        overflow: 'auto',
+        '&::-webkit-scrollbar': {
+          width: '6px'
+        },
+        '&::-webkit-scrollbar-track': {
+          background: alpha(theme.palette.divider, 0.1),
+          borderRadius: '3px'
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: alpha(theme.palette.primary.main, 0.3),
+          borderRadius: '3px',
+          '&:hover': {
+            background: alpha(theme.palette.primary.main, 0.5)
+          }
         }
       }}>
         <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, 300px)', // 固定卡片宽度为300px
-          gap: 2.5,
-          alignContent: 'start',
-          justifyContent: 'center', // 居中对齐
-          minHeight: filteredTools.length > 0 ? 'auto' : '300px',
-          width: '100%', // 确保宽度不超出容器
-          maxWidth: '100%' // 限制最大宽度
+          py: 2,
+          px: 2
         }}>
-          {filteredTools.length > 0 ? filteredTools.map((tool) => {
-            const categoryColor = (() => {
-              switch(tool.category.toLowerCase()) {
-                case 'search': return 'linear-gradient(135deg, rgba(24, 144, 255, 0.15), rgba(24, 144, 255, 0.08))'; // 蓝色
-                case 'retrieval': return 'linear-gradient(135deg, rgba(22, 119, 255, 0.15), rgba(22, 119, 255, 0.08))'; // 深蓝色
-                case 'reasoning': return 'linear-gradient(135deg, rgba(114, 46, 209, 0.15), rgba(114, 46, 209, 0.08))'; // 紫色
-                case 'knowledge': return 'linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08))'; // 绿色
-                case 'integration': return 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08))'; // 橙色
-                case 'development': return 'linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.08))'; // 紫色
-                case 'multimodal': return 'linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.08))'; // 粉色
-                default: return 'linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(100, 116, 139, 0.08))'; // 默认灰色
-              }
-            })();
-            
-            const borderColor = (() => {
-              switch(tool.category.toLowerCase()) {
-                case 'search': return '#1890ff'; // 蓝色
-                case 'retrieval': return '#1677ff'; // 深蓝色
-                case 'reasoning': return '#722ed1'; // 紫色
-                case 'knowledge': return '#22c55e'; // 绿色
-                case 'integration': return '#f59e0b'; // 橙色
-                case 'development': return '#7c3aed'; // 紫色
-                case 'multimodal': return '#ec4899'; // 粉色
-                default: return '#64748b'; // 默认灰色
-              }
-            })();
-            
-            return (
-              <Box
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
+            gap: 2.5,
+            alignContent: 'start',
+            minHeight: filteredTools.length > 0 ? 'auto' : '300px'
+          }}>
+            {filteredTools.length > 0 ? filteredTools.map((tool) => (
+              <ToolCardContainer
                 key={tool.id}
+                isSelected={isToolSelected(tool.id)}
+                isAdvanced={isAdvancedTool(tool)}
+                isPremium={tool.isPremium}
                 onClick={() => toggleToolSelection(tool)}
-                sx={{
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: isToolSelected(tool.id) 
-                    ? borderColor
-                    : alpha(theme.palette.divider, 0.15),
-                  borderRadius: '16px',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: categoryColor,
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  boxShadow: isToolSelected(tool.id)
-                    ? `0 8px 20px ${alpha(borderColor, 0.15)}`
-                    : `0 4px 14px ${alpha(theme.palette.common.black, 0.03)}`,
-                  '&:hover': {
-                    borderColor: alpha(borderColor, 0.5),
-                    boxShadow: `0 10px 25px ${alpha(borderColor, 0.18)}`,
-                    transform: 'translateY(-3px)'
-                  }
-                }}
               >
-                <Box sx={{ p: 2.5, backgroundColor: 'transparent' }}>
+                <Box sx={{ p: 2.5 }}>
                   {/* 工具头部信息 */}
                   <Box sx={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
                     alignItems: 'flex-start',
-                    mb: 1.5,
-                    backgroundColor: 'transparent'
+                    mb: 1.5
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
                       <Box
@@ -351,7 +349,7 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                           width: 32,
                           height: 32,
                           borderRadius: '8px',
-                          backgroundColor: tool.complexity === 'high' || tool.complexity === 'medium' 
+                          backgroundColor: isAdvancedTool(tool) 
                             ? alpha(theme.palette.primary.main, 0.15)
                             : alpha(theme.palette.success.main, 0.15),
                           display: 'flex',
@@ -378,9 +376,26 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                           >
                             {tool.name}
                           </Typography>
+                          {tool.isPremium && (
+                            <Tooltip title="高级付费功能">
+                              <CrownOutlined 
+                                style={{ 
+                                  fontSize: '12px', 
+                                  color: '#FFD700',
+                                  filter: 'drop-shadow(0 1px 2px rgba(255,215,0,0.3))'
+                                }} 
+                              />
+                            </Tooltip>
+                          )}
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <ComplexityIndicator isAdvanced={tool.complexity === 'high' || tool.complexity === 'medium'}>
+                          <Typography variant="caption" sx={{ 
+                            color: alpha(theme.palette.text.secondary, 0.7),
+                            fontSize: '0.7rem'
+                          }}>
+                            {tool.provider} • v{tool.version}
+                          </Typography>
+                          <ComplexityIndicator isAdvanced={isAdvancedTool(tool)}>
                             {getComplexityIcon(tool)}
                             {getComplexityLabel(tool)}
                           </ComplexityIndicator>
@@ -414,7 +429,7 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                       color: alpha(theme.palette.text.secondary, 0.9),
                       fontSize: '0.8rem',
                       lineHeight: 1.4,
-                      mb: 1,
+                      mb: 1.5,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
@@ -423,37 +438,72 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
                   >
                     {tool.description}
                   </Typography>
+                  
+                  {/* 标签区域 */}
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
+                    {tool.tags?.slice(0, 3).map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        size="small"
+                        sx={{ 
+                          fontSize: '0.7rem',
+                          height: '22px',
+                          color: alpha(theme.palette.text.secondary, 0.8),
+                          backgroundColor: alpha(theme.palette.text.secondary, 0.06),
+                          border: `1px solid ${alpha(theme.palette.text.secondary, 0.1)}`,
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.text.secondary, 0.1)
+                          }
+                        }}
+                      />
+                    ))}
+                    {tool.tags && tool.tags.length > 3 && (
+                      <Chip
+                        label={`+${tool.tags.length - 3}`}
+                        size="small"
+                        sx={{ 
+                          fontSize: '0.7rem',
+                          height: '22px',
+                          color: alpha(theme.palette.text.secondary, 0.6),
+                          backgroundColor: alpha(theme.palette.text.secondary, 0.04),
+                          border: `1px dashed ${alpha(theme.palette.text.secondary, 0.2)}`
+                        }}
+                      />
+                    )}
+                  </Box>
                 </Box>
+              </ToolCardContainer>
+            )) : (
+              <Box sx={{ 
+                gridColumn: '1 / -1',
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center',
+                py: 6,
+                color: alpha(theme.palette.text.secondary, 0.6)
+              }}>
+                <ThunderboltOutlined style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }} />
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
+                  该类别暂无工具
+                </Typography>
+                <Typography variant="body2">
+                  请选择其他类别或等待更多工具上线
+                </Typography>
               </Box>
-            );
-          }) : (
-            <Box sx={{ 
-              gridColumn: '1 / -1',
-              display: 'flex', 
-              flexDirection: 'column',
-              alignItems: 'center', 
-              justifyContent: 'center',
-              py: 6,
-              color: alpha(theme.palette.text.secondary, 0.6)
-            }}>
-              <ThunderboltOutlined style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }} />
-              <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
-                该类别暂无工具
-              </Typography>
-              <Typography variant="body2">
-                请选择其他类别或等待更多工具上线
-              </Typography>
-            </Box>
-          )}
+            )}
+          </Box>
         </Box>
       </Box>
       
-      {/* 选中工具的芯片展示区域 */}
+      {/* 选中工具的芯片展示区域 - 固定在底部 */}
       {renderToolChips && (
         <Box sx={{ 
           p: 2, 
           borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-          bgcolor: alpha(theme.palette.background.paper, 0.8)
+          bgcolor: alpha(theme.palette.background.paper, 0.8),
+          flexShrink: 0
         }}>
           {renderToolChips()}
         </Box>

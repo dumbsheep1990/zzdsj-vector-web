@@ -605,52 +605,13 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 
-              justifyContent: 'space-between',
               mb: 3,
               color: theme.palette.error.main
             }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                color: theme.palette.error.main
-              }}>
-                <SafetyCertificateOutlined style={{ marginRight: 8, fontSize: '18px' }} />
-                <Typography variant="subtitle1" fontWeight={600}>
-                  安全与隐私设置
-                </Typography>
-              </Box>
-              
-              {/* 右上角敏感词过滤开关 */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="caption" sx={{ 
-                  fontWeight: 600,
-                  color: settings.enableSensitiveWordFilter ? theme.palette.warning.main : theme.palette.text.secondary
-                }}>
-                  敏感词过滤
-                </Typography>
-                <Switch
-                  checked={settings.enableSensitiveWordFilter}
-                  onChange={handleSwitchChange('enableSensitiveWordFilter')}
-                  color="warning"
-                  size="small"
-                  sx={{
-                    '& .MuiSwitch-switchBase': {
-                      '&.Mui-checked': {
-                        '& + .MuiSwitch-track': {
-                          backgroundColor: theme.palette.warning.main,
-                          opacity: 0.8
-                        }
-                      }
-                    },
-                    '& .MuiSwitch-track': {
-                      borderRadius: 10
-                    },
-                    '& .MuiSwitch-thumb': {
-                      boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)'
-                    }
-                  }}
-                />
-              </Box>
+              <SafetyCertificateOutlined style={{ marginRight: 8, fontSize: '18px' }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                安全与隐私设置
+              </Typography>
             </Box>
           
             <FormGroup>
@@ -752,38 +713,69 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
                 </Box>
               </Box>
             
-              {/* 敏感词过滤配置区域（仅在启用时显示） */}
-              {settings.enableSensitiveWordFilter && (
-                <Box sx={{ 
-                  mb: 3,
-                  border: `1px solid ${alpha(theme.palette.warning.main, 0.15)}`,
-                  borderRadius: '12px',
-                  p: 2.5,
-                  backgroundColor: alpha(theme.palette.warning.main, 0.02),
-                  position: 'relative',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '3px',
-                    background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${alpha(theme.palette.warning.main, 0.6)})`,
-                    borderRadius: '12px 12px 0 0'
-                  }
+              {/* 敏感词过滤配置区域 */}
+              <Box sx={{ 
+                mb: 3,
+                border: `1px solid ${alpha(theme.palette.warning.main, 0.15)}`,
+                borderRadius: '12px',
+                p: 2.5,
+                backgroundColor: alpha(theme.palette.warning.main, 0.02),
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: `linear-gradient(90deg, ${theme.palette.warning.main}, ${alpha(theme.palette.warning.main, 0.6)})`,
+                  borderRadius: '12px 12px 0 0'
+                }
+              }}>
+                <Typography variant="body2" gutterBottom display="flex" alignItems="center" sx={{ 
+                  fontWeight: 600, 
+                  color: theme.palette.warning.main,
+                  mb: 2.5
                 }}>
-                  <Typography variant="body2" gutterBottom display="flex" alignItems="center" sx={{ 
-                    fontWeight: 600, 
-                    color: theme.palette.warning.main,
-                    mb: 2.5
-                  }}>
-                    敏感词过滤配置
-                    <Tooltip title="配置敏感词和不良内容的过滤规则">
-                      <QuestionCircleOutlined style={{ marginLeft: 6, color: theme.palette.text.secondary, fontSize: '14px' }} />
-                    </Tooltip>
-                  </Typography>
-                  
-                  {/* 过滤级别设置 */}
+                  敏感词过滤配置
+                  <Tooltip title="配置敏感词和不良内容的过滤规则">
+                    <QuestionCircleOutlined style={{ marginLeft: 6, color: theme.palette.text.secondary, fontSize: '14px' }} />
+                  </Tooltip>
+                </Typography>
+                
+                {/* 敏感词过滤开关 */}
+                <Box sx={{ 
+                  p: 1.5,
+                  bgcolor: alpha(theme.palette.warning.main, 0.05),
+                  borderRadius: '8px',
+                  border: `1px solid ${alpha(theme.palette.warning.main, 0.1)}`,
+                  mb: 2
+                }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.enableSensitiveWordFilter}
+                        onChange={handleSwitchChange('enableSensitiveWordFilter')}
+                        color="warning"
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                          启用敏感词过滤
+                        </Typography>
+                        <Tooltip title="启用后，系统会在模型响应前先过滤敏感词和不良内容">
+                          <QuestionCircleOutlined style={{ marginLeft: 4, color: theme.palette.text.secondary, fontSize: '11px' }} />
+                        </Tooltip>
+                      </Box>
+                    }
+                    sx={{ m: 0 }}
+                  />
+                </Box>
+                
+                {/* 过滤级别设置（仅在启用时显示） */}
+                {settings.enableSensitiveWordFilter && (
                   <Box sx={{ 
                     p: 2,
                     bgcolor: alpha(theme.palette.background.paper, 0.6),
@@ -853,8 +845,8 @@ const AdvancedAgentSettings: React.FC<AdvancedAgentSettingsProps> = ({
                       {sensitiveWordFilterLevels.find(l => l.value === settings.sensitiveWordFilterLevel)?.description}
                     </Typography>
                   </Box>
-                </Box>
-              )}
+                )}
+              </Box>
             
               {/* 功能权限配置区域 */}
               <Box sx={{ 

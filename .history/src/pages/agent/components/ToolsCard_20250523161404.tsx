@@ -264,7 +264,7 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
       {/* 工具网格区域 - 可滚动内容区 */}
       <Box sx={{ 
         py: 2,
-        px: 2, 
+        px: 2,
         overflow: 'auto', // 只允许内容区域滚动
         flex: 1, // 占据剩余空间
         backgroundColor: 'transparent', // 确保背景透明
@@ -274,10 +274,9 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
       }}>
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, 300px)', // 固定卡片宽度为300px
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', // 修改为auto-fit和减小最小宽度
           gap: 2.5,
           alignContent: 'start',
-          justifyContent: 'center', // 居中对齐
           minHeight: filteredTools.length > 0 ? 'auto' : '300px',
           width: '100%', // 确保宽度不超出容器
           maxWidth: '100%' // 限制最大宽度

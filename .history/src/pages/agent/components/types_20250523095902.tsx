@@ -4,37 +4,16 @@ export interface Tool {
   name: string;
   description: string;
   category: ToolCategory;
-  icon?: React.ReactNode;
+  icon?: string;
   tags?: string[];
-  // 新增属性
-  isAdvanced?: boolean; // 是否为高级工具
-  isPremium?: boolean; // 是否为付费工具
-  complexity?: 'low' | 'medium' | 'high'; // 复杂度
-  provider?: string; // 提供商
-  version?: string; // 版本
-  apiEndpoint?: string; // API端点
-  documentation?: string; // 文档链接
-  isEnabled?: boolean; // 是否启用
-  // 配置参数
-  config?: Record<string, unknown>;
-  // 权限要求
-  permissions?: string[];
-  // 依赖关系
-  dependencies?: string[];
 }
 
-// 工具类别 - 扩展为更多实际的工具类别
+// 工具类别
 export enum ToolCategory {
-  SEARCH = 'search', // 搜索工具
-  RETRIEVAL = 'retrieval', // 检索工具  
-  REASONING = 'reasoning', // 推理工具
-  MULTIMODAL = 'multimodal', // 多模态工具
-  INTEGRATION = 'integration', // 集成工具
-  KNOWLEDGE = 'knowledge', // 知识处理工具
-  WEB = 'web', // 网页工具
-  DEVELOPMENT = 'development', // 开发工具
-  DOCUMENT = 'document', // 文档工具
-  MULTIMEDIA = 'multimedia' // 多媒体工具
+  WEB = 'web',
+  DEVELOPMENT = 'development',
+  DOCUMENT = 'document',
+  MULTIMEDIA = 'multimedia'
 }
 
 // 知识库类型

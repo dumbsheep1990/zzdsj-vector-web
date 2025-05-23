@@ -8,6 +8,7 @@ import {
   Tabs, 
   Tab, 
   Switch, 
+  Paper,
   alpha,
   useTheme,
   Chip
@@ -37,6 +38,111 @@ const ComplexityIndicator = styled(Box)<{ isAdvanced: boolean }>(
       fontSize: '0.7rem',
       fontWeight: 600,
       color: isAdvanced ? theme.palette.primary.main : theme.palette.success.main
+    };
+  }
+);
+
+const ToolCardContainer = styled(Paper)<{ isSelected: boolean; category: string }>(
+  ({ theme, isSelected, category }) => {
+    // 根据工具类别决定背景色
+    const getCategoryColors = () => {
+      switch(category) {
+        case 'search':
+          return {
+            light: alpha(theme.palette.info.light, 0.12),
+            medium: alpha(theme.palette.info.main, 0.08),
+            accent: theme.palette.info.main
+          };
+        case 'retrieval':
+          return {
+            light: alpha(theme.palette.primary.light, 0.12),
+            medium: alpha(theme.palette.primary.main, 0.08),
+            accent: theme.palette.primary.main
+          };
+        case 'reasoning':
+          return {
+            light: alpha(theme.palette.secondary.light, 0.12),
+            medium: alpha(theme.palette.secondary.main, 0.08),
+            accent: theme.palette.secondary.main
+          };
+        case 'knowledge':
+          return {
+            light: alpha('#22c55e', 0.12), // 绿色
+            medium: alpha('#22c55e', 0.08),
+            accent: '#22c55e'
+          };
+        case 'integration':
+          return {
+            light: alpha('#f59e0b', 0.12), // 橙色
+            medium: alpha('#f59e0b', 0.08),
+            accent: '#f59e0b'
+          };
+        case 'development':
+          return {
+            light: alpha('#7c3aed', 0.12), // 紫色
+            medium: alpha('#7c3aed', 0.08), 
+            accent: '#7c3aed'
+          };
+        case 'multimodal':
+          return {
+            light: alpha('#ec4899', 0.12), // 粉色
+            medium: alpha('#ec4899', 0.08),
+            accent: '#ec4899'
+          };
+        default:
+          return {
+            light: alpha(theme.palette.grey[500], 0.12),
+            medium: alpha(theme.palette.grey[500], 0.08),
+            accent: theme.palette.grey[500]
+          };
+      }
+    };
+    
+    const colors = getCategoryColors();
+    
+    return {
+      cursor: 'pointer',
+      border: '1px solid',
+      borderColor: isSelected 
+        ? colors.accent 
+        : alpha(theme.palette.divider, 0.2),
+      borderRadius: '16px',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      position: 'relative',
+      overflow: 'hidden',
+      background: `linear-gradient(135deg, 
+          ${colors.light}, 
+          ${colors.medium})`,
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      boxShadow: isSelected 
+        ? `0 8px 32px ${alpha(colors.accent, 0.2)}` 
+        : `0 4px 16px ${alpha(theme.palette.common.black, 0.05)}`,
+      // 添加装饰性背景元素
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: '-15%',
+        right: '-5%',
+        width: '120px',
+        height: '120px',
+        background: `radial-gradient(circle, ${alpha(colors.accent, 0.08)} 0%, transparent 70%)`,
+        borderRadius: '50%',
+        opacity: 0.7,
+        zIndex: 0
+      },
+      '&:hover': {
+        borderColor: colors.accent,
+        boxShadow: `0 12px 40px ${alpha(colors.accent, 0.15)}`,
+        transform: 'translateY(-4px)',
+        background: `linear-gradient(135deg, 
+            ${alpha(colors.accent, 0.12)}, 
+            ${alpha(colors.accent, 0.05)})`
+      },
+      '& > *': {
+        position: 'relative',
+        zIndex: 1 // 确保内容在装饰层之上
+      }
     };
   }
 );
@@ -84,9 +190,7 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
         border: '1px solid',
         borderColor: alpha(theme.palette.divider, 0.1),
         borderRadius: '16px',
-        background: 'transparent',
-        bgcolor: 'transparent',
-        backgroundColor: 'transparent',
+        bgcolor: alpha(theme.palette.background.paper, 0.8),
         backdropFilter: 'blur(20px)',
         position: 'relative',
         overflow: 'hidden',
@@ -264,169 +368,153 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
       {/* 工具网格区域 - 可滚动内容区 */}
       <Box sx={{ 
         py: 2,
-        px: 2, 
+        px: 2,
         overflow: 'auto', // 只允许内容区域滚动
-        flex: 1, // 占据剩余空间
-        backgroundColor: 'transparent', // 确保背景透明
-        '.MuiPaper-root': { // 直接覆盖Paper组件的样式
-          backgroundImage: 'none !important' // 确保没有背景图像
-        }
+        flex: 1 // 占据剩余空间
       }}>
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, 300px)', // 固定卡片宽度为300px
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
           gap: 2.5,
           alignContent: 'start',
-          justifyContent: 'center', // 居中对齐
-          minHeight: filteredTools.length > 0 ? 'auto' : '300px',
-          width: '100%', // 确保宽度不超出容器
-          maxWidth: '100%' // 限制最大宽度
+          minHeight: filteredTools.length > 0 ? 'auto' : '300px'
         }}>
-          {filteredTools.length > 0 ? filteredTools.map((tool) => {
-            const categoryColor = (() => {
-              switch(tool.category.toLowerCase()) {
-                case 'search': return 'linear-gradient(135deg, rgba(24, 144, 255, 0.15), rgba(24, 144, 255, 0.08))'; // 蓝色
-                case 'retrieval': return 'linear-gradient(135deg, rgba(22, 119, 255, 0.15), rgba(22, 119, 255, 0.08))'; // 深蓝色
-                case 'reasoning': return 'linear-gradient(135deg, rgba(114, 46, 209, 0.15), rgba(114, 46, 209, 0.08))'; // 紫色
-                case 'knowledge': return 'linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08))'; // 绿色
-                case 'integration': return 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08))'; // 橙色
-                case 'development': return 'linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.08))'; // 紫色
-                case 'multimodal': return 'linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.08))'; // 粉色
-                default: return 'linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(100, 116, 139, 0.08))'; // 默认灰色
-              }
-            })();
-            
-            const borderColor = (() => {
-              switch(tool.category.toLowerCase()) {
-                case 'search': return '#1890ff'; // 蓝色
-                case 'retrieval': return '#1677ff'; // 深蓝色
-                case 'reasoning': return '#722ed1'; // 紫色
-                case 'knowledge': return '#22c55e'; // 绿色
-                case 'integration': return '#f59e0b'; // 橙色
-                case 'development': return '#7c3aed'; // 紫色
-                case 'multimodal': return '#ec4899'; // 粉色
-                default: return '#64748b'; // 默认灰色
-              }
-            })();
-            
-            return (
-              <Box
-                key={tool.id}
-                onClick={() => toggleToolSelection(tool)}
-                sx={{
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: isToolSelected(tool.id) 
-                    ? borderColor
-                    : alpha(theme.palette.divider, 0.15),
-                  borderRadius: '16px',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: categoryColor,
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  boxShadow: isToolSelected(tool.id)
-                    ? `0 8px 20px ${alpha(borderColor, 0.15)}`
-                    : `0 4px 14px ${alpha(theme.palette.common.black, 0.03)}`,
-                  '&:hover': {
-                    borderColor: alpha(borderColor, 0.5),
-                    boxShadow: `0 10px 25px ${alpha(borderColor, 0.18)}`,
-                    transform: 'translateY(-3px)'
-                  }
-                }}
-              >
-                <Box sx={{ p: 2.5, backgroundColor: 'transparent' }}>
-                  {/* 工具头部信息 */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'flex-start',
-                    mb: 1.5,
-                    backgroundColor: 'transparent'
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                      <Box
-                        sx={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: '8px',
-                          backgroundColor: tool.complexity === 'high' || tool.complexity === 'medium' 
-                            ? alpha(theme.palette.primary.main, 0.15)
-                            : alpha(theme.palette.success.main, 0.15),
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}
-                      >
-                        {tool.icon}
+          {filteredTools.length > 0 ? filteredTools.map((tool) => (
+            <ToolCardContainer
+              key={tool.id}
+              isSelected={isToolSelected(tool.id)}
+              category={tool.category}
+              onClick={() => toggleToolSelection(tool)}
+            >
+              <Box sx={{ p: 2.5 }}>
+                {/* 工具头部信息 */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start',
+                  mb: 1.5
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '8px',
+                        backgroundColor: tool.complexity === 'high' || tool.complexity === 'medium' 
+                          ? alpha(theme.palette.primary.main, 0.15)
+                          : alpha(theme.palette.success.main, 0.15),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      {tool.icon}
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Typography 
+                          variant="subtitle2" 
+                          sx={{ 
+                            fontWeight: 700, 
+                            color: theme.palette.text.primary,
+                            fontSize: '0.9rem',
+                            lineHeight: 1.2,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {tool.name}
+                        </Typography>
                       </Box>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                          <Typography 
-                            variant="subtitle2" 
-                            sx={{ 
-                              fontWeight: 700, 
-                              color: theme.palette.text.primary,
-                              fontSize: '0.9rem',
-                              lineHeight: 1.2,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {tool.name}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <ComplexityIndicator isAdvanced={tool.complexity === 'high' || tool.complexity === 'medium'}>
-                            {getComplexityIcon(tool)}
-                            {getComplexityLabel(tool)}
-                          </ComplexityIndicator>
-                        </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="caption" sx={{ 
+                          color: alpha(theme.palette.text.secondary, 0.7),
+                          fontSize: '0.7rem'
+                        }}>
+                          {tool.provider} • v{tool.version}
+                        </Typography>
+                        <ComplexityIndicator isAdvanced={tool.complexity === 'high' || tool.complexity === 'medium'}>
+                          {getComplexityIcon(tool)}
+                          {getComplexityLabel(tool)}
+                        </ComplexityIndicator>
                       </Box>
                     </Box>
-                    
-                    <Switch 
-                      size="small" 
-                      checked={isToolSelected(tool.id)} 
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        toggleToolSelection(tool);
-                      }}
-                      sx={{
-                        flexShrink: 0,
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: theme.palette.primary.main,
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          backgroundColor: theme.palette.primary.main,
-                        },
-                      }}
-                    />
                   </Box>
                   
-                  {/* 工具描述 */}
-                  <Typography 
-                    variant="body2" 
-                    sx={{ 
-                      color: alpha(theme.palette.text.secondary, 0.9),
-                      fontSize: '0.8rem',
-                      lineHeight: 1.4,
-                      mb: 1,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
+                  <Switch 
+                    size="small" 
+                    checked={isToolSelected(tool.id)} 
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleToolSelection(tool);
                     }}
-                  >
-                    {tool.description}
-                  </Typography>
+                    sx={{
+                      flexShrink: 0,
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: theme.palette.primary.main,
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: theme.palette.primary.main,
+                      },
+                    }}
+                  />
+                </Box>
+                
+                {/* 工具描述 */}
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: alpha(theme.palette.text.secondary, 0.9),
+                    fontSize: '0.8rem',
+                    lineHeight: 1.4,
+                    mb: 1.5,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {tool.description}
+                </Typography>
+                
+                {/* 标签区域 */}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
+                  {tool.tags?.slice(0, 3).map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      sx={{ 
+                        fontSize: '0.7rem',
+                        height: '22px',
+                        color: alpha(theme.palette.text.secondary, 0.8),
+                        backgroundColor: alpha(theme.palette.text.secondary, 0.06),
+                        border: `1px solid ${alpha(theme.palette.text.secondary, 0.1)}`,
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.text.secondary, 0.1)
+                        }
+                      }}
+                    />
+                  ))}
+                  {tool.tags && tool.tags.length > 3 && (
+                    <Chip
+                      label={`+${tool.tags.length - 3}`}
+                      size="small"
+                      sx={{ 
+                        fontSize: '0.7rem',
+                        height: '22px',
+                        color: alpha(theme.palette.text.secondary, 0.6),
+                        backgroundColor: alpha(theme.palette.text.secondary, 0.04),
+                        border: `1px dashed ${alpha(theme.palette.text.secondary, 0.2)}`
+                      }}
+                    />
+                  )}
                 </Box>
               </Box>
-            );
-          }) : (
+            </ToolCardContainer>
+          )) : (
             <Box sx={{ 
               gridColumn: '1 / -1',
               display: 'flex', 

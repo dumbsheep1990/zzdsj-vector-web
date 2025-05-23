@@ -46,8 +46,7 @@ export const defaultQuickConfig: QuickConfigOptions = {
   creativityLevel: 'balanced',
   maxTokens: 4096,
   memoryOption: 'short',
-  useCustomTokens: false,
-  contextCompression: false
+  useCustomTokens: false
 };
 
 // 响应长度选项
@@ -79,7 +78,7 @@ const QuickConfigPanel: React.FC<QuickConfigPanelProps> = ({
   const theme = useTheme();
   
   // 处理配置变更
-  const handleConfigChange = (key: keyof QuickConfigOptions, value: boolean | number | string) => {
+  const handleConfigChange = (key: keyof QuickConfigOptions, value: any) => {
     onConfigChange({
       ...config,
       [key]: value
@@ -93,7 +92,7 @@ const QuickConfigPanel: React.FC<QuickConfigPanelProps> = ({
   
   // 处理滑块变更
   const handleSliderChange = (key: keyof QuickConfigOptions) => (_event: Event, newValue: number | number[]) => {
-    handleConfigChange(key, Array.isArray(newValue) ? newValue[0] : newValue);
+    handleConfigChange(key, newValue);
   };
   
   // 处理记忆选项变更
@@ -616,81 +615,6 @@ const QuickConfigPanel: React.FC<QuickConfigPanelProps> = ({
                 {config.maxTokens >= 1000 ? `${(config.maxTokens/1024).toFixed(0)}K` : config.maxTokens}
               </Typography>
             </Box>
-          </Box>
-        </Box>
-        
-        {/* 上下文压缩开关 */}
-        <Box sx={{ 
-          mb: 3,
-          p: 2,
-          border: `1px solid ${alpha(theme.palette.warning.main, 0.15)}`,
-          borderRadius: '12px',
-          backgroundColor: alpha(theme.palette.warning.main, 0.03)
-        }}>
-          <Typography variant="subtitle2" sx={{ 
-            fontWeight: 600, 
-            mb: 1.5, 
-            display: 'flex', 
-            alignItems: 'center',
-            color: theme.palette.warning.dark
-          }}>
-            <Box component="span" sx={{ 
-              width: 24, 
-              height: 24, 
-              borderRadius: '50%', 
-              backgroundColor: alpha(theme.palette.warning.main, 0.1),
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mr: 1
-            }}>
-              <span style={{ fontSize: '14px' }}>⚡</span>
-            </Box>
-            上下文压缩
-            <Tooltip title="启用后将自动压缩长对话历史，减少 token 使用量但可能影响上下文连贯性。适用于长对话场景。">
-              <QuestionCircleOutlined style={{ marginLeft: '4px', color: theme.palette.text.secondary, fontSize: '14px' }} />
-            </Tooltip>
-          </Typography>
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            p: 1.5,
-            bgcolor: alpha(theme.palette.warning.main, 0.05),
-            borderRadius: '8px',
-            border: `1px solid ${alpha(theme.palette.warning.main, 0.1)}`
-          }}>
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.text.primary }}>
-                启用上下文压缩
-              </Typography>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, display: 'block', mt: 0.5 }}>
-                自动压缩历史对话以节省 token 使用量
-              </Typography>
-            </Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={config.contextCompression || false}
-                  onChange={handleSwitchChange('contextCompression')}
-                  color="warning"
-                  sx={{
-                    '& .MuiSwitch-thumb': {
-                      boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1)'
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: theme.palette.warning.main,
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: theme.palette.warning.main,
-                    },
-                  }}
-                />
-              }
-              label=""
-              sx={{ m: 0 }}
-            />
           </Box>
         </Box>
         

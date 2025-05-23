@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 import SidebarContainer from './components/SidebarContainer';
 import BuilderHeader from './components/BuilderHeader';
 // 不再使用ContentContainer，直接使用Box组件
+import CompleteButton from './components/CompleteButton';
 
 // 导入步骤组件
 import BasicInfoStep from './components/BasicInfoStep';
@@ -417,15 +418,18 @@ const AgentBuilder: React.FC = () => {
                   toggleKnowledgeBaseSelection={toggleKnowledgeBaseSelection}
                   advancedSettings={agentConfig.advanced || defaultAdvancedSettings}
                   onAdvancedSettingsChange={handleAdvancedSettingsChange}
-                  onBack={handleBack}
+                />
+                
+                {/* 完成按钮 */}
+                <CompleteButton
                   onComplete={completeStep}
-                  canContinue={canContinue(activeStep)}
+                  disabled={!canContinue(activeStep)}
                 />
               </>
             )}
             
-            {/* 底部导航按钮 - 仅在前两步显示 */}
-            {activeStep < 2 && activeStep > 0 && (
+            {/* 底部导航按钮 */}
+            {activeStep > 0 && (
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                 <Button onClick={handleBack} variant="outlined" size="small">
                   上一步

@@ -40,14 +40,6 @@ const AdvancedSettingsCard: React.FC<AdvancedSettingsCardProps> = ({
     });
   };
 
-  // 处理布尔值设置的函数
-  const handleBooleanChange = (setting: keyof AdvancedSettings, value: boolean) => {
-    onChange({
-      ...settings,
-      [setting]: value
-    });
-  };
-
   return (
     <Card
       sx={{
@@ -320,54 +312,6 @@ const AdvancedSettingsCard: React.FC<AdvancedSettingsCardProps> = ({
                   />
                 </Grid>
               </Grid>
-            </Box>
-          </Grid>
-          
-          {/* 分隔线 */}
-          <Grid item xs={12}>
-            <Divider sx={{ my: 2 }} />
-          </Grid>
-          
-          {/* 上下文压缩开关 */}
-          <Grid item xs={12}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              p: 2,
-              bgcolor: 'rgba(63, 81, 181, 0.04)',
-              borderRadius: 2,
-              border: '1px solid rgba(63, 81, 181, 0.12)'
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="subtitle2" sx={{ mr: 1 }}>
-                  上下文压缩
-                </Typography>
-                <Tooltip title="启用后将自动压缩长对话历史，减少 token 使用量但可能影响上下文连贯性。适用于长对话场景。">
-                  <IconButton size="small">
-                    <InfoCircleOutlined style={{ fontSize: 16 }} />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={settings.contextCompression}
-                    onChange={(e) => handleBooleanChange('contextCompression', e.target.checked)}
-                    color="primary"
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#3f51b5',
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#3f51b5',
-                      },
-                    }}
-                  />
-                }
-                label=""
-                sx={{ m: 0 }}
-              />
             </Box>
           </Grid>
         </Grid>
