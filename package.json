@@ -30,6 +30,7 @@
     "graphology": "^0.26.0",
     "lucide-react": "^0.288.0",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-force-graph": "^1.47.4",
     "react-force-graph-2d": "^1.27.0",
