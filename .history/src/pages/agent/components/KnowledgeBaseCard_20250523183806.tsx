@@ -433,29 +433,6 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
     exitConfigMode();
   };
 
-  // 保存配置并切换到新知识库
-  const saveAndSwitchConfig = () => {
-    if (configPanelKb && retrievalConfig) {
-      // 保存当前配置
-      console.log('保存知识库配置:', {
-        knowledgeBaseId: configPanelKb.id,
-        config: retrievalConfig
-      });
-      
-      // 更新availableKnowledgeBases数组中的配置
-      setAvailableKnowledgeBases(prevKbs => 
-        prevKbs.map(kb => 
-          kb.id === configPanelKb.id 
-            ? { ...kb, retrievalConfig: retrievalConfig }
-            : kb
-        )
-      );
-    }
-    
-    // 切换到新的知识库配置
-    confirmSwitchKb();
-  };
-
   // 获取配置状态标签
   const getConfigStatusLabel = (kb: KnowledgeBase) => {
     return kb.retrievalConfig ? '自定义配置' : '默认设置';
@@ -1997,7 +1974,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             取消
           </Button>
           <Button 
-            onClick={saveAndSwitchConfig}
+            onClick={saveConfig}
             variant="outlined"
             sx={{ 
               borderRadius: '8px',

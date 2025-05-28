@@ -1997,7 +1997,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             取消
           </Button>
           <Button 
-            onClick={saveAndSwitchConfig}
+            onClick={saveConfig}
             variant="outlined"
             sx={{ 
               borderRadius: '8px',

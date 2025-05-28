@@ -15,7 +15,7 @@ import ToolOrchestrationStep from './components/ToolOrchestrationStep';
 
 // 导入类型
 import { Tool, KnowledgeBase, AgentConfig } from './components/types';
-import { defaultExtensionConfig } from './components/extensionConfig';
+import { defaultExtensionConfig } from './components/ExtensionToolsCard';
 
 // 工具编排项接口
 interface OrchestrationItem {
@@ -486,36 +486,23 @@ const AgentBuilder: React.FC = () => {
               />
             )}
             
-            {/* 底部导航按钮 - 仅在第一步显示 */}
-            {activeStep === 0 && (
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                <Button 
-                  onClick={handleNext} 
-                  variant="contained" 
-                  color="primary" 
-                  size="small"
-                  disabled={!canContinue(activeStep)}
-                >
-                  下一步
-                </Button>
-              </Box>
-            )}
-            
-            {/* 第二步导航按钮 */}
-            {activeStep === 1 && (
+            {/* 底部导航按钮 - 仅在前两步显示 */}
+            {activeStep < 2 && activeStep >= 0 && (
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                 <Button onClick={handleBack} variant="outlined" size="small">
                   上一步
                 </Button>
-                <Button 
-                  onClick={handleNext} 
-                  variant="contained" 
-                  color="primary" 
-                  size="small"
-                  disabled={!canContinue(activeStep)}
-                >
-                  下一步
-                </Button>
+                {activeStep < stepTitles.length - 1 && (
+                  <Button 
+                    onClick={handleNext} 
+                    variant="contained" 
+                    color="primary" 
+                    size="small"
+                    disabled={!canContinue(activeStep)}
+                  >
+                    下一步
+                  </Button>
+                )}
               </Box>
             )}
           </Box>

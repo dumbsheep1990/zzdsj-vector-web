@@ -3,8 +3,7 @@ import { Box, Tabs, Tab, Button, alpha, useTheme } from '@mui/material';
 import { RightOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import ToolsCard from './ToolsCard';
 import KnowledgeBaseCard from './KnowledgeBaseCard';
-import ExtensionToolsCard from './ExtensionToolsCard';
-import { defaultExtensionConfig } from './extensionConfig';
+import ExtensionToolsCard, { defaultExtensionConfig } from './ExtensionToolsCard';
 import { Tool, KnowledgeBase } from './types';
 
 // 扩展工具配置接口

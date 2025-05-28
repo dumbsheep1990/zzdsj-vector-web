@@ -59,7 +59,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
   const [pendingKb, setPendingKb] = useState<KnowledgeBase | null>(null);
   
   // 示例知识库数据
-  const [availableKnowledgeBases, setAvailableKnowledgeBases] = useState<KnowledgeBase[]>([
+  const availableKnowledgeBases: KnowledgeBase[] = [
     {
       id: '1',
       name: '向量数据库文档',
@@ -115,7 +115,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
       size: 22.3,
       lastUpdated: '2024-01-16'
     }
-  ]);
+  ];
 
   // 根据搜索条件筛选知识库
   const filteredKnowledgeBases = availableKnowledgeBases.filter(kb => 
@@ -230,60 +230,6 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
     setRetrievalConfig(newConfig);
     const hasChanges = originalConfig ? checkConfigChanges(newConfig, originalConfig) : false;
     setHasUnsavedChanges(hasChanges);
-  };
-
-  // 检测当前配置对应的预设模式
-  const detectConfigMode = (config: KnowledgeBaseRetrievalConfig | null): { mode: string; color: string; bgColor: string } => {
-    if (!config) return { mode: '默认', color: '#64748b', bgColor: 'rgba(100, 116, 139, 0.15)' };
-
-    // 高精度模式检测
-    if (config.strategy === 'hybrid' && 
-        config.vectorParams.topK === 10 && 
-        config.vectorParams.scoreThreshold === 0.6 && 
-        config.vectorParams.includeMetadata === true &&
-        config.rrfParams.enabled === true &&
-        config.rrfParams.vectorWeight === 0.7 &&
-        config.indexConfig.type === 'HNSW' &&
-        config.indexConfig.metric === 'cosine') {
-      return { mode: '🎯 高精度', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.15)' };
-    }
-
-    // 平衡模式检测
-    if (config.strategy === 'hybrid' && 
-        config.vectorParams.topK === 5 && 
-        config.vectorParams.scoreThreshold === 0.7 && 
-        config.vectorParams.includeMetadata === true &&
-        config.rrfParams.enabled === true &&
-        config.rrfParams.vectorWeight === 0.6 &&
-        config.indexConfig.type === 'HNSW' &&
-        config.indexConfig.metric === 'cosine') {
-      return { mode: '⚖️ 平衡', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.15)' };
-    }
-
-    // 高性能模式检测
-    if (config.strategy === 'vector' && 
-        config.vectorParams.topK === 3 && 
-        config.vectorParams.scoreThreshold === 0.8 && 
-        config.vectorParams.includeMetadata === false &&
-        config.rrfParams.enabled === false &&
-        config.indexConfig.type === 'IVF_FLAT' &&
-        config.indexConfig.metric === 'dot_product') {
-      return { mode: '⚡ 高性能', color: '#22c55e', bgColor: 'rgba(34, 197, 94, 0.15)' };
-    }
-
-    // 关键词优化模式检测
-    if (config.strategy === 'keyword' && 
-        config.vectorParams.topK === 5 && 
-        config.vectorParams.scoreThreshold === 0.65 && 
-        config.keywordParams.boost === 1.5 &&
-        config.rrfParams.enabled === false &&
-        config.indexConfig.type === 'HNSW' &&
-        config.indexConfig.metric === 'cosine') {
-      return { mode: '🔍 关键词', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' };
-    }
-
-    // 自定义配置
-    return { mode: '🔧 自定义', color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.15)' };
   };
 
   // 应用配置预设
@@ -420,40 +366,9 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
         knowledgeBaseId: configPanelKb.id,
         config: retrievalConfig
       });
-      
-      // 更新availableKnowledgeBases数组中的配置
-      setAvailableKnowledgeBases(prevKbs => 
-        prevKbs.map(kb => 
-          kb.id === configPanelKb.id 
-            ? { ...kb, retrievalConfig: retrievalConfig }
-            : kb
-        )
-      );
+      // TODO: 更新availableKnowledgeBases数组中的配置
     }
     exitConfigMode();
-  };
-
-  // 保存配置并切换到新知识库
-  const saveAndSwitchConfig = () => {
-    if (configPanelKb && retrievalConfig) {
-      // 保存当前配置
-      console.log('保存知识库配置:', {
-        knowledgeBaseId: configPanelKb.id,
-        config: retrievalConfig
-      });
-      
-      // 更新availableKnowledgeBases数组中的配置
-      setAvailableKnowledgeBases(prevKbs => 
-        prevKbs.map(kb => 
-          kb.id === configPanelKb.id 
-            ? { ...kb, retrievalConfig: retrievalConfig }
-            : kb
-        )
-      );
-    }
-    
-    // 切换到新的知识库配置
-    confirmSwitchKb();
   };
 
   // 获取配置状态标签
@@ -537,25 +452,6 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                           color: getConfigStatusColor(kb).color 
                         }} 
                       />
-                      {(() => {
-                        const configToCheck = (configPanelKb?.id === kb.id && retrievalConfig) 
-                          ? retrievalConfig 
-                          : (kb.retrievalConfig || null);
-                        const modeInfo = detectConfigMode(configToCheck);
-                        return (
-                          <Chip 
-                            size="small" 
-                            label={modeInfo.mode} 
-                            sx={{ 
-                              height: '18px', 
-                              fontSize: '0.65rem', 
-                              backgroundColor: modeInfo.bgColor, 
-                              color: modeInfo.color,
-                              fontWeight: 600
-                            }} 
-                          />
-                        );
-                      })()}
                     </Box>
                   </Box>
                 </Box>
@@ -735,25 +631,6 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                       }} 
                     />
                   )}
-                  {(() => {
-                    const configToCheck = (configPanelKb?.id === kb.id && retrievalConfig) 
-                      ? retrievalConfig 
-                      : (kb.retrievalConfig || null);
-                    const modeInfo = detectConfigMode(configToCheck);
-                    return (
-                      <Chip 
-                        size="small" 
-                        label={modeInfo.mode} 
-                        sx={{ 
-                          height: '18px', 
-                          fontSize: '0.65rem', 
-                          backgroundColor: modeInfo.bgColor, 
-                          color: modeInfo.color,
-                          fontWeight: 600
-                        }} 
-                      />
-                    );
-                  })()}
                   <Typography variant="caption" sx={{ color: alpha(theme.palette.text.secondary, 0.6) }}>
                     {kb.size}MB · {kb.lastUpdated}
                   </Typography>
@@ -1997,7 +1874,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             取消
           </Button>
           <Button 
-            onClick={saveAndSwitchConfig}
+            onClick={saveConfig}
             variant="outlined"
             sx={{ 
               borderRadius: '8px',

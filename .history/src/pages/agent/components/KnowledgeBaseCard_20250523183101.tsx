@@ -59,7 +59,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
   const [pendingKb, setPendingKb] = useState<KnowledgeBase | null>(null);
   
   // 示例知识库数据
-  const [availableKnowledgeBases, setAvailableKnowledgeBases] = useState<KnowledgeBase[]>([
+  const availableKnowledgeBases: KnowledgeBase[] = [
     {
       id: '1',
       name: '向量数据库文档',
@@ -115,7 +115,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
       size: 22.3,
       lastUpdated: '2024-01-16'
     }
-  ]);
+  ];
 
   // 根据搜索条件筛选知识库
   const filteredKnowledgeBases = availableKnowledgeBases.filter(kb => 
@@ -420,40 +420,9 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
         knowledgeBaseId: configPanelKb.id,
         config: retrievalConfig
       });
-      
-      // 更新availableKnowledgeBases数组中的配置
-      setAvailableKnowledgeBases(prevKbs => 
-        prevKbs.map(kb => 
-          kb.id === configPanelKb.id 
-            ? { ...kb, retrievalConfig: retrievalConfig }
-            : kb
-        )
-      );
+      // TODO: 更新availableKnowledgeBases数组中的配置
     }
     exitConfigMode();
-  };
-
-  // 保存配置并切换到新知识库
-  const saveAndSwitchConfig = () => {
-    if (configPanelKb && retrievalConfig) {
-      // 保存当前配置
-      console.log('保存知识库配置:', {
-        knowledgeBaseId: configPanelKb.id,
-        config: retrievalConfig
-      });
-      
-      // 更新availableKnowledgeBases数组中的配置
-      setAvailableKnowledgeBases(prevKbs => 
-        prevKbs.map(kb => 
-          kb.id === configPanelKb.id 
-            ? { ...kb, retrievalConfig: retrievalConfig }
-            : kb
-        )
-      );
-    }
-    
-    // 切换到新的知识库配置
-    confirmSwitchKb();
   };
 
   // 获取配置状态标签
@@ -538,10 +507,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                         }} 
                       />
                       {(() => {
-                        const configToCheck = (configPanelKb?.id === kb.id && retrievalConfig) 
-                          ? retrievalConfig 
-                          : (kb.retrievalConfig || null);
-                        const modeInfo = detectConfigMode(configToCheck);
+                        const modeInfo = detectConfigMode(kb.retrievalConfig || null);
                         return (
                           <Chip 
                             size="small" 
@@ -736,10 +702,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
                     />
                   )}
                   {(() => {
-                    const configToCheck = (configPanelKb?.id === kb.id && retrievalConfig) 
-                      ? retrievalConfig 
-                      : (kb.retrievalConfig || null);
-                    const modeInfo = detectConfigMode(configToCheck);
+                    const modeInfo = detectConfigMode(kb.retrievalConfig || null);
                     return (
                       <Chip 
                         size="small" 
@@ -1997,7 +1960,7 @@ const KnowledgeBaseCard: React.FC<KnowledgeBaseCardProps> = ({
             取消
           </Button>
           <Button 
-            onClick={saveAndSwitchConfig}
+            onClick={saveConfig}
             variant="outlined"
             sx={{ 
               borderRadius: '8px',

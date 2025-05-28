@@ -15,7 +15,7 @@ import ToolOrchestrationStep from './components/ToolOrchestrationStep';
 
 // 导入类型
 import { Tool, KnowledgeBase, AgentConfig } from './components/types';
-import { defaultExtensionConfig } from './components/extensionConfig';
+import { defaultExtensionConfig } from './components/ExtensionToolsCard';
 
 // 工具编排项接口
 interface OrchestrationItem {

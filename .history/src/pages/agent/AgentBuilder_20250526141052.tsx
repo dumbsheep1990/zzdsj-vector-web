@@ -15,7 +15,7 @@ import ToolOrchestrationStep from './components/ToolOrchestrationStep';
 
 // 导入类型
 import { Tool, KnowledgeBase, AgentConfig } from './components/types';
-import { defaultExtensionConfig } from './components/extensionConfig';
+import { defaultExtensionConfig } from './components/ExtensionToolsCard';
 
 // 工具编排项接口
 interface OrchestrationItem {
@@ -285,23 +285,6 @@ const AgentBuilder: React.FC = () => {
     newCompleted[activeStep] = true;
     setCompleted(newCompleted);
   };
-
-  // 最终完成创建智能体
-  const handleFinalComplete = () => {
-    completeStep();
-    // 添加工具编排配置到智能体配置中
-    const finalConfig = {
-      ...agentConfig,
-      extensionTools: extensionToolsConfig,
-      orchestration: orchestrationItems
-    };
-    
-    console.log('最终智能体配置:', finalConfig);
-    // TODO: 调用 API 保存智能体配置
-    
-    // 可以导航到成功页面或返回列表
-    // navigate('/agent-list');
-  };
   
   // 保存智能体
   const handleSave = () => {
@@ -321,8 +304,6 @@ const AgentBuilder: React.FC = () => {
         return agentConfig.systemPrompt.trim() !== '';
       case 2:
         return true; // 没有特定要求
-      case 3:
-        return true; // 工具编排是可选的
       default:
         return false;
     }
@@ -338,7 +319,7 @@ const AgentBuilder: React.FC = () => {
   const canSave = agentConfig.name.trim() !== '' && agentConfig.systemPrompt.trim() !== '';
   
   // 步骤标题
-  const stepTitles = ['基本信息设置', '系统提示词设置', '功能配置', '工具编排'];
+  const stepTitles = ['基本信息设置', '系统提示词设置', '功能配置'];
   
   // 步骤配置
   const steps = [
@@ -361,14 +342,6 @@ const AgentBuilder: React.FC = () => {
       title: '功能配置',
       isRequired: false,
       isComplete: isStepComplete(2),
-      isOptional: true,
-      status: '可选'
-    },
-    {
-      id: 3,
-      title: '工具编排',
-      isRequired: false,
-      isComplete: isStepComplete(3),
       isOptional: true,
       status: '可选'
     }
@@ -466,56 +439,29 @@ const AgentBuilder: React.FC = () => {
                   extensionToolsConfig={extensionToolsConfig}
                   onExtensionToolsConfigChange={handleExtensionToolsConfigChange}
                   onBack={handleBack}
-                  onComplete={handleNext}
+                  onComplete={completeStep}
                   canContinue={canContinue(activeStep)}
                 />
               </>
             )}
             
-            {/* 工具编排页 */}
-            {activeStep === 3 && (
-              <ToolOrchestrationStep
-                selectedTools={agentConfig.selectedTools}
-                selectedKnowledgeBases={agentConfig.selectedKnowledgeBases}
-                extensionToolsConfig={extensionToolsConfig}
-                orchestrationItems={orchestrationItems}
-                onOrchestrationItemsChange={handleOrchestrationItemsChange}
-                onBack={handleBack}
-                onComplete={handleFinalComplete}
-                canContinue={canContinue(activeStep)}
-              />
-            )}
-            
-            {/* 底部导航按钮 - 仅在第一步显示 */}
-            {activeStep === 0 && (
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                <Button 
-                  onClick={handleNext} 
-                  variant="contained" 
-                  color="primary" 
-                  size="small"
-                  disabled={!canContinue(activeStep)}
-                >
-                  下一步
-                </Button>
-              </Box>
-            )}
-            
-            {/* 第二步导航按钮 */}
-            {activeStep === 1 && (
+            {/* 底部导航按钮 - 仅在前两步显示 */}
+            {activeStep < 2 && activeStep > 0 && (
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                 <Button onClick={handleBack} variant="outlined" size="small">
                   上一步
                 </Button>
-                <Button 
-                  onClick={handleNext} 
-                  variant="contained" 
-                  color="primary" 
-                  size="small"
-                  disabled={!canContinue(activeStep)}
-                >
-                  下一步
-                </Button>
+                {activeStep < stepTitles.length - 1 && (
+                  <Button 
+                    onClick={handleNext} 
+                    variant="contained" 
+                    color="primary" 
+                    size="small"
+                    disabled={!canContinue(activeStep)}
+                  >
+                    下一步
+                  </Button>
+                )}
               </Box>
             )}
           </Box>

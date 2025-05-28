@@ -3,8 +3,7 @@ import { Box, Tabs, Tab, Button, alpha, useTheme } from '@mui/material';
 import { RightOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import ToolsCard from './ToolsCard';
 import KnowledgeBaseCard from './KnowledgeBaseCard';
-import ExtensionToolsCard from './ExtensionToolsCard';
-import { defaultExtensionConfig } from './extensionConfig';
+import ExtensionToolsCard, { defaultExtensionConfig } from './ExtensionToolsCard';
 import { Tool, KnowledgeBase } from './types';
 
 // 扩展工具配置接口
@@ -13,11 +12,14 @@ interface ExtensionToolsConfig {
     enabled: boolean;
     speechToText: boolean;
     textToSpeech: boolean;
+    voiceCloning: boolean;
+    realtimeConversation: boolean;
   };
   multimodal: {
     enabled: boolean;
     imageAnalysis: boolean;
     videoProcessing: boolean;
+    documentScanning: boolean;
     chartGeneration: boolean;
   };
   fileAnalysis: {
@@ -26,6 +28,14 @@ interface ExtensionToolsConfig {
     batchProcessing: boolean;
     formatSupport: string[];
     intelligentExtraction: boolean;
+  };
+  advancedFeatures: {
+    webBrowsing: boolean;
+    apiIntegration: boolean;
+    codeExecution: boolean;
+    dataVisualization: boolean;
+    workflowAutomation: boolean;
+    knowledgeGraphing: boolean;
   };
 }
 
@@ -144,9 +154,9 @@ const FeaturesStep: React.FC<FeaturesStepProps> = ({
         )}
         
         {tabValue === 2 && (
-          <ExtensionToolsCard 
-            config={extensionToolsConfig}
-            onChange={onExtensionToolsConfigChange}
+          <AdvancedSettingsCard 
+            settings={advancedSettings}
+            onChange={onAdvancedSettingsChange}
           />
         )}
       </Box>

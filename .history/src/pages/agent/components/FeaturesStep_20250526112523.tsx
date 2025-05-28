@@ -3,8 +3,7 @@ import { Box, Tabs, Tab, Button, alpha, useTheme } from '@mui/material';
 import { RightOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import ToolsCard from './ToolsCard';
 import KnowledgeBaseCard from './KnowledgeBaseCard';
-import ExtensionToolsCard from './ExtensionToolsCard';
-import { defaultExtensionConfig } from './extensionConfig';
+import ExtensionToolsCard, { defaultExtensionConfig } from './ExtensionToolsCard';
 import { Tool, KnowledgeBase } from './types';
 
 // 扩展工具配置接口
@@ -13,11 +12,14 @@ interface ExtensionToolsConfig {
     enabled: boolean;
     speechToText: boolean;
     textToSpeech: boolean;
+    voiceCloning: boolean;
+    realtimeConversation: boolean;
   };
   multimodal: {
     enabled: boolean;
     imageAnalysis: boolean;
     videoProcessing: boolean;
+    documentScanning: boolean;
     chartGeneration: boolean;
   };
   fileAnalysis: {
@@ -26,6 +28,14 @@ interface ExtensionToolsConfig {
     batchProcessing: boolean;
     formatSupport: string[];
     intelligentExtraction: boolean;
+  };
+  advancedFeatures: {
+    webBrowsing: boolean;
+    apiIntegration: boolean;
+    codeExecution: boolean;
+    dataVisualization: boolean;
+    workflowAutomation: boolean;
+    knowledgeGraphing: boolean;
   };
 }
 
@@ -37,8 +47,8 @@ interface FeaturesStepProps {
   renderToolChips: () => React.ReactNode;
   selectedKnowledgeBases: KnowledgeBase[];
   toggleKnowledgeBaseSelection: (kb: KnowledgeBase) => void;
-  extensionToolsConfig?: ExtensionToolsConfig;
-  onExtensionToolsConfigChange?: (config: ExtensionToolsConfig) => void;
+  advancedSettings: AdvancedSettings;
+  onAdvancedSettingsChange: (settings: AdvancedSettings) => void;
   canContinue?: boolean;
   onBack?: () => void;
   onNext?: () => void;
@@ -49,7 +59,7 @@ interface FeaturesStepProps {
 
 /**
  * 功能设置步骤组件
- * 包含工具组件、知识库和扩展工具三个标签页
+ * 包含工具组件、知识库和高级功能三个标签页
  */
 const FeaturesStep: React.FC<FeaturesStepProps> = ({
   tabValue,
@@ -59,8 +69,8 @@ const FeaturesStep: React.FC<FeaturesStepProps> = ({
   renderToolChips,
   selectedKnowledgeBases,
   toggleKnowledgeBaseSelection,
-  extensionToolsConfig = defaultExtensionConfig,
-  onExtensionToolsConfigChange = () => {},
+  advancedSettings,
+  onAdvancedSettingsChange,
   canContinue = true,
   onBack,
   onComplete,
@@ -116,7 +126,7 @@ const FeaturesStep: React.FC<FeaturesStepProps> = ({
         >
           <Tab label="工具组件" />
           <Tab label="知识库" />
-          <Tab label="扩展工具" />
+          <Tab label="高级功能" />
         </Tabs>
       </Box>
       
@@ -144,9 +154,9 @@ const FeaturesStep: React.FC<FeaturesStepProps> = ({
         )}
         
         {tabValue === 2 && (
-          <ExtensionToolsCard 
-            config={extensionToolsConfig}
-            onChange={onExtensionToolsConfigChange}
+          <AdvancedSettingsCard 
+            settings={advancedSettings}
+            onChange={onAdvancedSettingsChange}
           />
         )}
       </Box>
