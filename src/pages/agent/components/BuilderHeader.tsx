@@ -16,7 +16,9 @@ interface BuilderHeaderProps {
 }
 
 // 样式化组件
-const HeaderContainer = styled(Box)(({ isMain }: { isMain?: boolean }) => ({
+const HeaderContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'isMain',
+})<{ isMain?: boolean }>(({ isMain }) => ({
   padding: '0',
   display: 'flex',
   justifyContent: 'center',
@@ -28,7 +30,9 @@ const HeaderContainer = styled(Box)(({ isMain }: { isMain?: boolean }) => ({
   marginBottom: isMain ? '16px' : '0'
 }));
 
-const DynamicIsland = styled(Box)(({ isMain }: { isMain?: boolean }) => ({
+const DynamicIsland = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'isMain',
+})<{ isMain?: boolean }>(({ isMain }) => ({
   backgroundColor: isMain ? 'rgba(255, 255, 255, 0.85)' : 'transparent',
   backdropFilter: isMain ? 'blur(12px)' : 'none',
   WebkitBackdropFilter: isMain ? 'blur(12px)' : 'none',

@@ -249,9 +249,9 @@ const AgentBuilder: React.FC = () => {
   };
 
   // 处理工具编排变更
-  const handleOrchestrationItemsChange = (items: OrchestrationItem[]) => {
+  const handleOrchestrationItemsChange = React.useCallback((items: OrchestrationItem[]) => {
     setOrchestrationItems(items);
-  };
+  }, []);
   
   // 检查步骤是否已完成
   const isStepComplete = (step: number) => {

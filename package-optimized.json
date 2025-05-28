@@ -1,0 +1,79 @@
+{
+  "name": "vector_manager_web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "向量数据库管理系统 Web 界面",
+  "author": "Your Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "clean": "rm -rf dist node_modules",
+    "deps:check": "npx depcheck",
+    "deps:audit": "npm audit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.3.0",
+    
+    "// UI框架 - 选择方案1：Ant Design（企业级应用）": "",
+    "antd": "^5.24.4",
+    "@ant-design/x": "^1.0.6",
+    
+    "// 可视化库 - 根据需求选择": "",
+    "react-force-graph-2d": "^1.27.0",
+    "@xyflow/react": "^12.6.0",
+    
+    "// 编辑器": "",
+    "@monaco-editor/react": "^4.7.0",
+    "react-quill": "^2.0.0",
+    
+    "// 图标和动画": "",
+    "lucide-react": "^0.288.0",
+    "framer-motion": "^12.9.2",
+    
+    "// 工具库": "",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.2",
+    "uuid": "^11.1.0",
+    
+    "// 类型定义": "",
+    "@types/uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/node": "^22.10.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^6.2.0",
+    
+    "// 测试工具": "",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "vitest": "^2.1.8",
+    "@vitest/ui": "^2.1.8"
+  }
+} 
