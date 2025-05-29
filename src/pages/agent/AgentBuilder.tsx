@@ -12,13 +12,14 @@ import BasicInfoStep from './components/BasicInfoStep';
 import SystemPromptStep from './components/SystemPromptStep';
 import FeaturesStep from './components/FeaturesStep';
 import ToolOrchestrationStep from './components/ToolOrchestrationStep';
+import FlowPreviewStep from './components/FlowPreviewStep';
 
 // 导入类型
 import { Tool, KnowledgeBase, AgentConfig } from './components/types';
 import { defaultExtensionConfig } from './components/extensionConfig';
 
 // 工具编排项接口
-interface OrchestrationItem {
+export interface OrchestrationItem {
   id: string;
   type: 'tool' | 'knowledgeBase' | 'extension';
   name: string;
@@ -98,12 +99,8 @@ const ContentWrapper = styled(Box)(() => ({
   overflow: 'hidden'
 }));
 
-const AgentBuilder: React.FC = () => {
-  // 当前未使用导航功能，但将来可能添加返回按钮等功能
-  // const navigate = useNavigate();
-  // const { state } = useAppContext();
-  
-  // 活动步骤状态
+const AgentBuilder = () => {
+  // 状态管理
   const [activeStep, setActiveStep] = useState(0);
   
   // 已完成步骤的状态
@@ -338,7 +335,7 @@ const AgentBuilder: React.FC = () => {
   const canSave = agentConfig.name.trim() !== '' && agentConfig.systemPrompt.trim() !== '';
   
   // 步骤标题
-  const stepTitles = ['基本信息设置', '系统提示词设置', '功能配置', '工具编排'];
+  const stepTitles = ['基本信息设置', '系统提示词设置', '功能配置', '工具编排', '流程预览'];
   
   // 步骤配置
   const steps = [
@@ -371,6 +368,14 @@ const AgentBuilder: React.FC = () => {
       isComplete: isStepComplete(3),
       isOptional: true,
       status: '可选'
+    },
+    {
+      id: 4,
+      title: '流程预览',
+      isRequired: false,
+      isComplete: isStepComplete(4),
+      isOptional: true,
+      status: '可选'
     }
   ];
   
@@ -392,23 +397,27 @@ const AgentBuilder: React.FC = () => {
           totalSteps={stepTitles.length}
           isMainHeader={true}
         />
-        <Box sx={{ 
-          display: 'flex', 
-          flexGrow: 1,
-          background: 'rgba(255, 255, 255, 0.65)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          borderRadius: '16px',
-          margin: 2,
-          marginTop: 4, // 增加与顶部灵动岛的间距
-          marginBottom: 3,
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)',
-          height: 'calc(100vh - 160px)', // 调整高度，留出更多空间给顶部灵动岛
-          overflow: 'auto',
-          position: 'relative',
-          zIndex: 2
-        }}>
+        <Box 
+          id="agent-builder-fullscreen-container"
+          sx={{
+            display: 'flex', 
+            flexGrow: 1,
+            background: 'rgba(255, 255, 255, 0.65)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            borderRadius: '16px',
+            margin: 2,
+            marginTop: 4, // 增加与顶部灵动岛的间距
+            marginBottom: 3,
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)',
+            height: 'calc(100vh - 160px)', // 调整高度，留出更多空间给顶部灵动岛
+            overflow: 'auto',
+            position: 'relative',
+            zIndex: 2
+          }}
+          data-agent-builder-main
+        >
           {/* 左侧步骤导航 */}
           <SidebarContainer
             agentName={agentConfig.name}
@@ -481,8 +490,19 @@ const AgentBuilder: React.FC = () => {
                 orchestrationItems={orchestrationItems}
                 onOrchestrationItemsChange={handleOrchestrationItemsChange}
                 onBack={handleBack}
-                onComplete={handleFinalComplete}
+                onComplete={handleNext}
                 canContinue={canContinue(activeStep)}
+              />
+            )}
+            
+            {/* 流程预览页 - 新增第五步 */}
+            {activeStep === 4 && (
+              <FlowPreviewStep
+                selectedTools={agentConfig.selectedTools}
+                selectedKnowledgeBases={agentConfig.selectedKnowledgeBases}
+                orchestrationItems={orchestrationItems}
+                onBack={handleBack}
+                onComplete={handleFinalComplete}
               />
             )}
             

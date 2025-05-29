@@ -1,0 +1,330 @@
+import React, { useMemo } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  alpha,
+  useTheme,
+  Avatar,
+  Button,
+  Chip,
+  Tooltip
+} from '@mui/material';
+import { 
+  RobotOutlined,
+  ArrowRightOutlined,
+  CheckCircleOutlined,
+  FileTextOutlined,
+  ToolOutlined,
+  DatabaseOutlined,
+  BranchesOutlined,
+  NodeIndexOutlined,
+  SearchOutlined,
+  BulbOutlined,
+  CodeSandboxOutlined,
+  ApiOutlined,
+  AppstoreOutlined
+} from '@ant-design/icons';
+import { Tool, KnowledgeBase } from './types';
+import { OrchestrationItem as BuilderOrchestrationItem } from '../AgentBuilder';
+import { FlowOrchestrationItem, adaptOrchestrationItems } from './adapters/orchestrationAdapter';
+
+// 使用从适配器导入的FlowOrchestrationItem
+
+// 组件属性
+interface FlowPreviewStepProps {
+  selectedTools: Tool[];
+  selectedKnowledgeBases: KnowledgeBase[];
+  orchestrationItems: BuilderOrchestrationItem[];
+  onBack?: () => void;
+  onComplete?: () => void;
+}
+
+// 模块可视化颜色映射
+const moduleColors: Record<string, string> = {
+  information_retrieval: '#1890ff', // 蓝色 - 信息获取
+  content_processing: '#52c41a',    // 绿色 - 内容处理
+  data_analysis_reasoning: '#722ed1', // 紫色 - 数据分析与推理
+  output_generation: '#fa8c16',     // 橙色 - 输出生成
+  workflow_control: '#f5222d'       // 红色 - 流程控制
+};
+
+// 模块类型图标映射
+const moduleIcons: Record<string, React.ReactNode> = {
+  information_retrieval: <SearchOutlined />,  // 信息获取
+  content_processing: <FileTextOutlined />,   // 内容处理
+  data_analysis_reasoning: <BulbOutlined />,  // 数据分析与推理
+  output_generation: <CodeSandboxOutlined />, // 输出生成
+  workflow_control: <BranchesOutlined />      // 流程控制
+};
+
+// 工具类型图标映射
+const toolTypeIcons: Record<string, React.ReactNode> = {
+  search: <SearchOutlined />,
+  retrieval: <DatabaseOutlined />,
+  reasoning: <BulbOutlined />,
+  integration: <ApiOutlined />,
+  knowledge: <NodeIndexOutlined />,
+  development: <AppstoreOutlined />,
+  default: <ToolOutlined />
+};
+
+const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
+  selectedTools,
+  selectedKnowledgeBases,
+  orchestrationItems,
+  onBack,
+  onComplete
+}) => {
+  const theme = useTheme();
+  
+  // 使用适配器转换编排项
+  const flowItems = useMemo(() => {
+    return adaptOrchestrationItems(orchestrationItems, selectedTools, selectedKnowledgeBases);
+  }, [orchestrationItems, selectedTools, selectedKnowledgeBases]);
+
+  // 渲染模块节点
+  const renderModuleNode = (item: FlowOrchestrationItem, index: number) => {
+    const moduleColor = moduleColors[item.moduleType] || theme.palette.primary.main;
+    const moduleIcon = moduleIcons[item.moduleType] || <ToolOutlined />;
+    
+    return (
+      <Box
+        key={`module-${item.moduleType}-${index}`}
+        sx={{
+          position: 'relative',
+          mb: 4,
+          width: '100%'
+        }}
+      >
+        {/* 节点连接线 */}
+        {index < flowItems.length - 1 && (
+          <Box
+            sx={{
+              position: 'absolute',
+              left: '50%',
+              bottom: '-30px',
+              height: '30px',
+              width: '2px',
+              bgcolor: alpha(moduleColor, 0.5),
+              zIndex: 1
+            }}
+          />
+        )}
+        
+        {/* 模块标题 */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 2
+          }}
+        >
+          <Avatar
+            sx={{
+              bgcolor: alpha(moduleColor, 0.1),
+              color: moduleColor,
+              mr: 2
+            }}
+          >
+            {moduleIcon}
+          </Avatar>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: moduleColor }}>
+            {item.moduleName}
+          </Typography>
+          <Chip 
+            size="small" 
+            label={item.executionStrategy} 
+            sx={{ ml: 2, bgcolor: alpha(moduleColor, 0.1), color: moduleColor }}
+          />
+        </Box>
+        
+        {/* 模块内容 */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: '12px',
+            border: '1px solid',
+            borderColor: alpha(moduleColor, 0.3),
+            bgcolor: alpha(theme.palette.background.paper, 0.9),
+            position: 'relative',
+            zIndex: 2,
+            transition: 'all 0.2s',
+            '&:hover': {
+              boxShadow: `0 4px 20px ${alpha(moduleColor, 0.2)}`,
+              borderColor: alpha(moduleColor, 0.5)
+            }
+          }}
+        >
+          {/* 数据流向指示器 */}
+          {index < flowItems.length - 1 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: -30,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}
+            >
+              <ArrowRightOutlined
+                style={{
+                  fontSize: 20,
+                  color: theme.palette.primary.main,
+                  transform: 'rotate(90deg)'
+                }}
+              />
+              <Typography variant="caption" sx={{ color: theme.palette.primary.main }}>
+                数据流向
+              </Typography>
+            </Box>
+          )}
+        </Paper>
+      </Box>
+    );
+  };
+
+  // 流程图为空时的提示
+  const renderEmptyState = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 4,
+        textAlign: 'center',
+        borderRadius: '12px',
+        bgcolor: alpha(theme.palette.background.paper, 0.7),
+        border: '1px dashed',
+        borderColor: alpha(theme.palette.primary.main, 0.2)
+      }}
+    >
+      <Typography variant="h6" sx={{ mb: 2, color: theme.palette.text.secondary }}>
+        暂无工具编排
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 3, color: theme.palette.text.secondary }}>
+        请返回上一步配置工具编排流程
+      </Typography>
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={onBack}
+        startIcon={<ArrowRightOutlined style={{ transform: 'rotate(180deg)' }} />}
+      >
+        返回配置
+      </Button>
+    </Paper>
+  );
+
+  return (
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative'
+      }}
+    >
+      {/* 顶部标题栏 */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          m: 2,
+          mb: 3,
+          borderRadius: '20px',
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)}, ${alpha(theme.palette.secondary.main, 0.06)})`,
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})` }}>
+              <RobotOutlined style={{ fontSize: 20 }} />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                流程预览
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                数据流向与逻辑执行路径
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* 流程预览区域 */}
+      <Box sx={{ flex: 1, p: 2, overflowY: 'auto' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            borderRadius: '16px',
+            bgcolor: alpha(theme.palette.background.paper, 0.5),
+            border: '1px solid',
+            borderColor: alpha(theme.palette.primary.main, 0.1),
+            mb: 3
+          }}
+        >
+          {/* 工具列表 */}
+          {item.tools && item.tools.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, color: alpha(theme.palette.text.primary, 0.7) }}>
+                工具 ({item.tools.length})
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {item.tools.map((tool) => {
+                  const toolCategory = (tool.category as string) || 'default';
+                  const iconComponent = toolTypeIcons[toolCategory] || toolTypeIcons.default;
+                  
+                  return (
+                    <Tooltip key={tool.id} title={tool.description}>
+                      <Chip
+                        icon={<Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>{iconComponent}</Box>}
+                        label={tool.name}
+                        size="small"
+                        sx={{
+                          bgcolor: alpha(moduleColor, 0.05),
+                          border: '1px solid',
+                          borderColor: alpha(moduleColor, 0.2),
+                          '&:hover': {
+                            bgcolor: alpha(moduleColor, 0.1)
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            </Box>
+          )}
+        </Paper>
+      </Box>
+
+      {/* 底部按钮区域 */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 2, mx: 2 }}>
+        <Button 
+          variant="outlined" 
+          onClick={onBack}
+          startIcon={<ArrowRightOutlined style={{ transform: 'rotate(180deg)' }} />}
+        >
+          上一步
+        </Button>
+        <Button 
+          variant="contained"
+          color="primary"
+          onClick={onComplete}
+          endIcon={<CheckCircleOutlined />}
+        >
+          完成
+        </Button>
+      </Box>
+    </Box>
+  );
+};
+
+export default FlowPreviewStep;

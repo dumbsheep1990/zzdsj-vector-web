@@ -1,9 +1,7 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
-  Card, 
-  CardContent,
   IconButton,
   Chip,
   Button,
@@ -14,21 +12,16 @@ import {
   Divider,
   Tooltip,
   Collapse,
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
   InputAdornment,
-  Switch,
-  FormControlLabel
+  Switch
 } from '@mui/material';
 import { 
-  DragOutlined,
-  EditOutlined,
   DeleteOutlined,
-  PlayCircleOutlined,
   CheckCircleOutlined,
   ToolOutlined,
   DatabaseOutlined,
@@ -36,38 +29,30 @@ import {
   PlusOutlined,
   BranchesOutlined,
   NodeIndexOutlined,
-  RobotOutlined,
   SearchOutlined,
   UpOutlined,
   DownOutlined,
-  FullscreenOutlined,
-  FullscreenExitOutlined,
   AppstoreOutlined,
-  ControlOutlined,
-  OrderedListOutlined,
-  PartitionOutlined,
   FileTextOutlined,
   CalculatorOutlined,
-  PictureOutlined,
-  CloudOutlined,
   BulbOutlined,
-  ClearOutlined,
   MenuOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
   EyeOutlined,
-  CloseCircleOutlined,
-  QuestionOutlined
+  CloseCircleOutlined
 } from '@ant-design/icons';
 
-// 功能模块类型 - 更新为更准确的命名
-enum ModuleType {
-  INFORMATION_RETRIEVAL = 'information_retrieval',  // 信息获取 (原检索增强)
-  CONTENT_PROCESSING = 'content_processing',        // 内容处理 (原文本处理)
-  DATA_ANALYSIS = 'data_analysis_reasoning',        // 数据分析与推理 (原数据分析)
-  OUTPUT_GENERATION = 'output_generation',          // 输出生成 (原内容生成)
-  WORKFLOW_CONTROL = 'workflow_control'             // 流程控制 (保留)
-}
+// 导入输出格式化工具
+import { outputFormattingTools, getDefaultFormattingTools } from './outputFormattingTools';
+
+// 导入编排系统类型
+import { 
+  ModuleType, 
+  ModuleConfig, 
+  ExecutionMode, 
+  OrchestrationData 
+} from './types/orchestration';
 
 // 简化的工具和知识库接口
 interface Tool {
@@ -90,24 +75,11 @@ interface NestedCardOrchestrationProps {
   onOrchestrationChange: (data: any) => void;
   onBack?: () => void;
   onComplete?: () => void;
-  executionMode?: 'sequential' | 'parallel' | 'conditional'; // 添加执行模式属性
+  executionMode?: 'sequential' | 'parallel' | 'conditional'; // 执行模式属性
+  moduleType?: ModuleType; // 模块类型属性。当选中特定功能模块时使用
 }
 
-// 模块配置接口
-interface ModuleConfig {
-  tools: string[];
-  knowledgeBases: string[];
-  executionStrategy: string;
-  order: number;
-  enabled: boolean; // 添加启用/禁用状态
-  parallelGroups?: string[][]; // 并行组配置
-  conditionConfig?: {
-    baseToolName?: string;     // 条件判断的基础工具
-    condition?: string;        // 条件表达式
-    trueBranchTools?: string[];  // 条件满足时执行的工具
-    falseBranchTools?: string[]; // 条件不满足时执行的工具
-  };
-}
+// 使用从types/orchestration导入的类型
 
 const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
   selectedTools,
@@ -115,13 +87,11 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
   onOrchestrationChange,
   onBack,
   onComplete,
-  executionMode = 'sequential' // 默认为串行执行
+  executionMode = 'sequential' as ExecutionMode // 默认为串行执行
 }) => {
   const theme = useTheme();
-  const containerRef = useRef<HTMLDivElement>(null);
   
   // 状态管理
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({
     informationRetrieval: true,
     contentProcessing: true,
@@ -153,11 +123,16 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
       enabled: true
     },
     outputGeneration: {
-      tools: [],
+      tools: getDefaultFormattingTools(), // 设置默认的数据格式工厂工具
       knowledgeBases: [],
       executionStrategy: '串行执行',
       order: 4,
-      enabled: true
+      enabled: true,
+      config: {
+        useModelOutput: true, // 默认同时使用模型直接输出
+        useFormatting: true,  // 默认使用格式化工具
+        formatOptions: ['json', 'markdown'] // 默认格式化选项
+      }
     }
   });
   
@@ -190,38 +165,62 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
     }
   }, [selectedTools, selectedKnowledgeBases]);
   
-  // 条件执行配置状态
+  // 条件执行配置状态 - 增强版本
   const [conditionConfigs, setConditionConfigs] = useState<{[key: string]: {
     baseToolName?: string;
     condition: string;
     trueBranchTools: string[];
     falseBranchTools: string[];
+    // 新增：默认处理选项
+    trueBranchDefaultAction?: 'none' | 'continue' | 'success' | 'custom';
+    falseBranchDefaultAction?: 'none' | 'retry' | 'skip' | 'fallback' | 'error' | 'custom';
+    trueBranchDefaultMessage?: string;
+    falseBranchDefaultMessage?: string;
   }}>({
     informationRetrieval: {
       baseToolName: '',
       condition: '',
       trueBranchTools: [],
-      falseBranchTools: []
+      falseBranchTools: [],
+      trueBranchDefaultAction: 'none',
+      falseBranchDefaultAction: 'none',
+      trueBranchDefaultMessage: '',
+      falseBranchDefaultMessage: ''
     },
     contentProcessing: {
       baseToolName: '',
       condition: '',
       trueBranchTools: [],
-      falseBranchTools: []
+      falseBranchTools: [],
+      trueBranchDefaultAction: 'none',
+      falseBranchDefaultAction: 'none',
+      trueBranchDefaultMessage: '',
+      falseBranchDefaultMessage: ''
     },
     dataAnalysis: {
       baseToolName: '',
       condition: '',
       trueBranchTools: [],
-      falseBranchTools: []
+      falseBranchTools: [],
+      trueBranchDefaultAction: 'none',
+      falseBranchDefaultAction: 'none',
+      trueBranchDefaultMessage: '',
+      falseBranchDefaultMessage: ''
     },
     outputGeneration: {
       baseToolName: '',
       condition: '',
       trueBranchTools: [],
-      falseBranchTools: []
+      falseBranchTools: [],
+      trueBranchDefaultAction: 'none',
+      falseBranchDefaultAction: 'none',
+      trueBranchDefaultMessage: '',
+      falseBranchDefaultMessage: ''
     }
   });
+  
+  // 添加流程预览功能
+  const [showFlowPreview, setShowFlowPreview] = useState(false);
   
   // 获取已排序的模块
   const getSortedModules = useCallback(() => {
@@ -230,24 +229,6 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
       .sort((a, b) => a.config.order - b.config.order);
   }, [modulesConfig]);
   
-  // 全屏相关函数
-  const toggleFullscreen = useCallback(() => {
-    if (isFullscreen) {
-      document.exitFullscreen?.();
-    } else {
-      containerRef.current?.requestFullscreen?.();
-    }
-  }, [isFullscreen]);
-
-  // 监听全屏状态变化
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // 切换部分是否展开
   const toggleSectionExpanded = (section: string) => {
     setExpandedSections(prev => ({
@@ -480,9 +461,6 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
     onComplete?.();
   };
   
-  // 添加流程预览功能
-  const [showFlowPreview, setShowFlowPreview] = useState(false);
-  
   // 切换流程预览
   const toggleFlowPreview = () => {
     setShowFlowPreview(prev => !prev);
@@ -519,6 +497,23 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
         [section]: {
           ...prev[section],
           [branchKey]: currentTools
+        }
+      };
+    });
+  };
+  
+  // 更新条件分支默认处理选项
+  const updateConditionBranchDefaultAction = (section: string, branch: 'true' | 'false', action: string, message?: string) => {
+    setConditionConfigs(prev => {
+      const actionKey = branch === 'true' ? 'trueBranchDefaultAction' : 'falseBranchDefaultAction';
+      const messageKey = branch === 'true' ? 'trueBranchDefaultMessage' : 'falseBranchDefaultMessage';
+      
+      return {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [actionKey]: action,
+          ...(message !== undefined && { [messageKey]: message })
         }
       };
     });
@@ -1454,7 +1449,7 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                   </Typography>
                 </Paper>
                 
-                {/* 分支配置 */}
+                {/* 分支配置 - 增强版本 */}
                 <Paper
                   variant="outlined"
                   sx={{ 
@@ -1478,6 +1473,7 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                         </Typography>
                       </Box>
                       
+                      {/* 工具区域 */}
                       <Paper
                         variant="outlined"
                         sx={{ 
@@ -1485,13 +1481,14 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                           borderColor: alpha(theme.palette.success.main, 0.2),
                           bgcolor: alpha(theme.palette.success.main, 0.02),
                           borderRadius: '8px',
-                          minHeight: 60
+                          minHeight: 60,
+                          mb: 1
                         }}
                       >
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
                           {conditionConfig.trueBranchTools.length === 0 ? (
                             <Typography variant="caption" color="text.secondary">
-                              点击下方工具添加到此分支
+                              选择工具或默认处理方式
                             </Typography>
                           ) : (
                             conditionConfig.trueBranchTools.map(toolName => (
@@ -1512,6 +1509,85 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                             ))
                           )}
                         </Box>
+                        
+                        {/* 智能推荐和默认处理 */}
+                        {(() => {
+                          const availableTools = otherTools.filter(tool => 
+                            !conditionConfig.trueBranchTools.includes(tool.name) &&
+                            !conditionConfig.falseBranchTools.includes(tool.name)
+                          );
+                          const hasOnlyFewTools = allSelectedToolObjects.length <= 2;
+                          const showDefaultOptions = conditionConfig.trueBranchTools.length === 0 || hasOnlyFewTools;
+                          
+                          return showDefaultOptions && (
+                            <Box sx={{ mt: 1, p: 1, bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: '6px' }}>
+                              <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 600 }}>
+                                {conditionConfig.trueBranchTools.length === 0 ? '推荐选项：' : '额外选项：'}
+                              </Typography>
+                              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                {/* 可用工具选项 */}
+                                {availableTools.map(tool => (
+                                  <Chip
+                                    key={`true-${tool.id}`}
+                                    label={tool.name}
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateConditionBranchTools(section, 'true', tool.name, true);
+                                    }}
+                                    sx={{
+                                      borderColor: alpha(theme.palette.success.main, 0.3),
+                                      color: theme.palette.success.main,
+                                      '&:hover': {
+                                        bgcolor: alpha(theme.palette.success.main, 0.1)
+                                      }
+                                    }}
+                                  />
+                                ))}
+                                
+                                {/* 默认处理选项 */}
+                                {[
+                                  { key: 'continue', label: '继续下一步', icon: '➡️' },
+                                  { key: 'success', label: '成功回复', icon: '✅' },
+                                  { key: 'custom', label: '自定义消息', icon: '💬' }
+                                ].map(option => (
+                                  <Chip
+                                    key={`true-default-${option.key}`}
+                                    label={`${option.icon} ${option.label}`}
+                                    size="small"
+                                    variant={conditionConfig.trueBranchDefaultAction === option.key ? "filled" : "outlined"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateConditionBranchDefaultAction(section, 'true', option.key);
+                                    }}
+                                    sx={{
+                                      borderColor: alpha(theme.palette.success.main, 0.3),
+                                      bgcolor: conditionConfig.trueBranchDefaultAction === option.key ? 
+                                        alpha(theme.palette.success.main, 0.15) : 'transparent',
+                                      color: theme.palette.success.main,
+                                      '&:hover': {
+                                        bgcolor: alpha(theme.palette.success.main, 0.1)
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                              
+                              {/* 自定义消息输入 */}
+                              {conditionConfig.trueBranchDefaultAction === 'custom' && (
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  placeholder="输入自定义成功消息..."
+                                  value={conditionConfig.trueBranchDefaultMessage || ''}
+                                  onChange={(e) => updateConditionBranchDefaultAction(section, 'true', 'custom', e.target.value)}
+                                  sx={{ mt: 1 }}
+                                />
+                              )}
+                            </Box>
+                          );
+                        })()}
                       </Paper>
                     </Box>
                     
@@ -1524,6 +1600,7 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                         </Typography>
                       </Box>
                       
+                      {/* 工具区域 */}
                       <Paper
                         variant="outlined"
                         sx={{ 
@@ -1531,13 +1608,14 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                           borderColor: alpha(theme.palette.error.main, 0.2),
                           bgcolor: alpha(theme.palette.error.main, 0.02),
                           borderRadius: '8px',
-                          minHeight: 60
+                          minHeight: 60,
+                          mb: 1
                         }}
                       >
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
                           {conditionConfig.falseBranchTools.length === 0 ? (
                             <Typography variant="caption" color="text.secondary">
-                              点击下方工具添加到此分支
+                              选择工具或默认处理方式
                             </Typography>
                           ) : (
                             conditionConfig.falseBranchTools.map(toolName => (
@@ -1558,37 +1636,120 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
                             ))
                           )}
                         </Box>
+                        
+                        {/* 智能推荐和默认处理 */}
+                        {(() => {
+                          const availableTools = otherTools.filter(tool => 
+                            !conditionConfig.trueBranchTools.includes(tool.name) &&
+                            !conditionConfig.falseBranchTools.includes(tool.name)
+                          );
+                          const hasOnlyFewTools = allSelectedToolObjects.length <= 2;
+                          const showDefaultOptions = conditionConfig.falseBranchTools.length === 0 || hasOnlyFewTools;
+                          
+                          return showDefaultOptions && (
+                            <Box sx={{ mt: 1, p: 1, bgcolor: alpha(theme.palette.error.main, 0.05), borderRadius: '6px' }}>
+                              <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 600 }}>
+                                {conditionConfig.falseBranchTools.length === 0 ? '推荐选项：' : '额外选项：'}
+                              </Typography>
+                              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                {/* 可用工具选项 */}
+                                {availableTools.map(tool => (
+                                  <Chip
+                                    key={`false-${tool.id}`}
+                                    label={tool.name}
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateConditionBranchTools(section, 'false', tool.name, true);
+                                    }}
+                                    sx={{
+                                      borderColor: alpha(theme.palette.error.main, 0.3),
+                                      color: theme.palette.error.main,
+                                      '&:hover': {
+                                        bgcolor: alpha(theme.palette.error.main, 0.1)
+                                      }
+                                    }}
+                                  />
+                                ))}
+                                
+                                {/* 默认处理选项 */}
+                                {[
+                                  { key: 'retry', label: '重试执行', icon: '🔄' },
+                                  { key: 'fallback', label: '降级处理', icon: '⬇️' },
+                                  { key: 'skip', label: '跳过继续', icon: '⏭️' },
+                                  { key: 'error', label: '错误回复', icon: '❌' },
+                                  { key: 'custom', label: '自定义消息', icon: '💬' }
+                                ].map(option => (
+                                  <Chip
+                                    key={`false-default-${option.key}`}
+                                    label={`${option.icon} ${option.label}`}
+                                    size="small"
+                                    variant={conditionConfig.falseBranchDefaultAction === option.key ? "filled" : "outlined"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateConditionBranchDefaultAction(section, 'false', option.key);
+                                    }}
+                                    sx={{
+                                      borderColor: alpha(theme.palette.error.main, 0.3),
+                                      bgcolor: conditionConfig.falseBranchDefaultAction === option.key ? 
+                                        alpha(theme.palette.error.main, 0.15) : 'transparent',
+                                      color: theme.palette.error.main,
+                                      '&:hover': {
+                                        bgcolor: alpha(theme.palette.error.main, 0.1)
+                                      }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                              
+                              {/* 自定义消息输入 */}
+                              {conditionConfig.falseBranchDefaultAction === 'custom' && (
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  placeholder="输入自定义错误消息..."
+                                  value={conditionConfig.falseBranchDefaultMessage || ''}
+                                  onChange={(e) => updateConditionBranchDefaultAction(section, 'false', 'custom', e.target.value)}
+                                  sx={{ mt: 1 }}
+                                />
+                              )}
+                            </Box>
+                          );
+                        })()}
                       </Paper>
                     </Box>
                   </Box>
                   
-                  {/* 可添加的工具 */}
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="caption" sx={{ display: 'block', mb: 1, color: 'text.secondary' }}>
-                      可添加到分支的工具：
+                  {/* 智能提示 */}
+                  <Box sx={{ 
+                    mt: 2, 
+                    p: 1.5, 
+                    bgcolor: alpha(theme.palette.info.main, 0.05), 
+                    borderRadius: '8px',
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
+                  }}>
+                    <Typography variant="caption" sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      color: theme.palette.info.main,
+                      fontWeight: 600
+                    }}>
+                      <BulbOutlined style={{ fontSize: 14 }} />
+                      智能配置建议
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                      {otherTools.map((tool) => (
-                        <Chip
-                          key={tool.id}
-                          label={tool.name}
-                          size="small"
-                          variant="outlined"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // 默认添加到条件满足分支，用户可以后续调整
-                            updateConditionBranchTools(section, 'true', tool.name, true);
-                          }}
-                          sx={{
-                            borderColor: alpha(theme.palette.divider, 0.3),
-                            '&:hover': {
-                              bgcolor: alpha(color.main, 0.05),
-                              borderColor: color.main
-                            }
-                          }}
-                        />
-                      ))}
-                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      {allSelectedToolObjects.length === 1 && 
+                        "单工具模式：建议为两个分支选择不同的默认处理方式"
+                      }
+                      {allSelectedToolObjects.length === 2 && 
+                        "双工具模式：可将工具分配到不同分支，或选择默认处理方式"
+                      }
+                      {allSelectedToolObjects.length >= 3 && 
+                        "多工具模式：灵活分配工具到不同分支，实现复杂条件逻辑"
+                      }
+                    </Typography>
                   </Box>
                 </Paper>
               </Box>
@@ -2106,47 +2267,13 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
   
   return (
     <Box
-      ref={containerRef}
       sx={{
         height: '100%', 
         display: 'flex',
         flexDirection: 'column',
-        position: 'relative',
-        ...(isFullscreen && {
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 9999,
-          backgroundColor: '#f8fafc'
-        })
+        position: 'relative'
       }}
     >
-      {/* 右上角全屏按钮 - 固定在最外层容器 */}
-      <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 10000 }}>
-        <Tooltip title={isFullscreen ? '退出全屏' : '进入全屏'}>
-          <IconButton
-            onClick={toggleFullscreen}
-            sx={{
-              bgcolor: 'rgba(255, 255, 255, 0.9)',
-              color: theme.palette.primary.main,
-              borderRadius: '8px',
-              width: 36,
-              height: 36,
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              '&:hover': {
-                bgcolor: 'rgba(255, 255, 255, 1)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }
-            }}
-          >
-            {isFullscreen ? <FullscreenExitOutlined style={{ fontSize: 18 }} /> : <FullscreenOutlined style={{ fontSize: 18 }} />}
-          </IconButton>
-        </Tooltip>
-      </Box>
-
       {/* 内容区域 - 添加完整圆角背景样式 */}
       <Box sx={{ 
         flex: 1, 
