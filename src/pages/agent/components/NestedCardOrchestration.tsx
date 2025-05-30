@@ -355,7 +355,7 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
   
   // 提交编排配置
   const handleComplete = () => {
-    // 构建编排配置数据
+    // 构建编排配置数据 - 与 FlowPreviewStep 期望的格式一致
     const orchestrationData = {
       type: 'nested',
       modules: getSortedModules()
@@ -457,7 +457,13 @@ const NestedCardOrchestration: React.FC<NestedCardOrchestrationProps> = ({
       })
     };
     
-    onOrchestrationChange(orchestrationData);
+    // 将数据包装在数组中传递，确保与 FlowPreviewStep 的期望格式一致
+    onOrchestrationChange([orchestrationData]);
+    
+    // 在控制台输出调试信息
+    console.log('工具编排导出数据:', [orchestrationData]);
+    
+    // 完成编排
     onComplete?.();
   };
   

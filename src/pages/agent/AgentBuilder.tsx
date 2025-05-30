@@ -246,7 +246,9 @@ const AgentBuilder = () => {
   };
 
   // 处理工具编排变更
-  const handleOrchestrationItemsChange = React.useCallback((items: OrchestrationItem[]) => {
+  const handleOrchestrationItemsChange = React.useCallback((items: any) => {
+    // 保存编排数据，保持原始格式
+    console.log('收到编排数据:', items);
     setOrchestrationItems(items);
   }, []);
   
@@ -497,13 +499,18 @@ const AgentBuilder = () => {
             
             {/* 流程预览页 - 新增第五步 */}
             {activeStep === 4 && (
-              <FlowPreviewStep
-                selectedTools={agentConfig.selectedTools}
-                selectedKnowledgeBases={agentConfig.selectedKnowledgeBases}
-                orchestrationItems={orchestrationItems}
-                onBack={handleBack}
-                onComplete={handleFinalComplete}
-              />
+              <>
+                {/* 添加调试信息 */}
+                {console.log('流程预览步骤使用的编排数据:', orchestrationItems)}
+                
+                <FlowPreviewStep
+                  selectedTools={agentConfig.selectedTools}
+                  selectedKnowledgeBases={agentConfig.selectedKnowledgeBases}
+                  orchestrationItems={orchestrationItems}
+                  onBack={handleBack}
+                  onComplete={handleFinalComplete}
+                />
+              </>
             )}
             
             {/* 底部导航按钮 - 仅在第一步显示 */}
