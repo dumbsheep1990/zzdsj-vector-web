@@ -507,6 +507,7 @@ const AgentBuilder = () => {
                   selectedTools={agentConfig.selectedTools}
                   selectedKnowledgeBases={agentConfig.selectedKnowledgeBases}
                   orchestrationItems={orchestrationItems}
+                  agentConfig={agentConfig}
                   onBack={handleBack}
                   onComplete={handleFinalComplete}
                 />

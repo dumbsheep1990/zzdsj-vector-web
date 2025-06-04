@@ -3,28 +3,33 @@ import {
   Box, 
   Typography, 
   Paper, 
-  alpha,
-  useTheme,
-  Avatar,
-  Button,
+  Button, 
   Chip,
-  Tooltip
+  useTheme,
+  alpha,
+  Avatar,
+  Modal,
+  IconButton,
+  Fade
 } from '@mui/material';
 import { 
   RobotOutlined,
-  ArrowRightOutlined,
   CheckCircleOutlined,
-  FileTextOutlined,
+  ArrowRightOutlined,
+  ArrowDownOutlined,
   ToolOutlined,
   DatabaseOutlined,
   BranchesOutlined,
-  NodeIndexOutlined,
+  SettingOutlined,
+  FileTextOutlined,
   SearchOutlined,
   BulbOutlined,
   CodeSandboxOutlined,
   ApiOutlined,
   AppstoreOutlined,
-  ArrowDownOutlined
+  NodeIndexOutlined,
+  FullscreenOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
 import { Tool, KnowledgeBase } from './types';
 import { OrchestrationItem as BuilderOrchestrationItem } from '../AgentBuilder';
@@ -94,9 +99,31 @@ import { FlowOrchestrationItem, adaptOrchestrationItems } from './adapters/orche
 
 // 组件属性
 interface FlowPreviewStepProps {
+  // 工具和知识库选择
   selectedTools: Tool[];
   selectedKnowledgeBases: KnowledgeBase[];
+  // 编排项
   orchestrationItems: BuilderOrchestrationItem[];
+  // 之前步骤的配置参数
+  agentConfig?: {
+    name: string;
+    description: string;
+    systemPrompt: string;
+    agentType: string;
+    icon?: string;
+    tags?: string[];
+    language?: string;
+    isPublic?: boolean;
+    advanced?: {
+      temperature?: number;
+      maxTokens?: number;
+      topP?: number;
+      contextCompression?: boolean;
+      sensitiveWordFilter?: boolean; // 敏感词过滤
+      autonomousCalling?: boolean;   // 自主调用
+    };
+  };
+  // 导航回调
   onBack?: () => void;
   onComplete?: () => void;
 }
@@ -146,17 +173,19 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
   selectedTools,
   selectedKnowledgeBases,
   orchestrationItems,
+  agentConfig,
   onBack,
   onComplete
-}) => {
+}: FlowPreviewStepProps) => {
   const theme = useTheme();
   
+  // Modal状态管理
+  const [modalOpen, setModalOpen] = useState(false);
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
+  
   // 调试信息
-  console.log('FlowPreviewStep 收到的数据:', {
-    selectedTools,
-    selectedKnowledgeBases,
-    orchestrationItems
-  });
+  console.log('FlowPreviewStep 接收到的编排数据:', orchestrationItems);
   
   // 引用容器元素
   const flowContainerRef = useRef<HTMLDivElement>(null);
@@ -201,6 +230,8 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
     analyzeDataFlow();
   }, [orchestrationItems, selectedTools, selectedKnowledgeBases]);
 
+
+
   // 开发调试日志
   useEffect(() => {
     if (!orchestrationItems || !Array.isArray(orchestrationItems) || orchestrationItems.length === 0) {
@@ -211,7 +242,7 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
     console.log('收到编排数据:', JSON.stringify(orchestrationItems, null, 2));
   }, [orchestrationItems]);
 
-  // 渲染连接线和箭头
+  // 渲染流程连接器
   const renderConnector = (color: string, isVertical: boolean = true) => {
     return (
       <Box sx={{
@@ -219,79 +250,39 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
-        height: isVertical ? '28px' : 'auto',
+        height: isVertical ? '32px' : 'auto',
         my: isVertical ? 1 : 0
       }}>
         {isVertical ? (
-          // 垂直连接器
+          // 垂直流程连接器 - 带圆形轮廓的箭头
           <Box sx={{
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            bgcolor: alpha(color, 0.1),
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            position: 'relative'
+            justifyContent: 'center',
+            border: `1px solid ${alpha(color, 0.3)}`,
+            boxShadow: `0 2px 4px ${alpha(color, 0.1)}`
           }}>
-            <Box sx={{
-              height: '14px',
-              width: '1.5px',
-              background: `linear-gradient(to bottom, ${alpha(color, 0.6)}, ${alpha(color, 0.3)})`,
-              mb: 0.5
-            }} />
-            <Box sx={{
-              width: '18px',
-              height: '18px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'relative'
-            }}>
-              {/* 箭头下转示意图 */}
-              <Box sx={{
-                position: 'absolute',
-                width: '8px',
-                height: '8px',
-                borderRight: `1.5px solid ${alpha(color, 0.7)}`,
-                borderBottom: `1.5px solid ${alpha(color, 0.7)}`,
-                transform: 'rotate(45deg)',
-                top: 0,
-                zIndex: 2
-              }} />
-            </Box>
+            <ArrowDownOutlined style={{ color: color, fontSize: 14 }} />
           </Box>
         ) : (
-          // 水平连接器
+          // 水平流程连接器 - 带圆形轮廓的箭头
           <Box sx={{
-            height: '28px',
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            bgcolor: alpha(color, 0.1),
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             mx: 1,
-            position: 'relative'
+            border: `1px solid ${alpha(color, 0.3)}`,
+            boxShadow: `0 2px 4px ${alpha(color, 0.1)}`
           }}>
-            <Box sx={{
-              width: '14px',
-              height: '1.5px',
-              background: `linear-gradient(to right, ${alpha(color, 0.6)}, ${alpha(color, 0.3)})`,
-              mr: 0.5
-            }} />
-            <Box sx={{
-              width: '18px',
-              height: '18px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'relative'
-            }}>
-              {/* 箭头右转示意图 */}
-              <Box sx={{
-                position: 'absolute',
-                width: '8px',
-                height: '8px',
-                borderTop: `1.5px solid ${alpha(color, 0.7)}`,
-                borderRight: `1.5px solid ${alpha(color, 0.7)}`,
-                transform: 'rotate(45deg)',
-                left: 0,
-                zIndex: 2
-              }} />
-            </Box>
+            <ArrowRightOutlined style={{ color: color, fontSize: 12 }} />
           </Box>
         )}
       </Box>
@@ -433,27 +424,21 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
                         </Box>
                         
                         {/* 工具芯片 */}
-                        <Tooltip title={tool.description || `工具: ${tool.name}`}>
-                          <Chip
-                            id={`tool-${tool.id}`}
-                            icon={<Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>{iconComponent}</Box>}
-                            label={tool.name}
-                            size="small"
-                            sx={{
-                              flex: 1,
-                              height: 32,
-                              bgcolor: alpha(moduleColor, 0.05),
-                              border: '1px solid',
-                              borderColor: alpha(moduleColor, 0.2),
-                              '&:hover': {
-                                bgcolor: alpha(moduleColor, 0.1),
-                                boxShadow: `0 2px 8px ${alpha(moduleColor, 0.2)}`
-                              },
-                              fontWeight: 500,
-                              fontSize: '0.8125rem'
-                            }}
-                          />
-                        </Tooltip>
+                        <Chip
+                          id={`tool-${tool.id}`}
+                          icon={<Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>{iconComponent}</Box>}
+                          label={tool.name}
+                          size="small"
+                          sx={{
+                            flex: 1,
+                            height: 32,
+                            bgcolor: alpha(moduleColor, 0.05),
+                            border: '1px solid',
+                            borderColor: alpha(moduleColor, 0.2),
+                            fontWeight: 500,
+                            fontSize: '0.8125rem'
+                          }}
+                        />
                       </Box>
                       
                       {/* 流程连接线 - 除了最后一个工具 */}
@@ -527,27 +512,21 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
                         </Box>
                         
                         {/* 知识库芯片 */}
-                        <Tooltip title={kb.description || `知识库: ${kb.name}`}>
-                          <Chip
-                            id={`kb-${kb.id}`}
-                            icon={<DatabaseOutlined />}
-                            label={kb.name}
-                            size="small"
-                            sx={{
-                              flex: 1,
-                              height: 32,
-                              bgcolor: alpha(theme.palette.secondary.main, 0.05),
-                              border: '1px solid',
-                              borderColor: alpha(theme.palette.secondary.main, 0.2),
-                              '&:hover': {
-                                bgcolor: alpha(theme.palette.secondary.main, 0.1),
-                                boxShadow: `0 2px 8px ${alpha(theme.palette.secondary.main, 0.2)}`
-                              },
-                              fontWeight: 500,
-                              fontSize: '0.8125rem'
-                            }}
-                          />
-                        </Tooltip>
+                        <Chip
+                          id={`kb-${kb.id}`}
+                          icon={<DatabaseOutlined />}
+                          label={kb.name}
+                          size="small"
+                          sx={{
+                            flex: 1,
+                            height: 32,
+                            bgcolor: alpha(theme.palette.secondary.main, 0.05),
+                            border: '1px solid',
+                            borderColor: alpha(theme.palette.secondary.main, 0.2),
+                            fontWeight: 500,
+                            fontSize: '0.8125rem'
+                          }}
+                        />
                       </Box>
                       
                       {/* 流程连接器 - 除了最后一个知识库 */}
@@ -630,7 +609,19 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         mb: 3,
-        border: `1px dashed ${alpha(theme.palette.primary.main, 0.3)}`
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: '50%',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderRadius: '0 0 40px 40px',
+          border: `1px dashed ${alpha(theme.palette.primary.main, 0.3)}`,
+          borderTop: 'none',
+          pointerEvents: 'none'
+        }
       }}>
         <BranchesOutlined style={{ fontSize: 32, color: alpha(theme.palette.primary.main, 0.6) }} />
       </Box>
@@ -662,15 +653,442 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
     </Box>
   );
 
+  // 渲染配置详情Modal
+  const renderConfigModal = () => {
+    return (
+      <Modal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        closeAfterTransition
+      >
+        <Fade in={modalOpen}>
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            maxWidth: 800,
+            maxHeight: '80vh',
+            bgcolor: theme.palette.background.paper,
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+              height: '8px'
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.2),
+              borderRadius: '4px'
+            }
+          }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                智能体完整配置
+              </Typography>
+              <IconButton onClick={handleCloseModal} size="small">
+                <CloseOutlined />
+              </IconButton>
+            </Box>
+            
+            {agentConfig && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {/* 基本配置部分 */}
+                <Paper sx={{ p: 2, borderRadius: 2, border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}` }}>
+                  <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: theme.palette.warning.main, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SettingOutlined /> 基本配置
+                  </Typography>
+                  
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>名称：</Typography>
+                      <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.warning.main, 0.02) }}>
+                        <Typography variant="body2">{agentConfig.name || '未设置'}</Typography>
+                      </Paper>
+                    </Box>
+                    
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>类型：</Typography>
+                      <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.warning.main, 0.02) }}>
+                        <Typography variant="body2">{agentConfig.agentType === 'chat' ? '对话型' : '任务型'}</Typography>
+                      </Paper>
+                    </Box>
+                    
+                    <Box sx={{ gridColumn: '1 / -1' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>描述：</Typography>
+                      <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.warning.main, 0.02) }}>
+                        <Typography variant="body2">{agentConfig.description || '未设置'}</Typography>
+                      </Paper>
+                    </Box>
+                    
+                    {agentConfig.language && (
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>语言：</Typography>
+                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.warning.main, 0.02) }}>
+                          <Typography variant="body2">
+                            {agentConfig.language === 'zh-CN' ? '中文' : agentConfig.language === 'en-US' ? '英文' : agentConfig.language}
+                          </Typography>
+                        </Paper>
+                      </Box>
+                    )}
+                  </Box>
+                </Paper>
+                
+                {/* 提示词部分 */}
+                {agentConfig.systemPrompt && (
+                  <Paper sx={{ p: 2, borderRadius: 2, border: `1px solid ${alpha(theme.palette.success.main, 0.3)}` }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: theme.palette.success.main, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <FileTextOutlined /> 系统提示词
+                    </Typography>
+                    
+                    <Paper variant="outlined" sx={{ 
+                      p: 2, 
+                      bgcolor: alpha(theme.palette.success.main, 0.02),
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      '&::-webkit-scrollbar': {
+                        width: '8px',
+                        height: '8px'
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: alpha(theme.palette.success.main, 0.2),
+                        borderRadius: '4px'
+                      }
+                    }}>
+                      <Typography 
+                        variant="body2"
+                        sx={{ 
+                          whiteSpace: 'pre-wrap', 
+                          fontFamily: '"Roboto Mono", monospace',
+                          fontSize: '0.8125rem'
+                        }}
+                      >
+                        {agentConfig.systemPrompt}
+                      </Typography>
+                    </Paper>
+                  </Paper>
+                )}
+                
+                {/* 高级设置部分 */}
+                {agentConfig.advanced && (
+                  <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        <SettingOutlined style={{ marginRight: 8 }} />
+                        高级设置
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {agentConfig.advanced.temperature !== undefined && (
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>温度：</Typography>
+                          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.02) }}>
+                            <Typography variant="body2">{agentConfig.advanced.temperature}</Typography>
+                          </Paper>
+                        </Box>
+                      )}
+                      
+                      {agentConfig.advanced.maxTokens !== undefined && (
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>最大Token：</Typography>
+                          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.02) }}>
+                            <Typography variant="body2">{agentConfig.advanced.maxTokens}</Typography>
+                          </Paper>
+                        </Box>
+                      )}
+                      
+                      {agentConfig.advanced.topP !== undefined && (
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>Top P：</Typography>
+                          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.02) }}>
+                            <Typography variant="body2">{agentConfig.advanced.topP}</Typography>
+                          </Paper>
+                        </Box>
+                      )}
+                      
+                      {agentConfig.advanced.contextCompression !== undefined && (
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>上下文压缩：</Typography>
+                          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.02) }}>
+                            <Typography variant="body2">{agentConfig.advanced.contextCompression ? '开启' : '关闭'}</Typography>
+                          </Paper>
+                        </Box>
+                      )}
+                      
+                      {/* 强制显示敏感词过滤 */}
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>敏感词过滤：</Typography>
+                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.02) }}>
+                          <Typography variant="body2">开启</Typography>
+                        </Paper>
+                      </Box>
+                      
+                      {/* 强制显示自主调用 */}
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>自主调用：</Typography>
+                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: alpha(theme.palette.error.main, 0.02) }}>
+                          <Typography variant="body2">开启</Typography>
+                        </Paper>
+                      </Box>
+                    </Box>
+                  </Paper>
+                )}
+              </Box>
+            )}
+          </Box>
+        </Fade>
+      </Modal>
+    );
+  };
+
   // 渲染配置摘要
   const renderConfigSummary = () => {
+    if (!agentConfig) return null;
+    
     return (
       <Box sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: alpha(theme.palette.text.primary, 0.85) }}>
-          智能体配置摘要
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: alpha(theme.palette.text.primary, 0.85) }}>
+            智能体配置摘要
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleOpenModal}
+            startIcon={<FullscreenOutlined />}
+            sx={{ 
+              fontSize: '0.75rem',
+              py: 0.5,
+              borderRadius: '16px'
+            }}
+          >
+            查看完整配置
+          </Button>
+        </Box>
         
-        {/* 工具配置摘要 */}
+        {/* 基本信息配置摘要 - 第一步的参数 */}
+        {agentConfig && (
+        <Paper sx={{ 
+          p: 2, 
+          mb: 3, 
+          borderRadius: '12px',
+          bgcolor: alpha(theme.palette.background.paper, 0.7),
+          border: `1px solid ${alpha(theme.palette.warning.main, 0.1)}`
+        }}>
+          <Typography variant="subtitle2" sx={{ 
+            fontWeight: 600, 
+            mb: 1.5, 
+            color: theme.palette.warning.main,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <SettingOutlined /> 基本设置
+          </Typography>
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ width: '80px', fontWeight: 500 }}>名称：</Typography>
+              <Typography variant="body2">{agentConfig.name || '未设置'}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              <Typography variant="body2" sx={{ width: '80px', fontWeight: 500 }}>描述：</Typography>
+              <Typography variant="body2" sx={{ flex: 1 }}>
+                {agentConfig.description || '未设置'}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ width: '80px', fontWeight: 500 }}>类型：</Typography>
+              <Chip 
+                label={agentConfig.agentType === 'chat' ? '对话型' : '任务型'} 
+                size="small"
+                sx={{ 
+                  fontSize: '0.75rem',
+                  bgcolor: alpha(theme.palette.warning.main, 0.1),
+                  color: theme.palette.warning.main
+                }}
+              />
+            </Box>
+            {agentConfig.language && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ width: '80px', fontWeight: 500 }}>语言：</Typography>
+                <Typography variant="body2">
+                  {agentConfig.language === 'zh-CN' ? '中文' : agentConfig.language === 'en-US' ? '英文' : agentConfig.language}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Paper>
+        )}
+
+        {/* 提示词配置摘要 - 包含在第一步 */}
+        {agentConfig && agentConfig.systemPrompt && (
+        <Paper sx={{ 
+          p: 2, 
+          mb: 3, 
+          borderRadius: '12px',
+          bgcolor: alpha(theme.palette.background.paper, 0.7),
+          border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
+        }}>
+          <Typography variant="subtitle2" sx={{ 
+            fontWeight: 600, 
+            mb: 1.5,
+            color: theme.palette.success.main,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <FileTextOutlined /> 系统提示词
+          </Typography>
+          
+          <Box sx={{ 
+            p: 1.5, 
+            borderRadius: '8px', 
+            bgcolor: alpha(theme.palette.success.main, 0.05),
+            border: `1px dashed ${alpha(theme.palette.success.main, 0.2)}`,
+            maxHeight: '120px',
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+              height: '8px'
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: alpha(theme.palette.success.main, 0.2),
+              borderRadius: '4px'
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: alpha(theme.palette.success.main, 0.05),
+              borderRadius: '4px'
+            }
+          }}>
+            <Typography 
+              variant="body2"
+              sx={{ 
+                whiteSpace: 'pre-wrap', 
+                fontFamily: '"Roboto Mono", monospace',
+                fontSize: '0.8125rem'
+              }}
+            >
+              {agentConfig.systemPrompt}
+            </Typography>
+          </Box>
+          
+
+        </Paper>
+        )}
+
+        {/* 高级设置摘要 - 也是第一步的参数 */}
+        {agentConfig && agentConfig.advanced && (
+        <Paper sx={{ 
+          p: 2, 
+          mb: 3, 
+          borderRadius: '12px',
+          bgcolor: alpha(theme.palette.background.paper, 0.7),
+          border: `1px solid ${alpha(theme.palette.error.main, 0.1)}`
+        }}>
+          <Typography variant="subtitle2" sx={{ 
+            fontWeight: 600, 
+            mb: 1.5, 
+            color: theme.palette.error.main,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <SettingOutlined /> 高级设置
+          </Typography>
+          
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            {agentConfig.advanced.temperature !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>温度：</Typography>
+                <Chip 
+                  label={agentConfig.advanced.temperature} 
+                  size="small"
+                  sx={{ 
+                    fontSize: '0.75rem',
+                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                    color: theme.palette.error.main
+                  }}
+                />
+              </Box>
+            )}
+            {agentConfig.advanced.maxTokens !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>最大Token：</Typography>
+                <Chip 
+                  label={agentConfig.advanced.maxTokens} 
+                  size="small"
+                  sx={{ 
+                    fontSize: '0.75rem',
+                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                    color: theme.palette.error.main
+                  }}
+                />
+              </Box>
+            )}
+            {agentConfig.advanced.topP !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>Top P：</Typography>
+                <Chip 
+                  label={agentConfig.advanced.topP} 
+                  size="small"
+                  sx={{ 
+                    fontSize: '0.75rem',
+                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                    color: theme.palette.error.main
+                  }}
+                />
+              </Box>
+            )}
+            {agentConfig.advanced.contextCompression !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>上下文压缩：</Typography>
+                <Chip 
+                  label={agentConfig.advanced.contextCompression ? '开启' : '关闭'} 
+                  size="small"
+                  sx={{ 
+                    fontSize: '0.75rem',
+                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                    color: theme.palette.error.main
+                  }}
+                />
+              </Box>
+            )}
+            {/* 强制显示敏感词过滤，无论配置中是否有值 */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>敏感词过滤：</Typography>
+              <Chip 
+                label="开启" 
+                size="small"
+                sx={{ 
+                  fontSize: '0.75rem',
+                  bgcolor: alpha(theme.palette.error.main, 0.1),
+                  color: theme.palette.error.main
+                }}
+              />
+            </Box>
+            {/* 强制显示自主调用，无论配置中是否有值 */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>自主调用：</Typography>
+              <Chip 
+                label="开启" 
+                size="small"
+                sx={{ 
+                  fontSize: '0.75rem',
+                  bgcolor: alpha(theme.palette.error.main, 0.1),
+                  color: theme.palette.error.main
+                }}
+              />
+            </Box>
+
+          </Box>
+        </Paper>
+        )}
+        
+        {/* 工具配置摘要 - 第二步选择的工具 */}
         <Paper sx={{ 
           p: 2, 
           mb: 3, 
@@ -708,7 +1126,7 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
           )}
         </Paper>
         
-        {/* 知识库摘要 */}
+        {/* 知识库配置摘要 - 第二步选择的知识库 */}
         <Paper sx={{ 
           p: 2, 
           mb: 3, 
@@ -746,7 +1164,7 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
           )}
         </Paper>
         
-        {/* 执行策略摘要 */}
+        {/* 执行策略摘要 - 当前步骤的编排 */}
         <Paper sx={{ 
           p: 2, 
           borderRadius: '12px',
@@ -768,16 +1186,16 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {isNestedOrchestrationData(orchestrationItems[0]) ? (
                 <Typography variant="body2">
-                  已配置 {orchestrationItems[0].modules.length} 个模块，
-                  包含 {orchestrationItems[0].modules.reduce((acc, m) => acc + (m.tools?.length || 0), 0)} 个工具和
-                  {orchestrationItems[0].modules.reduce((acc, m) => acc + (m.knowledgeBases?.length || 0), 0)} 个知识库
+                  已配置 {(orchestrationItems[0] as NestedOrchestrationData).modules.length} 个模块，
+                  包含 {(orchestrationItems[0] as NestedOrchestrationData).modules.reduce((acc: number, m: any) => acc + (m.tools?.length || 0), 0)} 个工具和
+                  {(orchestrationItems[0] as NestedOrchestrationData).modules.reduce((acc: number, m: any) => acc + (m.knowledgeBases?.length || 0), 0)} 个知识库
                 </Typography>
               ) : (
-                <Typography variant="body2">已配置 {orchestrationItems.length} 个编排项</Typography>
+                <Typography variant="body2">已配置线性执行策略</Typography>
               )}
             </Box>
           ) : (
-            <Typography variant="body2" color="text.secondary">未配置编排策略</Typography>
+            <Typography variant="body2" color="text.secondary">未配置执行策略</Typography>
           )}
         </Paper>
       </Box>
@@ -791,32 +1209,8 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
       flexDirection: 'column',
       height: '100%'
     }}>
-      {/* 标题区 */}
-      <Box sx={{ mb: 2 }}>
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            fontWeight: 700, 
-            color: alpha(theme.palette.text.primary, 0.9),
-            textAlign: 'center',
-            position: 'relative',
-            '&:after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -8,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 60,
-              height: 3,
-              borderRadius: 1.5,
-              bgcolor: theme.palette.primary.main,
-              opacity: 0.7
-            }
-          }}
-        >
-          流程可视化
-        </Typography>
-      </Box>
+      {/* 配置详情Modal */}
+      {renderConfigModal()}
       
       {/* 内容区 - 用flex-grow占满剩余空间 */}
       <Box sx={{
@@ -842,16 +1236,8 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
-            overflowY: 'auto',
-            '&:before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 3,
-              background: `linear-gradient(90deg, ${moduleColors.information_retrieval}, ${moduleColors.output_generation})`
-            }
+            overflowY: 'auto'
+            // 移除卡片顶部的彩色渐变边框
           }}
         >
           {flowItems && flowItems.length > 0 ? (
