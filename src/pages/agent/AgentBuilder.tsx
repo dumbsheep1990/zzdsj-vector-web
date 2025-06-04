@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useAgentFullscreen from '../../hooks/useAgentFullscreen';
 import { Box, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -16,7 +17,7 @@ import FlowPreviewStep from './components/FlowPreviewStep';
 
 // 导入类型
 import { Tool, KnowledgeBase, AgentConfig } from './components/types';
-import { defaultExtensionConfig } from './components/extensionConfig';
+import { defaultExtensionConfig, ExtensionToolsConfig } from './components/extensionConfig';
 
 // 工具编排项接口
 export interface OrchestrationItem {
@@ -99,7 +100,15 @@ const ContentWrapper = styled(Box)(() => ({
   overflow: 'hidden'
 }));
 
-const AgentBuilder = () => {
+const AgentBuilder: React.FC = () => {
+  // 使用全屏钩子 - 获取全屏状态及切换方法
+  const { isFullscreen } = useAgentFullscreen('agent-builder-fullscreen-container');
+  
+  // 在控制台输出当前全屏状态（可以在开发时调试使用）
+  React.useEffect(() => {
+    console.log(`全屏状态: ${isFullscreen ? '已启用' : '未启用'}`);
+  }, [isFullscreen]);
+  
   // 状态管理
   const [activeStep, setActiveStep] = useState(0);
   
@@ -241,8 +250,13 @@ const AgentBuilder = () => {
   };
   
   // 处理扩展工具配置变更
-  const handleExtensionToolsConfigChange = (config: typeof defaultExtensionConfig) => {
-    setExtensionToolsConfig(config);
+  const handleExtensionToolsConfigChange = (config: ExtensionToolsConfig) => {
+    // 确保所有必要属性都存在
+    const updatedConfig = {
+      ...defaultExtensionConfig,
+      ...config
+    };
+    setExtensionToolsConfig(updatedConfig);
   };
 
   // 处理工具编排变更
@@ -513,8 +527,8 @@ const AgentBuilder = () => {
               </>
             )}
             
-            {/* 底部导航按钮 - 仅在第一步显示 */}
-            {activeStep === 0 && (
+            {/* 底部导航按钮 - 仅在第一步且非全屏模式显示 */}
+            {activeStep === 0 && !isFullscreen && (
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                 <Button 
                   onClick={handleNext} 
@@ -522,16 +536,17 @@ const AgentBuilder = () => {
                   color="primary" 
                   size="small"
                   disabled={!canContinue(activeStep)}
+                  className="agent-builder-nav-button"
                 >
                   下一步
                 </Button>
               </Box>
             )}
             
-            {/* 第二步导航按钮 */}
-            {activeStep === 1 && (
+            {/* 第二步导航按钮 - 非全屏模式显示 */}
+            {activeStep === 1 && !isFullscreen && (
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                <Button onClick={handleBack} variant="outlined" size="small">
+                <Button onClick={handleBack} variant="outlined" size="small" className="agent-builder-nav-button">
                   上一步
                 </Button>
                 <Button 
@@ -540,6 +555,7 @@ const AgentBuilder = () => {
                   color="primary" 
                   size="small"
                   disabled={!canContinue(activeStep)}
+                  className="agent-builder-nav-button"
                 >
                   下一步
                 </Button>

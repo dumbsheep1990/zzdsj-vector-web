@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import AgentTemplateSelector, { AgentTemplateType } from './AgentTemplateSelector';
 import AdvancedAgentSettings, { AdvancedAgentSettings as AdvancedSettings, defaultAdvancedAgentSettings } from './AdvancedAgentSettings';
 import QuickConfigPanel, { QuickConfigOptions, defaultQuickConfig } from './QuickConfigPanel';
@@ -300,6 +301,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   
+  
   // 输入验证
   const [nameError, setNameError] = useState('');
   
@@ -398,7 +400,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
   };
 
   return (
-    <Box sx={{ height: '100%' }}>
+    <Box id="basic-info-fullscreen-container" sx={{ height: '100%' }}>
       <Typography variant="h6" gutterBottom sx={{ 
         fontWeight: 600, 
         fontSize: '1.1rem',

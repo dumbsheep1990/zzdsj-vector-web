@@ -785,7 +785,9 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
   };
 
   return (
-    <Box sx={{ 
+    <Box 
+      id="flow-preview-fullscreen-container"
+      sx={{ 
       p: 0, 
       display: 'flex', 
       flexDirection: 'column',
@@ -793,29 +795,7 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
     }}>
       {/* 标题区 */}
       <Box sx={{ mb: 2 }}>
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            fontWeight: 700, 
-            color: alpha(theme.palette.text.primary, 0.9),
-            textAlign: 'center',
-            position: 'relative',
-            '&:after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -8,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 60,
-              height: 3,
-              borderRadius: 1.5,
-              bgcolor: theme.palette.primary.main,
-              opacity: 0.7
-            }
-          }}
-        >
-          流程可视化
-        </Typography>
+        {/* 流程可视化标题已移除 */}
       </Box>
       
       {/* 内容区 - 用flex-grow占满剩余空间 */}
@@ -843,15 +823,7 @@ const FlowPreviewStep: React.FC<FlowPreviewStepProps> = ({
             flexDirection: 'column',
             height: '100%',
             overflowY: 'auto',
-            '&:before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 3,
-              background: `linear-gradient(90deg, ${moduleColors.information_retrieval}, ${moduleColors.output_generation})`
-            }
+            /* 渐变色边框已移除 */
           }}
         >
           {flowItems && flowItems.length > 0 ? (

@@ -1,33 +1,12 @@
 import React from 'react';
+
 import { Box, Tabs, Tab, Button, alpha, useTheme } from '@mui/material';
 import { RightOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import ToolsCard from './ToolsCard';
 import KnowledgeBaseCard from './KnowledgeBaseCard';
 import ExtensionToolsCard from './ExtensionToolsCard';
-import { defaultExtensionConfig } from './extensionConfig';
+import { defaultExtensionConfig, ExtensionToolsConfig } from './extensionConfig';
 import { Tool, KnowledgeBase } from './types';
-
-// 扩展工具配置接口
-interface ExtensionToolsConfig {
-  voiceSupport: {
-    enabled: boolean;
-    speechToText: boolean;
-    textToSpeech: boolean;
-  };
-  multimodal: {
-    enabled: boolean;
-    imageAnalysis: boolean;
-    videoProcessing: boolean;
-    chartGeneration: boolean;
-  };
-  fileAnalysis: {
-    enabled: boolean;
-    realtimeProcessing: boolean;
-    batchProcessing: boolean;
-    formatSupport: string[];
-    intelligentExtraction: boolean;
-  };
-}
 
 interface FeaturesStepProps {
   tabValue: number;
@@ -66,13 +45,16 @@ const FeaturesStep: React.FC<FeaturesStepProps> = ({
   onComplete,
 }) => {
   const theme = useTheme();
+
   
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     onTabChange(newValue);
   };
 
   return (
-    <Box sx={{ 
+    <Box 
+      id="features-step-fullscreen-container"
+      sx={{ 
       display: 'flex', 
       flexDirection: 'column',
       height: '100%',

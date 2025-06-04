@@ -15,7 +15,7 @@ const SystemPromptStep: React.FC<SystemPromptStepProps> = ({
 }) => {
   return (
     <Fade in={true}>
-      <Box className="prompt-card-container" sx={{ 
+      <Box id="system-prompt-fullscreen-container" className="prompt-card-container" sx={{ 
         position: 'relative',
         '& textarea': {
           overflow: 'hidden !important'

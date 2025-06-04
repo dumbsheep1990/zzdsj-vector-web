@@ -148,46 +148,111 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-          智能工具
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          选择需要使用的智能工具，可以增强智能体的能力
-        </Typography>
-        {renderToolChips && renderToolChips()}
+      <Box sx={{ p: 1.5, borderBottom: `1px solid ${theme.palette.divider}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>
+            <ThunderboltOutlined style={{ marginRight: '6px', fontSize: '14px', color: theme.palette.primary.main }} />
+            智能工具
+            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+              选择需要使用的智能工具，增强智能体能力
+            </Typography>
+          </Typography>
+          {renderToolChips && renderToolChips()}
+        </Box>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            borderRadius: '6px', 
+            px: 1, 
+            py: 0.25, 
+            height: '22px',
+            bgcolor: alpha(theme.palette.primary.main, 0.08),
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+          }}>
+            <Typography variant="caption" sx={{ fontWeight: 500, color: theme.palette.primary.main, fontSize: '0.7rem' }}>
+              筛选结果: {filteredTools.length}
+            </Typography>
+          </Box>
+          
+          <Chip 
+            size="small" 
+            label={`已选: ${selectedTools.length}`}
+            color={selectedTools.length > 0 ? "primary" : "default"}
+            variant={selectedTools.length > 0 ? "filled" : "outlined"}
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.7rem',
+              height: '22px',
+              '& .MuiChip-label': {
+                padding: '0 6px'
+              },
+              backgroundColor: selectedTools.length > 0 
+                ? alpha(theme.palette.primary.main, 0.9)
+                : 'transparent',
+              color: selectedTools.length > 0 
+                ? '#fff'
+                : theme.palette.text.secondary,
+              border: `1px solid ${selectedTools.length > 0 
+                ? 'transparent'
+                : alpha(theme.palette.text.secondary, 0.2)}`,
+              boxShadow: selectedTools.length > 0 
+                ? `0 2px 4px ${alpha(theme.palette.primary.main, 0.2)}` 
+                : 'none'
+            }}
+          />
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.7rem' }}>
+              高级工具
+            </Typography>
+            <Switch 
+              size="small" 
+              sx={{
+                transform: 'scale(0.7)',
+                ml: -0.5,
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.5),
+                },
+              }}
+            />
+          </Box>
+        </Box>
       </Box>
       
       {/* 模块大类选择器 */}
-      <Box sx={{ px: 2, pt: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
-            功能模块
-          </Typography>
-          <Box 
-            sx={{ 
-              ml: 1.5, 
-              height: '1px', 
-              flex: 1, 
-              background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(theme.palette.divider, 0.05)})` 
-            }} 
-          />
-        </Box>
+      <Box sx={{ px: 2, pt: 0.75 }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', mb: 0.75 }}>
+          功能模块
+        </Typography>
         <Box sx={{ 
           display: 'flex', 
           flexWrap: 'wrap', 
-          gap: 1, 
-          mb: 2 
+          gap: 0.75, 
+          mb: 1 
         }}>
           <Chip 
-            icon={<ToolOutlined style={{ fontSize: '14px' }} />}
+            icon={<ToolOutlined style={{ fontSize: '12px' }} />}
             label="全部模块"
             onClick={() => setActiveModuleType('all')}
             color={activeModuleType === 'all' ? 'primary' : 'default'}
             variant={activeModuleType === 'all' ? 'filled' : 'outlined'}
+            size="small"
             sx={{
               fontWeight: 500,
               px: 0.5,
+              height: '22px',
+              '& .MuiChip-label': {
+                fontSize: '0.7rem',
+                padding: '0 6px'
+              },
               '&.MuiChip-filled': {
                 boxShadow: `0 2px 5px ${alpha(theme.palette.primary.main, 0.15)}`
               }
@@ -196,14 +261,20 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
           {moduleCategories.map(module => (
             <Chip
               key={module.id}
-              icon={React.cloneElement(module.icon as React.ReactElement, { style: { fontSize: '14px' } })}
+              icon={React.cloneElement(module.icon as React.ReactElement, { style: { fontSize: '12px' } })}
               label={module.name}
               onClick={() => setActiveModuleType(module.id)}
               color={activeModuleType === module.id ? 'primary' : 'default'}
               variant={activeModuleType === module.id ? 'filled' : 'outlined'}
+              size="small"
               sx={{
                 fontWeight: 500,
                 px: 0.5,
+                height: '22px',
+                '& .MuiChip-label': {
+                  fontSize: '0.7rem',
+                  padding: '0 6px'
+                },
                 borderColor: alpha(module.color, 0.5),
                 '&.MuiChip-outlined': {
                   color: module.color,
@@ -221,9 +292,9 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
         {/* 当前选中模块的描述 */}
         {activeModuleType !== 'all' && (
           <Box sx={{ 
-            p: 1.5, 
-            mb: 2, 
-            borderRadius: '10px',
+            p: 1, 
+            mb: 1, 
+            borderRadius: '8px',
             backgroundColor: alpha(
               moduleCategories.find(m => m.id === activeModuleType)?.color || theme.palette.primary.main, 
               0.05
@@ -278,20 +349,10 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
         )}
       </Box>
       
-      <Box sx={{ px: 2, pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
-            工具类别
-          </Typography>
-          <Box 
-            sx={{ 
-              ml: 1.5, 
-              height: '1px', 
-              flex: 1, 
-              background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(theme.palette.divider, 0.05)})` 
-            }} 
-          />
-        </Box>
+      <Box sx={{ px: 2, pb: 0.5 }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, color: theme.palette.text.primary, display: 'block', mb: 0.75 }}>
+          工具类别
+        </Typography>
         <Tabs
           value={currentCategory}
           onChange={(_, newValue) => setCurrentCategory(newValue)}
@@ -299,7 +360,7 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
           scrollButtons="auto"
           TabIndicatorProps={{ style: { display: 'none' } }} // 隐藏底部指示器，使用胶囊样式代替
           sx={{ 
-            minHeight: '36px',
+            minHeight: '30px',
             '& .MuiTabs-scrollButtons': {
               color: alpha(theme.palette.text.secondary, 0.5),
               width: '20px',
@@ -311,9 +372,9 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
               gap: '6px' // 标签之间的间距加大，突出胶囊效果
             },
             '& .MuiTab-root': {
-              minHeight: '28px',
-              py: 0.5,
-              px: 1.5,
+              minHeight: '24px',
+              py: 0.25,
+              px: 1.25,
               borderRadius: '18px',
               fontSize: '0.75rem',
               fontWeight: 500,
@@ -344,81 +405,13 @@ const ToolsCard: React.FC<ToolsCardProps> = ({
         </Tabs>
       </Box>
 
-      {/* 统计信息 - 已选工具数量 */}
-      <Box sx={{ 
-        px: 2, 
-        py: 1.5, 
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-        borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: alpha(theme.palette.background.default, 0.5)
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            borderRadius: '6px', 
-            px: 1, 
-            py: 0.5, 
-            bgcolor: alpha(theme.palette.primary.main, 0.08),
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-          }}>
-            <Typography variant="caption" sx={{ fontWeight: 500, color: theme.palette.primary.main }}>
-              筛选结果: {filteredTools.length} 工具
-            </Typography>
-          </Box>
-          <Chip 
-            size="small" 
-            label={`已选: ${selectedTools.length}`}
-            color={selectedTools.length > 0 ? "primary" : "default"}
-            variant={selectedTools.length > 0 ? "filled" : "outlined"}
-            sx={{
-              fontWeight: 600,
-              fontSize: '0.75rem',
-              height: '24px',
-              backgroundColor: selectedTools.length > 0 
-                ? alpha(theme.palette.primary.main, 0.9)
-                : 'transparent',
-              color: selectedTools.length > 0 
-                ? '#fff'
-                : theme.palette.text.secondary,
-              border: `1px solid ${selectedTools.length > 0 
-                ? 'transparent'
-                : alpha(theme.palette.text.secondary, 0.2)}`,
-              boxShadow: selectedTools.length > 0 
-                ? `0 2px 4px ${alpha(theme.palette.primary.main, 0.2)}` 
-                : 'none'
-            }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-            高级工具
-          </Typography>
-          <Switch 
-            size="small" 
-            sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': {
-                color: theme.palette.primary.main,
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                },
-              },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.5),
-              },
-            }}
-          />
-        </Box>
-      </Box>
+
 
       {/* 工具列表 - 使用Grid布局 */}
       <Box sx={{ 
         flex: 1, 
         p: 2, 
-        pt: 2,
+        pt: 1.5,
         overflowY: 'auto',
         bgcolor: alpha(theme.palette.background.default, 0.5),
         backgroundImage: activeModuleType !== 'all' ? 
