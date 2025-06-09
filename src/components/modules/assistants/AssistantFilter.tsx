@@ -1,6 +1,7 @@
-import React from 'react';
-import { Menu, Dropdown, Button, Input } from 'antd';
-import { DownOutlined, FilterOutlined, SortAscendingOutlined, SearchOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Menu, Dropdown, Button } from 'antd';
+import { DownOutlined, FilterOutlined, SortAscendingOutlined } from '@ant-design/icons';
+import CustomSearchBox from '../../common/CustomSearchBox';
 
 interface AssistantFilterProps {
   filterStatus: string | null;
@@ -17,6 +18,7 @@ const AssistantFilter: React.FC<AssistantFilterProps> = ({
   setSortOrder,
   onSearch
 }) => {
+  const [searchText, setSearchText] = useState('');
   const filterMenu = (
     <Menu 
       selectedKeys={filterStatus ? [filterStatus] : ['all']}
@@ -40,20 +42,23 @@ const AssistantFilter: React.FC<AssistantFilterProps> = ({
   );
 
   // 处理搜索功能
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
     if (onSearch) {
-      onSearch(e.target.value);
+      onSearch(value);
     }
   };
 
   return (
     <div className="flex items-center gap-2">
       {/* 搜索框 */}
-      <Input.Search 
+      <CustomSearchBox
         placeholder="搜索助手名称" 
         allowClear 
         style={{ width: 200 }} 
-        onChange={handleSearch}
+        value={searchText}
+        onChange={handleSearchChange}
+        onSearch={handleSearchChange}
         className="mr-2"
       />
       

@@ -11,58 +11,51 @@ interface FileListModalProps {
 }
 
 const FileListModal: React.FC<FileListModalProps> = ({ isOpen, onClose, knowledgeBaseName }) => {
-    const [mounted, setMounted] = useState(false);
+    const [key, setKey] = useState(0); // 为Files组件创建key，确保每次打开都是新实例
     
+    // 每次isOpen变为true时，更新key创建新的Files实例
     useEffect(() => {
         if (isOpen) {
-            setMounted(true);
+            setKey(prevKey => prevKey + 1);
         }
     }, [isOpen]);
     
-    const handleAnimationComplete = () => {
-        if (!isOpen) {
-            setMounted(false);
-        }
-    };
-    
-    if (!mounted && !isOpen) return null;
-    
     return (
-        <div className="fixed inset-0" style={{ zIndex: zIndexLevels.MODAL }}>
-            {/* Backdrop with improved blur effect */}
-            <AnimatePresence>
-                {isOpen && (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div 
+                    key="modal-container"
+                    className="fixed inset-0"
+                    style={{ zIndex: zIndexLevels.MODAL }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    {/* 背景遮罩 */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
                         className="absolute inset-0 bg-gray-900/50 backdrop-blur-md"
                         onClick={onClose}
                         style={{ zIndex: zIndexLevels.MODAL_BACKDROP }}
                     />
-                )}
-            </AnimatePresence>
-            
-            {/* Modal with enhanced design */}
-            <AnimatePresence>
-                {isOpen && (
+                    
+                    {/* 模态框内容 */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        transition={{ 
-                            type: 'spring',
-                            damping: 25, 
-                            stiffness: 300 
-                        }}
-                        onAnimationComplete={handleAnimationComplete}
                         className="absolute inset-4 bg-white/95 rounded-xl shadow-2xl overflow-hidden flex flex-col ring-1 ring-gray-200 border border-white/90"
                         style={{ 
                             zIndex: zIndexLevels.MODAL,
                             backdropFilter: 'blur(8px)'
                         }}
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98, y: 5 }}
+                        transition={{ 
+                            type: 'spring',
+                            damping: 25, 
+                            stiffness: 300 
+                        }}
                     >
+                        {/* 标题栏 */}
                         <div 
                             className="flex items-center justify-between px-6 py-4"
                             style={{ 
@@ -75,31 +68,30 @@ const FileListModal: React.FC<FileListModalProps> = ({ isOpen, onClose, knowledg
                                 <div className="bg-white/20 p-2 rounded-lg mr-3 backdrop-blur-sm">
                                     <FileText className="h-5 w-5 text-white" />
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-white tracking-tight flex items-center">
-                                        {knowledgeBaseName} 
-                                        <span className="mx-2 text-white/50">•</span> 
-                                        <span className="text-lg font-normal text-white/90">文件列表</span>
-                                    </h2>
-                                </div>
+                                <h2 className="text-xl font-semibold text-white tracking-tight flex items-center">
+                                    {knowledgeBaseName} 
+                                    <span className="mx-2 text-white/50">•</span> 
+                                    <span className="text-lg font-normal text-white/90">文件列表</span>
+                                </h2>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={onClose}
-                                    className="p-2 hover:bg-white/30 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center backdrop-blur-sm"
-                                    title="关闭"
-                                >
-                                    <X size={18} className="text-white" />
-                                </button>
-                            </div>
+                            <button
+                                onClick={onClose}
+                                className="p-2 hover:bg-white/30 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-center backdrop-blur-sm"
+                                title="关闭"
+                            >
+                                <X size={18} className="text-white" />
+                            </button>
                         </div>
+                        
+                        {/* 文件列表内容区域 */}
                         <div className="flex-1 overflow-hidden bg-gradient-to-b from-gray-50/80 to-white/90">
-                            <Files />
+                            {/* 为Files组件提供key确保每次打开获得全新实例 */}
+                            <Files key={key} />
                         </div>
                     </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 

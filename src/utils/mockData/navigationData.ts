@@ -163,6 +163,11 @@ export const navigationItems: NavItem[] = [
         id: 'model-settings',
         label: '模型设置',
         iconType: 'Box'
+      },
+      {
+        id: 'security-settings',
+        label: '安全设置',
+        iconType: 'Shield'
       }
     ]
   }

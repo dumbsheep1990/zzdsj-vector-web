@@ -1,0 +1,254 @@
+/* 磨砂玻璃模态框样式 */
+.glassmorphism-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.glassmorphism-modal-container {
+  background-color: rgba(30, 30, 30, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(60, 60, 60, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 0;
+  max-width: 90vw;
+  max-height: 95vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 模态框头部 */
+.glassmorphism-modal-container header {
+  border-bottom: 1px solid rgba(80, 80, 80, 0.7);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(40, 40, 40, 0.9);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 模态框内容 */
+.glassmorphism-modal-container main {
+  padding: 24px;
+  background-color: rgba(25, 25, 25, 0.8);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 模态框底部 */
+.glassmorphism-modal-container footer {
+  border-top: 1px solid rgba(80, 80, 80, 0.7);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: rgba(40, 40, 40, 0.9);
+  flex-shrink: 0;
+}
+
+/* 表单元素样式 */
+.glassmorphism-form .ant-form-item-label > label {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.glassmorphism-input,
+.glassmorphism-textarea,
+input.ant-input,
+textarea.ant-input {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(200, 200, 200, 0.8) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.glassmorphism-select .ant-select-selector,
+.ant-select-selector {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(200, 200, 200, 0.8) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.glassmorphism-radio-group .ant-radio-button-wrapper {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(200, 200, 200, 0.8) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.glassmorphism-tag {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(200, 200, 200, 0.8) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* 描述区域特殊样式 */
+.glassmorphism-form .description-container {
+  background-color: rgba(40, 40, 40, 0.7);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(80, 80, 80, 0.6);
+}
+
+/* 下拉菜单样式 */
+.glassmorphism-dropdown {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(200, 200, 200, 0.8) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Tooltip 悬停提示样式 - 与index.css保持一致 */
+.ant-tooltip {
+  max-width: 300px;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+}
+
+.ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
+
+.ant-tooltip-arrow-content {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  background-image: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.ant-tooltip-placement-top .ant-tooltip-arrow, 
+.ant-tooltip-placement-topLeft .ant-tooltip-arrow, 
+.ant-tooltip-placement-topRight .ant-tooltip-arrow {
+  bottom: -5.71px;
+}
+
+/* 自定义tooltip声明式类名，用于知识库模态框 */
+.kb-tooltip .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 清除任何伪元素干扰 */
+.ant-tooltip-inner::before,
+.ant-tooltip-inner::after,
+.ant-tooltip::before,
+.ant-tooltip::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+}
+
+/* 确保tooltip箭头正常显示 */
+.ant-tooltip-arrow {
+  display: block !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 强制覆盖任何可能的背景干扰 */
+.ant-tooltip,
+.ant-tooltip *,
+.ant-tooltip-inner,
+.ant-tooltip-inner *,
+.kb-tooltip,
+.kb-tooltip * {
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* 知识图谱卡片中的Switch开关样式 */
+.glassmorphism-modal-container .ant-switch {
+  background-color: rgba(200, 200, 200, 0.6) !important;
+  border: 2px solid rgba(180, 180, 180, 0.8) !important;
+  border-radius: 20px !important;
+  transition: all 0.3s ease !important;
+  min-width: 44px !important;
+  height: 22px !important;
+}
+
+.glassmorphism-modal-container .ant-switch:hover {
+  background-color: rgba(220, 220, 220, 0.7) !important;
+  border-color: rgba(160, 160, 160, 0.9) !important;
+}
+
+.glassmorphism-modal-container .ant-switch-checked {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  border-color: rgba(25, 118, 210, 0.8) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+}
+
+.glassmorphism-modal-container .ant-switch-checked:hover {
+  background: linear-gradient(135deg, #42a5f5 0%, #1565c0 100%) !important;
+  border-color: rgba(21, 101, 192, 0.9) !important;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4) !important;
+}
+
+/* Switch滑块样式 */
+.glassmorphism-modal-container .ant-switch-handle {
+  background-color: #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  width: 18px !important;
+  height: 18px !important;
+  top: 50% !important;
+  left: 2px !important;
+  transform: translateY(-50%) !important;
+  position: absolute !important;
+}
+
+.glassmorphism-modal-container .ant-switch-checked .ant-switch-handle {
+  background-color: #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+  left: calc(100% - 20px) !important;
+  transform: translateY(-50%) !important;
+}
+
+/* Switch滑块的before元素确保圆形 */
+.glassmorphism-modal-container .ant-switch-handle::before {
+  border-radius: 50% !important;
+}

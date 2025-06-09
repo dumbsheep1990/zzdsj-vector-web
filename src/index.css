@@ -214,14 +214,15 @@ button[style*="#9c27b0"]:hover,
   }
 }
 
-/* 全局禁用所有模糊效果 - 强力版本 */
-/* 这将禁用所有弹框组件上的模糊效果 */
-* {
+/* =================== 彻底修复 TOOLTIP 样式 =================== */
+
+/* 1. 全局禁用模糊效果，但完全排除tooltip */
+*:not(.ant-tooltip):not(.ant-tooltip *):not(.ant-tooltip-inner):not(.ant-tooltip-content):not(.kb-tooltip):not([class*="tooltip"]):not([class*="tooltip"] *) {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* Ant Design Modal 和下拉菜单特定修复 */
+/* 2. 重置所有可能干扰tooltip的框架样式 */
 .ant-modal-content,
 .ant-modal-header,
 .ant-modal-body,
@@ -233,14 +234,12 @@ button[style*="#9c27b0"]:hover,
 .ant-popover-content,
 .ant-popover-inner,
 .ant-popover-inner-content,
-.ant-tooltip-inner,
 .dropdown-menu,
 .modal-content,
 .modal-header,
 .modal-body,
 .modal-footer,
 .popover-content,
-.tooltip-content,
 .rc-dialog,
 .rc-dialog-content,
 .MuiDialog-paper,
@@ -250,7 +249,6 @@ button[style*="#9c27b0"]:hover,
 [class*="drawer"],
 [class*="popup"],
 [class*="dropdown"],
-[class*="tooltip"],
 [class*="popover"] {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -258,6 +256,246 @@ button[style*="#9c27b0"]:hover,
   background-color: #ffffff !important;
   background-image: none !important;
   background: #ffffff !important;
+}
+
+/* 3. 强力修复 Ant Design Tooltip 样式 */
+.ant-tooltip {
+  z-index: 9999 !important;
+  pointer-events: none !important;
+}
+
+.ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
+
+/* 4. 清除任何可能的伪元素干扰 */
+.ant-tooltip-inner::before,
+.ant-tooltip-inner::after,
+.ant-tooltip::before,
+.ant-tooltip::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+}
+
+/* 5. 修复tooltip箭头 */
+.ant-tooltip-arrow {
+  display: block !important;
+}
+
+.ant-tooltip-arrow-content {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  background-image: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 6. 特殊处理知识库tooltip */
+.kb-tooltip .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 7. 修复questionCircle图标的hover效果 */
+.anticon-question-circle,
+.ant-form-item-label .anticon-question-circle,
+span.anticon.anticon-question-circle,
+.text-gray-400.anticon-question-circle {
+  color: #9ca3af !important;
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 0 0 8px !important;
+  transition: color 0.2s ease !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+.anticon-question-circle:hover,
+.ant-form-item-label .anticon-question-circle:hover,
+span.anticon.anticon-question-circle:hover,
+.text-gray-400.anticon-question-circle:hover {
+  color: #6b7280 !important;
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* 特别修复CreateKnowledgeBaseModal中的问题图标 */
+.ml-2.text-gray-400.anticon-question-circle,
+.text-gray-400.ml-2.anticon-question-circle {
+  color: #9ca3af !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin-left: 8px !important;
+}
+
+/* 8. 强制清除所有UI框架对tooltip的影响 */
+.ant-tooltip,
+.ant-tooltip *,
+.ant-tooltip-inner,
+.ant-tooltip-inner *,
+.ant-tooltip-content,
+.ant-tooltip-content *,
+.kb-tooltip,
+.kb-tooltip * {
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  box-sizing: border-box !important;
+}
+
+/* 9. 防止Material-UI、Chakra-UI、Radix-UI干扰 */
+.ant-tooltip-inner {
+  background: #2d2d2d !important;
+}
+
+/* 10. 最终确保tooltip显示正常 */
+.ant-tooltip[role="tooltip"] .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  color: white !important;
+  opacity: 1 !important;
+}
+
+/* 11. 全局重置多UI框架冲突 */
+/* 重置Chakra UI对Ant Design的影响 */
+.chakra-ui-light .ant-tooltip-inner,
+.chakra-ui-dark .ant-tooltip-inner,
+[data-theme] .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+/* 重置Material-UI对Ant Design的影响 */
+.MuiThemeProvider .ant-tooltip-inner,
+[class*="Mui"] .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+/* 重置Radix UI对Ant Design的影响 */
+[data-radix-portal] .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+/* 强制重置所有可能的框架样式干扰 */
+* .ant-tooltip-inner {
+  background: #2d2d2d !important;
+  background-color: #2d2d2d !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+/* 知识图谱Toggle开关样式 - 蓝色配色（黑色主题） */
+.ant-switch {
+  background-color: rgba(200, 200, 200, 0.6) !important;
+  border: 2px solid rgba(180, 180, 180, 0.8) !important;
+  border-radius: 20px !important;
+  transition: all 0.3s ease !important;
+  min-width: 44px !important;
+  height: 22px !important;
+}
+
+.ant-switch:hover {
+  background-color: rgba(220, 220, 220, 0.7) !important;
+  border-color: rgba(160, 160, 160, 0.9) !important;
+}
+
+.ant-switch-checked {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  border-color: rgba(25, 118, 210, 0.8) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+}
+
+.ant-switch-checked:hover {
+  background: linear-gradient(135deg, #42a5f5 0%, #1565c0 100%) !important;
+  border-color: rgba(21, 101, 192, 0.9) !important;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4) !important;
+}
+
+/* Switch内部滑块样式 */
+.ant-switch-handle {
+  background-color: #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  width: 18px !important;
+  height: 18px !important;
+  top: 50% !important;
+  left: 2px !important;
+  transform: translateY(-50%) !important;
+  position: absolute !important;
+}
+
+.ant-switch-checked .ant-switch-handle {
+  background-color: #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+  left: calc(100% - 20px) !important;
+  transform: translateY(-50%) !important;
+}
+
+/* Switch内部滑块的Before元素 */
+.ant-switch-handle::before {
+  border-radius: 50% !important;
+}
+
+/* 特殊处理知识图谱卡片中的Switch */
+[style*="linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)"] .ant-switch {
+  background-color: rgba(180, 180, 180, 0.6) !important;
+  border: 2px solid rgba(160, 160, 160, 0.8) !important;
+  border-radius: 20px !important;
+}
+
+[style*="linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)"] .ant-switch-checked {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  border-color: rgba(25, 118, 210, 0.8) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
 }
 
 /* 特别处理背景遮罩 - 仅允许背景遮罩使用模糊效果 */
@@ -270,4 +508,5 @@ button[style*="#9c27b0"]:hover,
   background-color: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
-}
+  }
+  

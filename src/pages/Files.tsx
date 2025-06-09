@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Button } from '../components/ui/Button';
-import { Search, Plus, Upload, FileText, Image, Trash2, X } from 'lucide-react';
+import { Search, Plus, Upload, FileText, Image, Trash2 } from 'lucide-react';
 import FilesList from '../components/modules/files/FilesList';
 import CreateFolderDialog from '../components/modules/files/CreateFolderDialog';
 import { FileItem } from '../utils/types';
@@ -160,22 +160,6 @@ const Files: React.FC = () => {
             borderRadius: '0.75rem',
             boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
         }}>
-            {/* 顶部蓝色渐变背景 */}
-            <div 
-                className="flex items-center px-6 py-3 border-b sticky top-0 z-10"
-                style={{ 
-                    background: 'linear-gradient(to right, #4299e1, #63b3ed)',
-                    borderBottomColor: 'rgba(226,232,240,0.6)',
-                }}
-            >
-                <div className="text-white flex items-center text-sm">
-                    <FileText className="h-4 w-4 mr-2" />
-                    城市规划知识库 · 文件列表
-                </div>
-                <button className="ml-auto text-white opacity-80 hover:opacity-100">
-                    <X className="h-4 w-4" />
-                </button>
-            </div>
 
             {/* 搜索、分类与操作区域 */}
             <div className="p-6 border-b border-gray-100 flex flex-wrap items-center gap-4">
@@ -246,16 +230,11 @@ const Files: React.FC = () => {
                     
                     {/* 上传文件按钮 */}
                     <Button 
-                        className="text-sm relative overflow-hidden group"
+                        variant="outline"
+                        className="text-sm bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-300 shadow-sm transition-colors"
                         onClick={() => document.getElementById('file-upload')?.click()}
-                        style={{ 
-                            background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
-                            boxShadow: '0 2px 4px rgba(56, 189, 248, 0.25)'
-                        }}
                         size="sm"
                     >
-                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-shimmer" 
-                              style={{ backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }}></span>
                         <Upload className="h-4 w-4 mr-1.5" />
                         上传文件
                         <input 

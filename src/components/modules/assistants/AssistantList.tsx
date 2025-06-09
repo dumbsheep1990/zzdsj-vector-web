@@ -1,8 +1,9 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { Button, Input, Table, Typography, Tag, Space } from 'antd';
+import { Button, Table, Typography, Tag, Space } from 'antd';
 import { AssistantType } from './AssistantTypeSelector';
 import AssistantTypeModal from './AssistantTypeModal';
+import CustomSearchBox from '../../common/CustomSearchBox';
 
 // Define interface for Assistant data
 interface Assistant {
@@ -99,12 +100,12 @@ const AssistantList = () => {
 
       {/* 搜索与筛选区 */}
       <div className="mb-6">
-        <Input.Search
+        <CustomSearchBox
           placeholder="搜索助手名称或描述"
           allowClear
-          enterButton
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={setSearchText}
+          onSearch={setSearchText}
           style={{ maxWidth: 300 }}
         />
       </div>

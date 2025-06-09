@@ -14,6 +14,7 @@ import AgentTools from '../pages/AgentTools';
 import ToolFactory from '../pages/ToolFactory';
 import BasicSettings from '../pages/BasicSettings';
 import ModelSettings from '../pages/ModelSettings';
+import SecuritySettings from '../pages/SecuritySettings';
 import GraphDatabase from '../pages/GraphDatabase';
 import GraphPreview from '../pages/GraphPreview';
 import MCPCenter from '../pages/MCPCenter';
@@ -146,6 +147,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/settings/model" element={
         <AuthGuard>
           <ModelSettings />
+        </AuthGuard>
+      } />
+      <Route path="/settings/security" element={
+        <AuthGuard>
+          <SecuritySettings />
         </AuthGuard>
       } />
       

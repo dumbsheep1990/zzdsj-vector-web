@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Tabs, Input, Button, Space, Card, Row, Col, Tag, Typography } from 'antd';
+import { Tabs, Button, Space, Card, Row, Col, Tag, Typography } from 'antd';
 import { 
-  SearchOutlined, 
   PlusOutlined,
   ImportOutlined,
   RobotOutlined,
@@ -10,9 +9,9 @@ import {
   PlayCircleOutlined
 } from '@ant-design/icons';
 import PageHeader from '../components/layout/PageHeader';
+import CustomSearchBox from '../components/common/CustomSearchBox';
 
 const { TabPane } = Tabs;
-const { Search } = Input;
 
 interface AgentTool {
   id: string;
@@ -130,25 +129,13 @@ const AgentTools: React.FC = () => {
 
       <div className="flex-1 min-h-0 overflow-auto p-6">
         <div className="mb-6 flex items-center justify-between">
-          <Search
+          <CustomSearchBox
             placeholder="搜索工具..."
-            allowClear
-            enterButton={
-              <Button 
-                type="primary" 
-                style={{
-                  background: 'linear-gradient(135deg, #409eff, #66b1ff)',
-                  border: 'none',
-                  boxShadow: '0 2px 6px rgba(64, 158, 255, 0.2)'
-                }}
-              >
-                <SearchOutlined />
-              </Button>
-            }
-            size="large"
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="max-w-md"
+            onChange={setSearchTerm}
+            onSearch={(value) => setSearchTerm(value)}
+            allowClear
+            size="large"
             style={{ width: '400px' }}
           />
           <Space>

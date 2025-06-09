@@ -200,10 +200,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     )}
 
                     {/* 右侧图标按钮组 */}
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3">
                         {/* 通知按钮 */}
                         <button 
-                            className="p-1.5 rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center relative bg-blue-600 text-white"
+                            className="relative w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 border border-slate-300 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                             onClick={(e) => {
                                 setShowNotifications(!showNotifications);
                                 setShowServiceStatus(false);
@@ -212,9 +212,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                             }}
                             aria-label="通知"
                         >
-                            <Bell size={18} className="text-white" />
+                            <Bell size={16} className="text-slate-600" />
                             {notificationCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-md border-2 border-white">
                                     {notificationCount}
                                 </span>
                             )}
@@ -271,7 +271,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         
                         {/* 服务状态按钮 */}
                         <button 
-                            className="p-1.5 rounded-full hover:bg-green-700 transition-colors flex items-center justify-center relative bg-green-600 text-white"
+                            className="relative w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 border border-slate-300 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                             onClick={(e) => {
                                 setShowServiceStatus(!showServiceStatus);
                                 setShowNotifications(false);
@@ -280,7 +280,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                             }}
                             aria-label="服务状态"
                         >
-                            <Server size={18} className="text-white" />
+                            <Server size={16} className="text-slate-600" />
+                            {/* 服务状态指示器 */}
+                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-sm animate-pulse"></span>
                         </button>
                         
                         {/* 服务状态下拉框 - 通过Portal渲染 */}
@@ -337,7 +339,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
                         {/* 用户菜单按钮 */}
                         <button 
-                            className="p-1.5 rounded-full hover:bg-indigo-700 transition-colors flex items-center justify-center relative bg-indigo-600"
+                            className="relative w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border border-slate-300 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                             onClick={(e) => {
                                 setShowUserMenu(!showUserMenu);
                                 setShowServiceStatus(false);
@@ -345,8 +347,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                                 setUserBtnRect(e.currentTarget.getBoundingClientRect());
                             }}
                             aria-label="用户菜单"
+                            title={`当前用户: ${username}`}
                         >
-                            <User size={18} className="text-white" />
+                            <span className="text-white text-xs font-semibold">
+                                {username ? username.charAt(0).toUpperCase() : 'U'}
+                            </span>
+                            {/* 在线状态指示器 */}
+                            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border border-white shadow-sm"></span>
                         </button>
                         
                         {/* 用户菜单下拉框 - 通过Portal渲染 */}
@@ -402,7 +409,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
             {/* 搜索和筛选区域 */}
             {(searchComponent || filterComponent) && (
-                <div className="px-6 py-2 bg-white border-t border-gray-100">
+                <div className="px-6 py-2 bg-gray-50 border-t border-gray-100">
                     <div className="flex items-center space-x-4">
                         {searchComponent}
                         {filterComponent}

@@ -20,7 +20,8 @@ import {
     Brain,
     List,
     Copy,
-    Send
+    Send,
+    Shield
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { navigationItems } from '../../utils/mockData';
@@ -59,6 +60,7 @@ const Sidebar: React.FC = () => {
         'graph-qa': '/knowledge-graph/graph-qa',
         'basic-settings': '/settings/basic',
         'model-settings': '/settings/model',
+        'security-settings': '/settings/security',
         'agent-tools': '/tool-plaza/agent-tools',
         'tool-factory': '/tool-plaza/tool-factory',
         'mcp-center': '/tool-plaza/mcp',
@@ -214,6 +216,8 @@ const Sidebar: React.FC = () => {
                 return <Copy size={size} />;
             case 'Send':
                 return <Send size={size} />;
+            case 'Shield':
+                return <Shield size={size} />;
             default:
                 return <FileText size={size} />;
         }

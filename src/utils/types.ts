@@ -130,6 +130,14 @@ export interface KnowledgeBaseItem {
     pendingFiles?: number;
     tags?: string[];
     recentKeywords?: string[];
+    retrievalMethod?: 'semantic' | 'fulltext' | 'hybrid';
+    vectorModel?: 'standard' | 'high_precision' | 'lightweight' | 'chinese_optimized';
+    // 知识图谱相关信息
+    knowledgeGraph?: {
+        available: boolean;     // 是否有知识图谱
+        fileName?: string;     // 知识图谱文件名
+        lastGenerated?: string; // 知识图谱生成时间
+    };
 }
 
 // 应用全局状态

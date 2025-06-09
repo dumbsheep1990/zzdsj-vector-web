@@ -1,0 +1,192 @@
+/* 自定义搜索框样式 - 完全独立，无框架依赖 */
+.custom-search-box {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.custom-search-box:hover {
+  border-color: #9ca3af;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.custom-search-box.focused {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* 输入区域包装器 */
+.custom-search-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: transparent;
+}
+
+/* 搜索图标 */
+.custom-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #6b7280;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 输入框 */
+.custom-search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 12px 0 40px;
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.custom-search-input::placeholder {
+  color: #9ca3af;
+}
+
+/* 清除按钮 */
+.custom-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.custom-search-clear:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* 搜索按钮 */
+.custom-search-button {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 0;
+}
+
+.custom-search-button:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.custom-search-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
+
+/* 尺寸变体 */
+.custom-search-small {
+  height: 32px;
+}
+
+.custom-search-small .custom-search-input {
+  font-size: 13px;
+  padding: 0 8px 0 32px;
+}
+
+.custom-search-small .custom-search-icon {
+  left: 8px;
+}
+
+.custom-search-small .custom-search-button {
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.custom-search-medium {
+  height: 40px;
+}
+
+.custom-search-medium .custom-search-button {
+  padding: 0 16px;
+}
+
+.custom-search-large {
+  height: 48px;
+}
+
+.custom-search-large .custom-search-input {
+  font-size: 16px;
+  padding: 0 16px 0 44px;
+}
+
+.custom-search-large .custom-search-icon {
+  left: 16px;
+}
+
+.custom-search-large .custom-search-button {
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .custom-search-box {
+    min-width: 280px;
+  }
+  
+  .custom-search-button {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+/* 禁用状态 */
+.custom-search-box.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.custom-search-box.disabled .custom-search-input,
+.custom-search-box.disabled .custom-search-button {
+  cursor: not-allowed;
+}
+
+/* 错误状态 */
+.custom-search-box.error {
+  border-color: #ef4444;
+}
+
+.custom-search-box.error.focused {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* 成功状态 */
+.custom-search-box.success {
+  border-color: #10b981;
+}
+
+.custom-search-box.success.focused {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+} 

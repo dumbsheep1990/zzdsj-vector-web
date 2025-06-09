@@ -3,7 +3,7 @@ import { KnowledgeBaseItem } from "../types";
 // 知识库数据
 export const knowledgeBaseData: KnowledgeBaseItem[] = [
   {
-    id: '1',
+    id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
     name: '城市规划知识库',
     description: '包含城市规划相关的政策文件、规划方案和研究报告',
     fileCount: 128,
@@ -18,7 +18,7 @@ export const knowledgeBaseData: KnowledgeBaseItem[] = [
     recentKeywords: ['可持续发展', '城市规划', '政策解读']
   },
   {
-    id: '2',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     name: '政府工作报告库',
     description: '历年政府工作报告及解读文件',
     fileCount: 86,
@@ -33,7 +33,7 @@ export const knowledgeBaseData: KnowledgeBaseItem[] = [
     recentKeywords: ['政府工作', '工作报告', '政策解读']
   },
   {
-    id: '3',
+    id: 'c81d4e2e-bcf2-11e6-869b-7df92533d2db',
     name: '经济数据分析库',
     description: '经济发展数据及分析报告',
     fileCount: 156,
@@ -48,7 +48,7 @@ export const knowledgeBaseData: KnowledgeBaseItem[] = [
     recentKeywords: ['经济发展', '数据分析', '统计分析']
   },
   {
-    id: '4',
+    id: '38400000-8cf0-11bd-b23e-10b96e4ef00d',
     name: '智慧城市建设库',
     description: '智慧城市建设方案和实施案例',
     fileCount: 92,
@@ -63,7 +63,7 @@ export const knowledgeBaseData: KnowledgeBaseItem[] = [
     recentKeywords: ['智慧城市', '建设方案', '实施案例']
   },
   {
-    id: '5',
+    id: 'a3dfe108-fb8c-4cf5-8461-152db119afe4',
     name: '政策法规库',
     description: '各类政策法规文件及解读',
     fileCount: 210,

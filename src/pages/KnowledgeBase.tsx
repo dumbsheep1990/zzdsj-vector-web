@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter, BarChart2, Settings } from 'lucide-react';
-import { knowledgeBaseData } from '../utils/mockData';
-import type { KnowledgeBaseItem } from '../utils/types';
-import FileListModal from '../components/modals/FileListModal';
+import { Database, FileIcon, Settings, Plus, Filter, BarChart2 } from 'lucide-react';
+import CreateKnowledgeBaseModal from '../components/modals/CreateKnowledgeBaseModal';
+import KnowledgeBaseSettingsModal from '../components/modals/KnowledgeBaseSettingsModal';
 import PageHeader from '../components/layout/PageHeader';
-import SearchInput from '../components/common/SearchInput';
+import CustomSearchBox from '../components/common/CustomSearchBox';
 import Switch from '../components/ui/Switch';
 import { useAppContext } from '../context/AppContext';
-import { FileIcon, Database } from 'lucide-react';
 import { KnowledgeBaseListSkeleton } from '../components/skeleton';
+import { useToast } from '../components/Toast';
+import { knowledgeBaseData } from '../utils/mockData';
+import type { KnowledgeBaseItem } from '../utils/types';
+// FileListModal removed as it's not being used
 import { Empty } from 'antd';
 
 const KnowledgeBase: React.FC = () => {
+    const useToastHook = useToast();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBaseItem | null>(null);
     const [knowledgeBaseItems, setKnowledgeBaseItems] = useState<KnowledgeBaseItem[]>([]);
     const [loading, setLoading] = useState(true); // 添加加载状态
     const [hasData, setHasData] = useState(true); // 是否有数据状态
+    const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // 创建知识库模态框状态
+    const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
     const { state } = useAppContext();
 
     // 加载数据
@@ -36,9 +41,10 @@ const KnowledgeBase: React.FC = () => {
     };
 
     // 刷新数据
-    const handleRefresh = () => {
-        loadKnowledgeBaseData();
-    };
+    // 将在页面添加刷新按钮时使用
+    // const handleRefresh = () => {
+    //     loadKnowledgeBaseData();
+    // };
 
     const getCategoryGradient = (category: string) => {
         switch (category) {
@@ -117,13 +123,37 @@ const KnowledgeBase: React.FC = () => {
 
     const handleSettingsClick = (kb: KnowledgeBaseItem, e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log('Settings clicked for', kb.name);
+        setSelectedKnowledgeBase(kb);
+        setIsSettingsModalVisible(true);
+    };
+    
+    const handleUpdateKnowledgeBase = (id: string, values: any) => {
+        // 模拟更新知识库设置
+        setKnowledgeBaseItems(prevBases => {
+            return prevBases.map(kb => {
+                if (kb.id === id) {
+                    return {
+                        ...kb,
+                        ...values,
+                        lastUpdated: new Date().toISOString().split('T')[0] // 更新日期为今天
+                    };
+                }
+                return kb;
+            });
+        });
+    };
+    
+    const handleDeleteKnowledgeBase = (id: string) => {
+        // 模拟删除知识库
+        setKnowledgeBaseItems(prevBases => prevBases.filter(kb => kb.id !== id));
     };
 
     const renderKnowledgeBaseCard = (kb: KnowledgeBaseItem) => {
-        const { name, description, category, status, tags = [], progressPercentage, documentCount, questionCount } = kb;
-        const progressColor = getProgressColor(progressPercentage);
-        const incompleteColor = getIncompleteColor(progressPercentage);
+        const { name, description, category, status, tags = [] } = kb;
+        // 使用模拟进度值
+        const progress = 70; // 模拟的默认进度值
+        const progressColor = getProgressColor(progress);
+        const incompleteColor = getIncompleteColor(progress);
 
         return (
             <div
@@ -137,7 +167,7 @@ const KnowledgeBase: React.FC = () => {
                         style={{ background: getCategoryGradient(category || '') }}
                     ></div>
 
-                    <div className="p-4 flex-1 flex flex-col">
+                    <div className="pt-4 px-4 pb-0 flex-1 flex flex-col">
                         <div className="flex justify-between items-start mb-1">
                             <div className="flex items-center">
                                 <div
@@ -162,6 +192,7 @@ const KnowledgeBase: React.FC = () => {
                                         checked={status === '活跃'}
                                         size="sm"
                                         className="data-[state=checked]:bg-blue-500"
+                                        onChange={() => {}} // 添加onChange处理函数
                                     />
                                 </div>
                             </div>
@@ -172,13 +203,13 @@ const KnowledgeBase: React.FC = () => {
                         <div className="mb-3">
                             <div className="flex justify-between text-xs mb-1">
                                 <span className="py-1 px-2 bg-gray-50 rounded-md text-gray-700 font-medium">完成进度</span>
-                                <span className="py-1 px-2 bg-blue-50 rounded-md text-blue-700 font-medium">{progressPercentage}%</span>
+                                <span className="py-1 px-2 bg-blue-50 rounded-md text-blue-700 font-medium">{progress}%</span>
                             </div>
                             <div className="h-2 w-full rounded-full" style={{ background: incompleteColor }}>
                                 <div
                                     className="h-2 rounded-full transition-all duration-500"
                                     style={{
-                                        width: `${progressPercentage}%`,
+                                        width: `${progress}%`,
                                         background: progressColor
                                     }}
                                 ></div>
@@ -188,7 +219,7 @@ const KnowledgeBase: React.FC = () => {
                         <div className="flex mb-3">
                             <div className="flex items-center mr-4 px-2 py-1 bg-blue-50 rounded-md">
                                 <FileIcon size={14} className="text-blue-600 mr-1" />
-                                <span className="text-sm text-blue-700 font-medium">{documentCount}</span>
+                                <span className="text-sm text-blue-700 font-medium">{kb.fileCount || 0}</span>
                             </div>
                             <div className="flex items-center px-2 py-1 bg-purple-50 rounded-md">
                                 <svg
@@ -203,9 +234,11 @@ const KnowledgeBase: React.FC = () => {
                                     strokeLinejoin="round"
                                     className="text-purple-600 mr-1"
                                 >
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                    <path d="M12 17h.01" />
                                 </svg>
-                                <span className="text-sm text-purple-700 font-medium">{questionCount}</span>
+                                <span className="text-sm text-purple-700 font-medium">{kb.vectorCount || 0}</span>
                             </div>
                         </div>
 
@@ -234,6 +267,23 @@ const KnowledgeBase: React.FC = () => {
                             <div onClick={(e: React.MouseEvent) => handleSettingsClick(kb, e)} className="cursor-pointer ml-2">
                                 <Settings size={18} className="text-gray-600 hover:text-gray-800 transition-colors" />
                             </div>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-gray-500" 
+                            style={{ marginTop: '8px', paddingTop: '5px', paddingBottom: '5px', borderTop: '1px solid #e5e7eb', marginLeft: '-16px', marginRight: '-16px', paddingLeft: '16px', paddingRight: '16px', width: 'calc(100% + 32px)' }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>ID: 
+                                <span 
+                                style={{ display: 'inline-block', marginLeft: '5px', padding: '1px 5px', border: '1px solid #e0e0e0', backgroundColor: '#f9f9f9', borderRadius: '3px', cursor: 'pointer', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
+                                title={`点击复制完整ID: ${kb.id}`} 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(kb.id);
+                                  useToastHook.showToast(`ID已复制: ${kb.id}`, 'success', 2000);
+                                }}
+                                >{kb.id.split('-')[0]}</span>
+                            </div>
+                            <div>更新时间: {kb.lastUpdated || 'N/A'}</div>
                         </div>
                     </div>
                 </div>
@@ -265,11 +315,13 @@ const KnowledgeBase: React.FC = () => {
     );
 
     const searchComponent = (
-        <SearchInput
+        <CustomSearchBox
             value={searchTerm}
             onChange={setSearchTerm}
+            onSearch={setSearchTerm}
             placeholder="搜索知识库..."
-            className="w-80"
+            allowClear
+            style={{ width: '320px' }}
         />
     );
 
@@ -283,7 +335,7 @@ const KnowledgeBase: React.FC = () => {
                     {
                         icon: <Plus size={20} />,
                         label: '新建知识库',
-                        onClick: () => console.log('新建知识库')
+                        onClick: () => setIsCreateModalVisible(true)
                     }
                 ]}
                 secondaryActions={[
@@ -321,11 +373,43 @@ const KnowledgeBase: React.FC = () => {
                 )}
             </div>
 
-            <FileListModal 
-                isOpen={!!selectedKnowledgeBase}
-                onClose={() => setSelectedKnowledgeBase(null)}
-                knowledgeBaseName={selectedKnowledgeBase?.name || ''}
-            />
+            {/* FileListModal removed as it's not being used */}
+
+            {isCreateModalVisible && (
+                <CreateKnowledgeBaseModal
+                    open={isCreateModalVisible}
+                    onClose={() => setIsCreateModalVisible(false)}
+                    onCreateKnowledgeBase={(values) => {
+                        console.log('创建知识库:', values);
+                        // 这里处理创建知识库的逻辑
+                        // 模拟添加新知识库
+                        const newKnowledgeBase: KnowledgeBaseItem = {
+                            id: `kb-${Date.now()}`,
+                            name: values.name,
+                            description: values.description,
+                            category: '文档',
+                            status: '活跃',
+                            tags: values.tags,
+                            fileCount: 0,
+                            vectorCount: 0,
+                            lastUpdated: new Date().toISOString(),
+                            size: '0 KB'
+                        };
+                        setKnowledgeBaseItems([newKnowledgeBase, ...knowledgeBaseItems]);
+                        setIsCreateModalVisible(false);
+                    }}
+                />
+            )}
+            
+            {isSettingsModalVisible && selectedKnowledgeBase && (
+                <KnowledgeBaseSettingsModal
+                    open={isSettingsModalVisible}
+                    onClose={() => setIsSettingsModalVisible(false)}
+                    knowledgeBase={selectedKnowledgeBase}
+                    onUpdateKnowledgeBase={handleUpdateKnowledgeBase}
+                    onDeleteKnowledgeBase={handleDeleteKnowledgeBase}
+                />
+            )}
         </div>
     );
 };

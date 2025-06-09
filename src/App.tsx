@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import AppRoutes from './routes';
 import { zIndexLevels } from './styles/zIndexLevels';
+import { ToastProvider } from './components/Toast';
 
 /**
  * 创建一个Portal容器用于渲染弹出层内容，确保它们不受页面模糊效果的影响
@@ -86,7 +87,9 @@ const App: React.FC = () => {
         <Router>
             <AuthProvider>
                 <AppProvider>
-                    <AppContent />
+                    <ToastProvider>
+                        <AppContent />
+                    </ToastProvider>
                 </AppProvider>
             </AuthProvider>
         </Router>

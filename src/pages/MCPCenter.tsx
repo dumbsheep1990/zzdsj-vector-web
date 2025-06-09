@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Card, Row, Col, Input, Button, Tag, Typography, Switch } from 'antd';
-import { PlusOutlined, SearchOutlined, InfoCircleOutlined, ToolOutlined, SettingOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Button, Tag, Typography, Switch } from 'antd';
+import { PlusOutlined, InfoCircleOutlined, ToolOutlined, SettingOutlined } from '@ant-design/icons';
 import PageHeader from '../components/layout/PageHeader';
 import AddMCPModal from '../components/mcp/AddMCPModal';
 import MCPServiceDrawer from '../components/mcp/MCPServiceDrawer';
-
-const { Search } = Input;
+import CustomSearchBox from '../components/common/CustomSearchBox';
 
 // 模拟 MCP 服务数据
 const mcpServices = [
@@ -274,25 +273,13 @@ const MCPCenter: React.FC = () => {
 
       <div className="flex-1 min-h-0 overflow-auto p-6">
         <div className="mb-6 flex items-center justify-between">
-          <Search
+          <CustomSearchBox
             placeholder="搜索你感兴趣的MCP服务"
             allowClear
-            enterButton={
-              <Button 
-                type="primary" 
-                style={{
-                  background: 'linear-gradient(135deg, #1890ff, #40a9ff)',
-                  border: 'none',
-                  boxShadow: '0 2px 6px rgba(24, 144, 255, 0.2)'
-                }}
-              >
-                <SearchOutlined />
-              </Button>
-            }
             size="large"
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="max-w-md"
+            onChange={setSearchTerm}
+            onSearch={setSearchTerm}
             style={{ width: '400px' }}
           />
           <div className="flex gap-2">
