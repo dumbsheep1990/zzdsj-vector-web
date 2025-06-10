@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Select, Switch, Typography, Badge, Input, Button, Alert, Table, Space, Popconfirm, message } from 'antd';
 import PageHeader from '../components/layout/PageHeader';
+import CreateApiKeyModal from '../components/modals/CreateApiKeyModal';
 import { 
   KeyIcon,
   FilterIcon,
@@ -59,8 +60,8 @@ const SecuritySettings: React.FC = () => {
     description: '',
     permissions: []
   });
-
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
   
   const [contentFilter, setContentFilter] = useState({
     enabled: true,
@@ -105,8 +106,35 @@ const SecuritySettings: React.FC = () => {
     
     setApiKeys(prev => [...prev, newKey]);
     setNewKeyForm({ name: '', description: '', permissions: [] });
-    setShowCreateForm(false);
     message.success('API Key 创建成功！');
+  };
+
+  // 处理Modal提交
+  const handleModalSubmit = async (formData: { name: string; description: string; permissions: string[] }) => {
+    setIsCreatingKey(true);
+    try {
+      // 模拟API调用延迟
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newKey: ApiKeyItem = {
+        id: Date.now().toString(),
+        name: formData.name,
+        description: formData.description,
+        key: `sk-${formData.name.toLowerCase().replace(/\s+/g, '_')}_${Math.random().toString(36).substring(2, 15)}`,
+        permissions: formData.permissions,
+        createdAt: new Date().toISOString().split('T')[0],
+        lastUsed: '-',
+        status: 'active'
+      };
+      
+      setApiKeys(prev => [...prev, newKey]);
+      setShowCreateModal(false);
+      message.success('API Key 创建成功！');
+    } catch (error) {
+      message.error('创建失败，请重试');
+    } finally {
+      setIsCreatingKey(false);
+    }
   };
 
   // 删除API Key
@@ -378,7 +406,7 @@ const SecuritySettings: React.FC = () => {
               <Button
                 type="primary"
                 icon={<PlusIcon size={20} />}
-                onClick={() => setShowCreateForm(!showCreateForm)}
+                onClick={() => setShowCreateModal(true)}
                 size="large"
                 style={{
                   borderRadius: '12px',
@@ -403,92 +431,8 @@ const SecuritySettings: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
                 }}
               >
-                {showCreateForm ? '取消创建' : '创建新的API Key'}
+                创建新的API Key
               </Button>
-            </div>
-            
-            {/* 创建表单 - 下拉展开方式 */}
-            <div 
-              className="api-form-wrapper"
-              style={{
-                display: 'grid',
-                gridTemplateRows: showCreateForm ? '1fr' : '0fr',
-                transition: 'grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.4s ease',
-                marginBottom: showCreateForm ? '32px' : '0'
-              }}
-            >
-              <div 
-                style={{
-                  overflow: 'hidden',
-                  minHeight: 0
-                }}
-              >
-                <div 
-                  className="p-6 rounded-2xl border-2"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0.95) 60%)',
-                    borderColor: '#2563eb30',
-                    opacity: showCreateForm ? 1 : 0,
-                    transform: showCreateForm ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.98)',
-                    transition: 'opacity 0.3s ease 0.1s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s',
-                    margin: '8px 0'
-                  }}
-                >
-                  <Title level={4} className="mb-4">
-                    创建新的API Key
-                  </Title>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Text className="font-semibold mb-2 block">Key名称</Text>
-                      <Input
-                        value={newKeyForm.name}
-                        onChange={(e) => setNewKeyForm(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="输入API Key名称..."
-                        style={{ borderRadius: '8px' }}
-                      />
-                    </div>
-                    <div>
-                      <Text className="font-semibold mb-2 block">描述</Text>
-                      <Input
-                        value={newKeyForm.description}
-                        onChange={(e) => setNewKeyForm(prev => ({ ...prev, description: e.target.value }))}
-                        placeholder="输入API Key用途描述..."
-                        style={{ borderRadius: '8px' }}
-                      />
-                    </div>
-                    <div>
-                      <Text className="font-semibold mb-2 block">权限</Text>
-                      <Select
-                        mode="multiple"
-                        value={newKeyForm.permissions}
-                        onChange={(value) => setNewKeyForm(prev => ({ ...prev, permissions: value }))}
-                        className="w-full"
-                        placeholder="选择权限..."
-                        style={{ borderRadius: '8px' }}
-                        options={[
-                          { value: 'read', label: '🔍 读取权限 - 查看数据' },
-                          { value: 'search', label: '🔎 搜索权限 - 执行搜索' },
-                          { value: 'chat', label: '💬 对话权限 - AI对话' },
-                          { value: 'upload', label: '📤 上传权限 - 上传文件' },
-                          { value: 'manage', label: '⚙️ 管理权限 - 管理配置' }
-                        ]}
-                      />
-                    </div>
-                    <div className="flex space-x-3 mt-4">
-                      <Button 
-                        type="primary" 
-                        onClick={generateApiKey}
-                        disabled={!newKeyForm.name.trim()}
-                      >
-                        生成API Key
-                      </Button>
-                      <Button onClick={() => setShowCreateForm(false)}>
-                        取消
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
             
             <Table 
@@ -843,6 +787,14 @@ const SecuritySettings: React.FC = () => {
           </SecurityCard>
         </div>
       </div>
+
+      {/* 创建API Key Modal */}
+      <CreateApiKeyModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleModalSubmit}
+        loading={isCreatingKey}
+      />
 
       <style>{`
         /* API表单Grid动画样式 */
