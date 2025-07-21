@@ -1,0 +1,258 @@
+/* 智能体编排页面专用样式 */
+
+/* 主容器 */
+.agent-orchestration-container {
+  --ao-primary: #2563eb;
+  --ao-primary-hover: #1d4ed8;
+  --ao-background: #f9fafb;
+  --ao-surface: #ffffff;
+  --ao-text: #1e293b;
+  --ao-text-muted: #64748b;
+  --ao-border: #e5e7eb;
+  --ao-success: #10b981;
+  --ao-warning: #f59e0b;
+  --ao-error: #ef4444;
+  --ao-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* 暗黑模式主题变量 */
+[data-theme="dark"] .agent-orchestration-container {
+  --ao-primary: #60a5fa;
+  --ao-primary-hover: #3b82f6;
+  --ao-background: #0f172a;
+  --ao-surface: #1e293b;
+  --ao-text: #e2e8f0;
+  --ao-text-muted: #94a3b8;
+  --ao-border: #374151;
+  --ao-success: #34d399;
+  --ao-warning: #fbbf24;
+  --ao-error: #f87171;
+  --ao-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* iframe容器样式 */
+.iframe-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: var(--ao-shadow);
+  background: var(--ao-surface);
+  border: 1px solid var(--ao-border);
+  transition: all 0.3s ease;
+}
+
+.iframe-container:hover {
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* 加载覆盖层样式 */
+.iframe-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--ao-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+/* 状态指示器动画 */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-indicator {
+  animation: statusPulse 2s infinite;
+}
+
+.status-indicator.running {
+  animation: statusPulse 1s infinite;
+}
+
+.status-indicator.error {
+  animation: statusPulse 0.5s infinite;
+}
+
+/* 指标卡片样式 */
+.metrics-card {
+  background: var(--ao-surface);
+  border: 1px solid var(--ao-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.metrics-card:hover {
+  border-color: var(--ao-primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+/* 错误提示栏样式 */
+.error-banner {
+  background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 100%);
+  border-left: 4px solid var(--ao-error);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .agent-orchestration-container {
+    padding: 0;
+  }
+  
+  .iframe-container {
+    border-radius: 8px;
+    margin: 8px;
+  }
+  
+  .enhanced-header {
+    padding: 16px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .iframe-container {
+    border-radius: 0;
+    margin: 0;
+    height: calc(100vh - 140px);
+  }
+  
+  .enhanced-header {
+    padding: 12px;
+  }
+  
+  .enhanced-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .enhanced-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .metrics-container {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .iframe-container {
+    height: calc(100vh - 180px);
+  }
+}
+
+/* 加载动画优化 */
+.loading-spinner {
+  border: 4px solid var(--ao-border);
+  border-top: 4px solid var(--ao-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 过渡动画 */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+  transition: all 0.2s ease;
+  border: 1px solid var(--ao-border);
+  background: var(--ao-surface);
+  color: var(--ao-text);
+}
+
+.theme-toggle:hover {
+  background: var(--ao-primary);
+  color: white;
+  border-color: var(--ao-primary);
+}
+
+/* 自定义滚动条（如果需要） */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--ao-background);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ao-border);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ao-text-muted);
+}
+
+/* 焦点和可访问性样式 */
+.focus-visible:focus {
+  outline: 2px solid var(--ao-primary);
+  outline-offset: 2px;
+}
+
+/* 提升性能的硬件加速 */
+.iframe-container,
+.loading-overlay,
+.enhanced-header {
+  transform: translateZ(0);
+  will-change: transform;
+}

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { Card, Select } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Card, Select, message } from 'antd';
 import PageHeader from '../components/layout/PageHeader';
 import Graph from 'graphology';
 import Sigma from 'sigma';
+import { graphApi } from '../utils/api/graph';
 
 interface SigmaInstance {
   kill: () => void;
@@ -41,14 +42,129 @@ const mockGraphData = {
 const GraphPreview: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sigmaRef = useRef<SigmaInstance | null>(null);
+  const [availableGraphs, setAvailableGraphs] = useState<any[]>([]);
+  const [selectedGraphId, setSelectedGraphId] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
+  // 加载可用图谱列表
   useEffect(() => {
+    loadAvailableGraphs();
+  }, []);
+
+  // 当选择图谱改变时重新渲染
+  useEffect(() => {
+    if (selectedGraphId) {
+      loadGraphData(selectedGraphId);
+    } else {
+      renderMockData();
+    }
+  }, [selectedGraphId]);
+
+  const loadAvailableGraphs = async () => {
+    try {
+      const graphs = await graphApi.getGraphs();
+      setAvailableGraphs(graphs || []);
+      
+      // 如果有图谱，默认选择第一个
+      if (graphs && graphs.length > 0) {
+        setSelectedGraphId(graphs[0].id);
+      } else {
+        // 没有图谱时显示模拟数据
+        renderMockData();
+      }
+    } catch (error) {
+      console.error('加载图谱列表失败:', error);
+      message.error('加载图谱列表失败，显示模拟数据');
+      renderMockData();
+    }
+  };
+
+  const loadGraphData = async (graphId: string) => {
     if (!containerRef.current) return;
+    
+    try {
+      setLoading(true);
+      
+      // 清理现有的图
+      if (sigmaRef.current) {
+        sigmaRef.current.kill();
+        sigmaRef.current = null;
+      }
+
+      const response = await graphApi.getGraphNodes(graphId);
+      const edges = await graphApi.getGraphEdges(graphId);
+      
+      // 创建新图实例
+      const graph = new Graph();
+
+      // 添加节点
+      if (response && response.length > 0) {
+        response.forEach((node: any) => {
+          graph.addNode(node.id, {
+            x: node.x || Math.random() * 800,
+            y: node.y || Math.random() * 600,
+            size: node.size || 15,
+            color: node.color || '#4CAF50',
+            label: node.label || node.name
+          });
+        });
+      }
+
+      // 添加边
+      if (edges && edges.length > 0) {
+        edges.forEach((edge: any) => {
+          try {
+            graph.addEdge(edge.source, edge.target, {
+              size: edge.weight || 2,
+              color: edge.color || '#666',
+              label: edge.label || edge.type
+            });
+          } catch (e) {
+            // 忽略无效边
+            console.warn('Invalid edge:', edge);
+          }
+        });
+      }
+
+      // 如果没有数据，显示提示
+      if (graph.order === 0) {
+        renderEmptyGraph();
+        return;
+      }
+
+      // 创建 Sigma 实例
+      sigmaRef.current = new Sigma(graph, containerRef.current, {
+        minCameraRatio: 0.1,
+        maxCameraRatio: 10,
+        renderEdgeLabels: true,
+        defaultEdgeColor: '#999',
+        defaultNodeColor: '#999',
+        labelSize: 12,
+        labelWeight: 'bold',
+      });
+
+    } catch (error) {
+      console.error('加载图谱数据失败:', error);
+      message.error('加载图谱数据失败，显示模拟数据');
+      renderMockData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderMockData = () => {
+    if (!containerRef.current) return;
+
+    // 清理现有的图
+    if (sigmaRef.current) {
+      sigmaRef.current.kill();
+      sigmaRef.current = null;
+    }
 
     // 创建图实例
     const graph = new Graph();
 
-    // 添加节点
+    // 添加模拟节点
     mockGraphData.nodes.forEach(node => {
       graph.addNode(node.id, {
         x: node.x,
@@ -59,7 +175,7 @@ const GraphPreview: React.FC = () => {
       });
     });
 
-    // 添加边
+    // 添加模拟边
     mockGraphData.edges.forEach(edge => {
       graph.addEdge(edge.source, edge.target, {
         size: edge.size,
@@ -78,7 +194,24 @@ const GraphPreview: React.FC = () => {
       labelSize: 12,
       labelWeight: 'bold',
     });
+  };
 
+  const renderEmptyGraph = () => {
+    if (!containerRef.current) return;
+
+    // 显示空图提示
+    containerRef.current.innerHTML = `
+      <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #999;">
+        <div style="text-align: center;">
+          <p style="font-size: 16px; margin: 0;">该图谱暂无数据</p>
+          <p style="font-size: 14px; margin: 5px 0 0 0;">请先在图谱管理中创建并生成图谱数据</p>
+        </div>
+      </div>
+    `;
+  };
+
+  // 清理效果
+  useEffect(() => {
     return () => {
       if (sigmaRef.current) {
         sigmaRef.current.kill();
@@ -99,16 +232,22 @@ const GraphPreview: React.FC = () => {
             <span>选择图谱：</span>
             <Select
               style={{ width: 300 }}
-              defaultValue="industry"
-              options={[
-                { value: 'industry', label: '产业政策知识图谱' },
-                { value: 'technology', label: '科技创新政策图谱' },
-                { value: 'livelihood', label: '民生政策知识图谱' },
-                { value: 'finance', label: '财税政策知识图谱' },
-                { value: 'business', label: '营商环境政策图谱' },
-                { value: 'regional', label: '区域发展政策图谱' }
+              value={selectedGraphId}
+              onChange={setSelectedGraphId}
+              placeholder="请选择要预览的图谱"
+              loading={loading}
+              options={availableGraphs.length > 0 ? availableGraphs.map(graph => ({
+                value: graph.id,
+                label: graph.name
+              })) : [
+                { value: 'mock', label: '模拟数据演示' }
               ]}
             />
+            {availableGraphs.length === 0 && (
+              <span style={{ color: '#999', fontSize: '12px' }}>
+                暂无可用图谱，显示模拟数据
+              </span>
+            )}
           </div>
         </Card>
         <Card bodyStyle={{ padding: 0 }}>

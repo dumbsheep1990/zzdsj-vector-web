@@ -77,7 +77,7 @@ const AgentList: React.FC = () => {
   };
 
   const handleCreateAgent = () => {
-    navigate('/agent-system/builder');
+    navigate('/agent-system/flow-builder');
   };
   
   // 页面标题及操作

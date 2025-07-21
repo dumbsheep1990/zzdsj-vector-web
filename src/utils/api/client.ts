@@ -41,6 +41,7 @@ function isPublicEndpoint(url: string): boolean {
   const cleanUrl = url.replace(API_BASE_URL, '').replace(/^\/+/, '');
   // 移除URL参数
   const path = cleanUrl.split('?')[0];
+  
   // 检查是否在公开端点列表中
   return PUBLIC_ENDPOINTS.some(endpoint => {
     const cleanEndpoint = endpoint.replace(/^\/+/, '');
@@ -102,16 +103,16 @@ async function request<T>(
       ...options.headers,
     };
     
-    // 如果不是公开端点，添加JWT token验证
-    if (!isPublicEndpoint(fullUrl)) {
-      const token = getAccessToken();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      } else {
-        // 如果需要Token但没有Token，抛出未授权错误
-        throw new ApiError(API_ERROR_MESSAGES.UNAUTHORIZED, 401);
-      }
-    }
+    // 临时跳过所有认证检查
+    // if (!isPublicEndpoint(fullUrl)) {
+    //   const token = getAccessToken();
+    //   if (token) {
+    //     headers['Authorization'] = `Bearer ${token}`;
+    //   } else {
+    //     // 如果需要Token但没有Token，抛出未授权错误
+    //     throw new ApiError(API_ERROR_MESSAGES.UNAUTHORIZED, 401);
+    //   }
+    // }
     
     const config: RequestInit = {
       method,

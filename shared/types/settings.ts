@@ -38,6 +38,25 @@ export interface SecurityConfig {
   maxLoginAttempts: number;
   twoFactorAuthEnabled: boolean;
   allowedIPs?: string[];
+  // 敏感词过滤配置
+  sensitiveWordEnabled: boolean;
+  sensitiveWordFilterType: 'block' | 'replace' | 'warn';
+  sensitiveWordReplaceChar: string;
+  autoBlockEnabled: boolean;
+  logSensitiveWords: boolean;
+  whitelistEnabled: boolean;
+  blacklistEnabled: boolean;
+  customRulesEnabled: boolean;
+}
+
+export interface SensitiveWord {
+  id: string;
+  word: string;
+  category: string;
+  level: 'low' | 'medium' | 'high';
+  createTime: string;
+  updateTime: string;
+  isActive: boolean;
 }
 
 export interface StorageConfig {

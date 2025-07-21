@@ -4,7 +4,7 @@
 import { Graph, GraphNode, GraphEdge, GraphQuery } from '../../../shared/types/graph';
 import apiClient from './client';
 
-const BASE_URL = 'graph';
+const BASE_URL = '';  // 空字符串，因为API_BASE_URL已经包含了graph路径
 
 /**
  * 图数据库API服务

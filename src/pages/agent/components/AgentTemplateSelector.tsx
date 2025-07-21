@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -206,25 +206,30 @@ const AgentTemplateSelector: React.FC<AgentTemplateSelectorProps> = ({
   const [agents, setAgents] = useState<AgentTemplateType[]>(mockAgents);
   const [selectedAgent, setSelectedAgent] = useState<AgentTemplateType | null>(null);
 
-  // 过滤智能体
-  const filteredAgents = agents.filter(agent =>
-    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    agent.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    agent.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // 使用useMemo优化过滤性能
+  const filteredAgents = useMemo(() => {
+    if (!searchTerm.trim()) return agents;
+    
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return agents.filter(agent =>
+      agent.name.toLowerCase().includes(lowercaseSearch) ||
+      agent.description.toLowerCase().includes(lowercaseSearch) ||
+      agent.tags.some(tag => tag.toLowerCase().includes(lowercaseSearch))
+    );
+  }, [agents, searchTerm]);
 
-  // 处理选择智能体
-  const handleSelectAgent = (agent: AgentTemplateType) => {
+  // 使用useCallback优化事件处理函数
+  const handleSelectAgent = useCallback((agent: AgentTemplateType) => {
     setSelectedAgent(agent);
-  };
+  }, []);
 
   // 处理确认选择
-  const handleConfirmSelection = () => {
+  const handleConfirmSelection = useCallback(() => {
     if (selectedAgent) {
       onSelectTemplate(selectedAgent);
       onClose();
     }
-  };
+  }, [selectedAgent, onSelectTemplate, onClose]);
 
   // 格式化日期
   const formatDate = (dateString: string) => {

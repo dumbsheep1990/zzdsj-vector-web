@@ -32,7 +32,9 @@ export const PUBLIC_ENDPOINTS = [
   '/auth/register',
   '/auth/forgot-password',
   '/auth/reset-password',
-  '/auth/validate'
+  '/auth/validate',
+  '/graph',  // 知识图谱接口无需认证
+  'graph'    // 兼容不同路径格式
 ];
 
 // API错误消息

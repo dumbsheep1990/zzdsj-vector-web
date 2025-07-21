@@ -1,43 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter, BarChart2, Settings } from 'lucide-react';
-import { knowledgeBaseData } from '../utils/mockData';
+import { Plus, Filter, BarChart2, Settings, RefreshCw } from 'lucide-react';
 import type { KnowledgeBaseItem } from '../utils/types';
-import FileListModal from '../components/modals/FileListModal';
+import KnowledgeBaseFiles from '../components/modules/knowledge-base/KnowledgeBaseFiles';
+import KnowledgeBaseDetailDrawer from '../components/modules/knowledge-base/KnowledgeBaseDetailDrawer';
+import KnowledgeBaseCreateDialog from '../components/modules/knowledge-base/KnowledgeBaseCreateDialog';
 import PageHeader from '../components/layout/PageHeader';
 import SearchInput from '../components/common/SearchInput';
-import Switch from '../components/ui/Switch';
+import { Switch } from '../components/ui/Switch';
 import { useAppContext } from '../context/AppContext';
 import { FileIcon, Database } from 'lucide-react';
 import { KnowledgeBaseListSkeleton } from '../components/skeleton';
-import { Empty } from 'antd';
+import { Empty, message } from 'antd';
+import { knowledgeServiceApi } from '../utils/api/knowledge';
 
 const KnowledgeBase: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<KnowledgeBaseItem | null>(null);
+    const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [knowledgeBaseItems, setKnowledgeBaseItems] = useState<KnowledgeBaseItem[]>([]);
-    const [loading, setLoading] = useState(true); // 添加加载状态
-    const [hasData, setHasData] = useState(true); // 是否有数据状态
+    const [loading, setLoading] = useState(true);
+    const [hasData, setHasData] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const { state } = useAppContext();
 
     // 加载数据
     useEffect(() => {
         loadKnowledgeBaseData();
-    }, []);
+    }, [currentPage, searchTerm, selectedStatus]);
 
     // 加载知识库数据
-    const loadKnowledgeBaseData = () => {
+    const loadKnowledgeBaseData = async () => {
         setLoading(true);
-        // 模拟API调用延迟
-        setTimeout(() => {
-            setKnowledgeBaseItems(knowledgeBaseData);
+        setError(null);
+        
+        try {
+            const params = {
+                page: currentPage,
+                page_size: 12,
+                ...(selectedStatus !== 'all' && { status: selectedStatus }),
+                ...(searchTerm && { search: searchTerm })
+            };
+            
+            const result = await knowledgeServiceApi.getKnowledgeBases(params);
+            
+            if (result.success) {
+                const kbItems = result.data.knowledge_bases.map((kb: any) => ({
+                    id: kb.id,
+                    name: kb.name,
+                    description: kb.description,
+                    fileCount: kb.document_count || 0,
+                    vectorCount: kb.chunk_count || 0,
+                    lastUpdated: kb.updated_at,
+                    category: kb.embedding_model || '文档',
+                    status: kb.status === 'active' ? '活跃' : '维护中',
+                    vectorized: Math.round((kb.chunk_count || 0) / Math.max(kb.document_count || 1, 1) * 100),
+                    tags: kb.settings?.tags || []
+                }));
+                
+                setKnowledgeBaseItems(kbItems);
+                setTotalPages(result.data.pagination.total_pages || 0);
+                setHasData(kbItems.length > 0);
+            } else {
+                setError('获取知识库列表失败');
+                setKnowledgeBaseItems([]);
+                setHasData(false);
+            }
+        } catch (error: any) {
+            console.error('Failed to load knowledge bases:', error);
+            setError(error.message || '网络错误，请稍后重试');
+            setKnowledgeBaseItems([]);
+            setHasData(false);
+        } finally {
             setLoading(false);
-        }, 1500);
+        }
     };
 
     // 刷新数据
     const handleRefresh = () => {
+        setCurrentPage(1);
         loadKnowledgeBaseData();
+    };
+
+    // 创建知识库成功后的回调
+    const handleCreateSuccess = (newKnowledgeBase: any) => {
+        message.success('知识库创建成功');
+        handleRefresh();
+    };
+
+    // 删除知识库
+    const handleDeleteKnowledgeBase = async (kbId: string) => {
+        try {
+            const result = await knowledgeServiceApi.deleteKnowledgeBase(kbId);
+            if (result.success) {
+                message.success('知识库删除成功');
+                handleRefresh();
+            } else {
+                message.error(result.message || '删除知识库失败');
+            }
+        } catch (error: any) {
+            message.error(error.message || '删除知识库失败');
+        }
     };
 
     const getCategoryGradient = (category: string) => {
@@ -100,6 +166,7 @@ const KnowledgeBase: React.FC = () => {
 
     const handleCardClick = (kb: KnowledgeBaseItem) => {
         setSelectedKnowledgeBase(kb);
+        setIsDetailDrawerOpen(true);
     };
 
     const handleToggleStatus = (kb: KnowledgeBaseItem) => {
@@ -121,7 +188,8 @@ const KnowledgeBase: React.FC = () => {
     };
 
     const renderKnowledgeBaseCard = (kb: KnowledgeBaseItem) => {
-        const { name, description, category, status, tags = [], progressPercentage, documentCount, questionCount } = kb;
+        const { name, description, category, status, tags = [], vectorized } = kb;
+        const progressPercentage = vectorized || 0;
         const progressColor = getProgressColor(progressPercentage);
         const incompleteColor = getIncompleteColor(progressPercentage);
 
@@ -162,6 +230,7 @@ const KnowledgeBase: React.FC = () => {
                                         checked={status === '活跃'}
                                         size="sm"
                                         className="data-[state=checked]:bg-blue-500"
+                                        onChange={() => handleToggleStatus(kb)}
                                     />
                                 </div>
                             </div>
@@ -188,7 +257,7 @@ const KnowledgeBase: React.FC = () => {
                         <div className="flex mb-3">
                             <div className="flex items-center mr-4 px-2 py-1 bg-blue-50 rounded-md">
                                 <FileIcon size={14} className="text-blue-600 mr-1" />
-                                <span className="text-sm text-blue-700 font-medium">{documentCount}</span>
+                                <span className="text-sm text-blue-700 font-medium">{kb.fileCount}</span>
                             </div>
                             <div className="flex items-center px-2 py-1 bg-purple-50 rounded-md">
                                 <svg
@@ -205,7 +274,7 @@ const KnowledgeBase: React.FC = () => {
                                 >
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                                 </svg>
-                                <span className="text-sm text-purple-700 font-medium">{questionCount}</span>
+                                <span className="text-sm text-purple-700 font-medium">{kb.vectorCount}</span>
                             </div>
                         </div>
 
@@ -283,7 +352,7 @@ const KnowledgeBase: React.FC = () => {
                     {
                         icon: <Plus size={20} />,
                         label: '新建知识库',
-                        onClick: () => console.log('新建知识库')
+                        onClick: () => setIsCreateDialogOpen(true)
                     }
                 ]}
                 secondaryActions={[
@@ -321,10 +390,43 @@ const KnowledgeBase: React.FC = () => {
                 )}
             </div>
 
-            <FileListModal 
-                isOpen={!!selectedKnowledgeBase}
-                onClose={() => setSelectedKnowledgeBase(null)}
-                knowledgeBaseName={selectedKnowledgeBase?.name || ''}
+            {/* 知识库详情侧抽屉和遮罩 */}
+            {isDetailDrawerOpen && (
+                <div 
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    onClick={() => {
+                        setIsDetailDrawerOpen(false);
+                        setSelectedKnowledgeBase(null);
+                    }}
+                />
+            )}
+            <KnowledgeBaseDetailDrawer
+                knowledgeBase={selectedKnowledgeBase}
+                isOpen={isDetailDrawerOpen}
+                onClose={() => {
+                    setIsDetailDrawerOpen(false);
+                    setSelectedKnowledgeBase(null);
+                }}
+            />
+
+            {/* 知识库文件管理面板 - 保留原有功能 */}
+            {selectedKnowledgeBase && !isDetailDrawerOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="w-5/6 h-5/6 bg-white rounded-lg shadow-xl overflow-hidden">
+                        <KnowledgeBaseFiles 
+                            knowledgeBaseId={selectedKnowledgeBase.id}
+                            title={`${selectedKnowledgeBase.name} · 文件管理`}
+                            onClose={() => setSelectedKnowledgeBase(null)}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* 创建知识库对话框 */}
+            <KnowledgeBaseCreateDialog
+                open={isCreateDialogOpen}
+                onClose={() => setIsCreateDialogOpen(false)}
+                onSuccess={handleCreateSuccess}
             />
         </div>
     );

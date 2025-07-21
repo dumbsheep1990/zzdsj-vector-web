@@ -4,6 +4,7 @@ import { Database, FileText, Network, Calendar, Trash2 } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import GraphDatabaseListSkeleton from '../components/skeleton/GraphDatabaseListSkeleton';
 import ConfirmDeleteModal from '../components/modal/ConfirmDeleteModal';
+import { graphApi } from '../utils/api/graph';
 
 // 模拟数据，实际应该从API获取
 const mockDatabases = [
@@ -67,19 +68,45 @@ const GraphDatabase: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
   const [graphToDelete, setGraphToDelete] = useState<number | null>(null);
   
-  // 模拟API加载数据
+  // 加载图谱数据
   useEffect(() => {
-    setLoading(true);
-    
-    // 模拟延迟加载
-    const timer = setTimeout(() => {
+    loadGraphData();
+  }, [currentPage, pageSize]);
+
+  const loadGraphData = async () => {
+    try {
+      setLoading(true);
+      const response = await graphApi.getGraphs();
+      
+      if (response && response.length > 0) {
+        // 适配后端数据格式到前端显示格式
+        const adaptedData = response.map((graph: any) => ({
+          id: graph.id,
+          name: graph.name,
+          description: graph.description || '暂无描述',
+          fileCount: graph.nodeCount || 0,
+          nodeCount: graph.nodeCount || 0,
+          lastUpdated: graph.updatedAt ? new Date(graph.updatedAt).toISOString().split('T')[0] : '未知'
+        }));
+        
+        setGraphData(adaptedData);
+        setTotalCount(adaptedData.length);
+      } else {
+        // 如果没有数据，使用模拟数据
+        setGraphData(mockDatabases);
+        setTotalCount(mockDatabases.length);
+      }
+    } catch (error) {
+      console.error('加载图谱数据失败:', error);
+      message.error('加载图谱数据失败，使用模拟数据');
+      
+      // 失败时使用模拟数据
       setGraphData(mockDatabases);
       setTotalCount(mockDatabases.length);
+    } finally {
       setLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  };
 
   // 删除图谱
   const handleDelete = (id: number) => {
@@ -88,13 +115,24 @@ const GraphDatabase: React.FC = () => {
   };
 
   // 确认删除
-  const confirmDelete = () => {
-    // 模拟删除操作
-    const updatedData = graphData.filter(item => item.id !== graphToDelete);
-    setGraphData(updatedData);
-    setTotalCount(updatedData.length);
-    message.success('删除成功');
-    setDeleteModalVisible(false);
+  const confirmDelete = async () => {
+    if (!graphToDelete) return;
+    
+    try {
+      await graphApi.deleteGraph(String(graphToDelete));
+      
+      // 删除成功后重新加载数据
+      const updatedData = graphData.filter(item => item.id !== graphToDelete);
+      setGraphData(updatedData);
+      setTotalCount(updatedData.length);
+      
+      message.success('删除成功');
+      setDeleteModalVisible(false);
+      setGraphToDelete(null);
+    } catch (error) {
+      console.error('删除图谱失败:', error);
+      message.error('删除失败，请稍后重试');
+    }
   };
 
   // 分页处理

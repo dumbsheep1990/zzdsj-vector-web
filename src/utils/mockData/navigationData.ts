@@ -45,14 +45,9 @@ export const navigationItems: NavItem[] = [
         iconType: 'Database'
       },
       {
-        id: 'vectors',
-        label: '向量化管理',
-        iconType: 'Layers'
-      },
-      {
-        id: 'metadata',
-        label: '元数据管理',
-        iconType: 'Database'
+        id: 'splitting-strategy',
+        label: '切分策略',
+        iconType: 'Scissors'
       }
     ]
   },
@@ -80,7 +75,7 @@ export const navigationItems: NavItem[] = [
   },
   {
     id: 'workflow',
-    label: '工作流',
+    label: '助手管理',
     iconType: 'Layers',
     children: [
       {
@@ -91,11 +86,6 @@ export const navigationItems: NavItem[] = [
       {
         id: 'task-orchestration',
         label: '任务编排',
-        iconType: 'FileType'
-      },
-      {
-        id: 'autonomous-orchestration',
-        label: '自主编排',
         iconType: 'FileType'
       }
     ]
@@ -111,22 +101,32 @@ export const navigationItems: NavItem[] = [
         iconType: 'List'
       },
       {
-        id: 'agent-builder',
-        label: '智能体构建',
-        iconType: 'Tool'
-      },
-      {
-        id: 'agent-template',
-        label: '智能体模板',
-        iconType: 'Copy'
+        id: 'agent-flow-builder',
+        label: '流程画布构建',
+        iconType: 'FlowChart'
       }
     ]
+  },
+  {
+    id: 'agent-orchestration',
+    label: '智能体编排监控',
+    iconType: 'Brain'
+  },
+  {
+    id: 'intelligent-reports',
+    label: '智能报告',
+    iconType: 'FileText'
   },
   {
     id: 'tool-plaza',
     label: '工具广场',
     iconType: 'Wrench',
     children: [
+      {
+        id: 'tool-plaza-home',
+        label: '工具广场',
+        iconType: 'Home'
+      },
       {
         id: 'data-processing-tools',
         label: 'API工具',
@@ -163,6 +163,11 @@ export const navigationItems: NavItem[] = [
         id: 'model-settings',
         label: '模型设置',
         iconType: 'Box'
+      },
+      {
+        id: 'security-settings',
+        label: '安全配置',
+        iconType: 'Shield'
       }
     ]
   }

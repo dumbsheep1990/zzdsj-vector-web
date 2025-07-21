@@ -20,7 +20,16 @@ import {
     Brain,
     List,
     Copy,
-    Send
+    Send,
+    CheckSquare,
+    Plus,
+    Cog,
+    Package,
+    GitBranch,
+    Eye,
+    Workflow,
+    Shield,
+    Scissors
 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { navigationItems } from '../../utils/mockData';
@@ -52,13 +61,15 @@ const Sidebar: React.FC = () => {
         'prompt-templates': '/qa-assistant/prompt-templates',
         'datasets': '/qa-assistant/datasets',
         'knowledge-base': '/knowledge-base/files',
-        'vectors': '/knowledge-base/vectors',
+        'splitting-strategy': '/knowledge-base/splitting-strategy',
         'metadata': '/knowledge-base/metadata',
         'graph-database': '/knowledge-graph/database',
         'graph-preview': '/knowledge-graph/preview',
         'graph-qa': '/knowledge-graph/graph-qa',
         'basic-settings': '/settings/basic',
         'model-settings': '/settings/model',
+        'security-settings': '/settings/security',
+        'tool-plaza-home': '/tool-plaza/home',
         'agent-tools': '/tool-plaza/agent-tools',
         'tool-factory': '/tool-plaza/tool-factory',
         'mcp-center': '/tool-plaza/mcp',
@@ -67,9 +78,16 @@ const Sidebar: React.FC = () => {
         'task-orchestration': '/workflow/task-orchestration',
         'autonomous-orchestration': '/workflow/autonomous-orchestration',
         'agent-list': '/agent-system/list',
-        'agent-builder': '/agent-system/builder',
         'agent-template': '/agent-system/template',
         'agent-deployment': '/agent-system/deployment',
+        'agent-flow-builder': '/agent-system/flow-builder',
+        'agent-orchestration': '/agent-orchestration',
+        'intelligent-reports': '/intelligent-reports',
+        'report-list': '/intelligent-reports/report-list',
+        'report-generate': '/intelligent-reports/report-generate',
+        'report-templates': '/intelligent-reports/report-templates',
+        'task-management': '/intelligent-reports/task-management',
+        'agent-collaboration': '/intelligent-reports/agent-collaboration',
     };
 
     useEffect(() => {
@@ -214,6 +232,24 @@ const Sidebar: React.FC = () => {
                 return <Copy size={size} />;
             case 'Send':
                 return <Send size={size} />;
+            case 'CheckSquare':
+                return <CheckSquare size={size} />;
+            case 'Plus':
+                return <Plus size={size} />;
+            case 'Tool':
+                return <Cog size={size} />;
+            case 'Box':
+                return <Package size={size} />;
+            case 'Network':
+                return <GitBranch size={size} />;
+            case 'Eye':
+                return <Eye size={size} />;
+            case 'FlowChart':
+                return <Workflow size={size} />;
+            case 'Shield':
+                return <Shield size={size} />;
+            case 'Scissors':
+                return <Scissors size={size} />;
             default:
                 return <FileText size={size} />;
         }
@@ -389,7 +425,7 @@ const Sidebar: React.FC = () => {
         border: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'block',
         background: 'rgb(31, 41, 55)',
-        isolation: 'isolate'
+        isolation: 'isolate' as const
     };
 
     const popupMenuItemStyle = {
@@ -564,7 +600,32 @@ const Sidebar: React.FC = () => {
         <div style={sidebarStyle} className="sidebar-container">
             <div style={logoContainerStyle}>
                 <div style={logoStyle}>
-                    <Database color="#2563eb" size={24} />
+                    <div 
+                        style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '8px',
+                            background: 'linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(0, 201, 255, 0.3)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <span 
+                            style={{
+                                color: 'white',
+                                fontFamily: 'Arial Black, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: 900,
+                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                            }}
+                        >
+                            Z
+                        </span>
+                    </div>
                     {sidebarExpanded && (
                         <span style={{ 
                             marginLeft: '0.75rem',
@@ -572,7 +633,7 @@ const Sidebar: React.FC = () => {
                             fontWeight: 600,
                             color: '#1e293b'
                         }}>
-                            智政智脑
+                            NextAgent
                         </span>
                     )}
                 </div>

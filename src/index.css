@@ -3,6 +3,53 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -214,11 +261,84 @@ button[style*="#9c27b0"]:hover,
   }
 }
 
-/* 全局禁用所有模糊效果 - 强力版本 */
-/* 这将禁用所有弹框组件上的模糊效果 */
-* {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+/* 磨砂玻璃效果增强 */
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.glass-morphism-strong {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 12px 40px rgba(31, 38, 135, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 玻璃反射动画 */
+@keyframes glass-shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.glass-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: glass-shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 选择性禁用模糊效果 - 仅针对弹框组件 */
+/* 允许glass-effect组件使用模糊效果 */
+
+/* 确保底部导航栏的模糊效果正常工作 */
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(24px) saturate(180%) brightness(130%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(130%) !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 0 !important; /* 确保无圆角 */
+}
+
+/* 自定义磨砂导航栏样式 - 强制覆盖所有其他样式 */
+.custom-glass-navbar {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: absolute !important;
+  z-index: 9999 !important;
+}
+
+/* 确保滚动内容在底部栏后正确显示 */
+.scroll-content-with-glass {
+  padding-bottom: 120px !important;
+  overflow-y: auto !important;
 }
 
 /* Ant Design Modal 和下拉菜单特定修复 */

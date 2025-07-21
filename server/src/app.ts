@@ -20,6 +20,8 @@ import knowledgeRoutes from './api/knowledge';
 import vectorRoutes from './api/vector';
 import modelRoutes from './api/model';
 import qaRoutes from './api/qa';
+import authRoutes from './api/auth';
+import assistantRoutes from './api/assistants';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -64,6 +66,8 @@ app.get('/health', (req, res) => {
 });
 
 // API路由 (使用缓存中间件)
+app.use('/api/auth', authRoutes); // 认证接口不使用缓存
+app.use('/api/assistants', cacheMiddleware({ ttl: 5 * 60 * 1000 }), assistantRoutes);
 app.use('/api/knowledge', cacheMiddleware({ ttl: 5 * 60 * 1000 }), knowledgeRoutes);
 app.use('/api/vector', cacheMiddleware({ ttl: 5 * 60 * 1000 }), vectorRoutes);
 app.use('/api/model', cacheMiddleware({ ttl: 10 * 60 * 1000 }), modelRoutes);

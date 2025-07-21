@@ -157,7 +157,7 @@ const AgentDeployment: React.FC = () => {
     {
       icon: <CloudUploadIcon />,
       label: '新建部署',
-      onClick: () => navigate('/agent-system/builder?action=deploy')
+      onClick: () => navigate('/agent-system/flow-builder')
     }
   ];
   
@@ -189,7 +189,7 @@ const AgentDeployment: React.FC = () => {
 
   // 处理新部署
   const handleNewDeployment = () => {
-    navigate('/agent-system/builder?action=deploy');
+    navigate('/agent-system/flow-builder');
   };
 
   // 处理部署控制

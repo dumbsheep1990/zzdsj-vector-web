@@ -1,0 +1,20 @@
+.createButton {
+  color: #ffffff !important;
+}
+
+.createButton * {
+  color: #ffffff !important;
+}
+
+.createButton span {
+  color: #ffffff !important;
+}
+
+.createButton .anticon {
+  color: #ffffff !important;
+}
+
+.createButton svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}

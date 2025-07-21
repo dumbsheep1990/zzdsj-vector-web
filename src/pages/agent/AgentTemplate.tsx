@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
@@ -26,7 +26,10 @@ const PageContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   overflow: 'hidden',
   backgroundColor: '#f3f4f6',
-  height: '100vh'
+  height: '100vh',
+  // 启用硬件加速
+  transform: 'translateZ(0)',
+  backfaceVisibility: 'hidden'
 }));
 
 const ContentContainer = styled(Box)(({ theme }) => ({
@@ -38,26 +41,35 @@ const ContentContainer = styled(Box)(({ theme }) => ({
 
 const MainContent = styled(Box)(({ theme }) => ({
   width: '100%',
-  overflow: 'auto',
+  height: '100%', // 使用100%避免auto计算
+  overflow: 'hidden', // 移除滚动条，改用内部滚动
   backgroundColor: 'white',
   borderRadius: '0.5rem',
   boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-  padding: '1.25rem'
+  padding: '1.25rem',
+  display: 'flex',
+  flexDirection: 'column'
 }));
 
+// 优化卡片样式，减少重排重绘
 const TemplateCard = styled(Card)(({ theme }) => ({
-  height: '360px', // 固定卡片高度
-  width: '100%', // 确保宽度填满Grid容器
+  height: '360px',
+  width: '100%',
   display: 'flex',
   flexDirection: 'column',
   borderRadius: '8px',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-  },
   border: '1px solid rgba(0, 0, 0, 0.08)',
   borderTop: '4px solid #00c9ff',
+  // 优化过渡动画，只使用transform和opacity
+  transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+  willChange: 'transform', // 告知浏览器该元素会发生变换
+  // 启用硬件加速
+  transform: 'translateZ(0)',
+  backfaceVisibility: 'hidden',
+  '&:hover': {
+    transform: 'translateY(-4px) translateZ(0)', // 减少移动距离，保持硬件加速
+    boxShadow: '0 6px 20px rgba(0,0,0,0.08)', // 减少阴影复杂度
+  },
 }));
 
 // 模板数据接口
@@ -108,22 +120,26 @@ const AgentTemplate: React.FC = () => {
   const [templates, setTemplates] = useState<AgentTemplate[]>(mockTemplates);
   const { state } = useAppContext();
 
-  // 过滤模板
-  const filteredTemplates = templates.filter(template =>
-    template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    template.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 使用useMemo优化过滤性能
+  const filteredTemplates = useMemo(() => {
+    if (!searchTerm.trim()) return templates;
+    
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return templates.filter(template =>
+      template.name.toLowerCase().includes(lowercaseSearch) ||
+      template.description.toLowerCase().includes(lowercaseSearch) ||
+      template.category.toLowerCase().includes(lowercaseSearch)
+    );
+  }, [templates, searchTerm]);
 
-  // 处理使用模板
-  const handleUseTemplate = (templateId: string) => {
-    navigate(`/agent-system/builder?template=${templateId}`);
-  };
+  // 使用useCallback优化事件处理函数
+  const handleUseTemplate = useCallback((templateId: string) => {
+    navigate(`/agent-system/flow-builder?template=${templateId}`);
+  }, [navigate]);
   
-  // 创建新模板
-  const handleCreateTemplate = () => {
-    navigate('/agent-system/builder?action=create_template');
-  };
+  const handleCreateTemplate = useCallback(() => {
+    navigate('/agent-system/flow-builder');
+  }, [navigate]);
   
   // 页面标题及操作
   const primaryActions = [
@@ -166,19 +182,37 @@ const AgentTemplate: React.FC = () => {
       
       <ContentContainer>
         <MainContent>
-          {/* 统一固定宽度的卡片容器 */}
-          <Box sx={{ width: '100%' }}>
+          {/* 优化的卡片容器 - 使用flex布局避免grid计算性能问题 */}
+          <Box sx={{ 
+            width: '100%', 
+            height: '100%',
+            overflow: 'auto', // 内部滚动
+            // 启用硬件加速
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
+          }}>
             <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              display: 'flex',
+              flexWrap: 'wrap',
               gap: '24px',
-              width: '100%'
+              width: '100%',
+              // 确保每行3个卡片，响应式调整
+              '& > div': {
+                flexBasis: 'calc(33.333% - 16px)',
+                minWidth: '300px',
+                '@media (max-width: 1200px)': {
+                  flexBasis: 'calc(50% - 12px)',
+                },
+                '@media (max-width: 768px)': {
+                  flexBasis: '100%',
+                }
+              }
             }}>
               {filteredTemplates.map((template) => (
                 <Box 
                   key={template.id} 
                   sx={{ 
-                    width: '100%', // 强制每个盒子填满网格单元
+                    // 避免不必要的宽度设置，由父容器控制
                   }}
                 >
                   <TemplateCard>
@@ -246,10 +280,17 @@ const AgentTemplate: React.FC = () => {
                         fullWidth
                         variant="contained"
                         sx={{ 
-                          background: 'linear-gradient(90deg, #00c9ff 0%, #92fe9d 100%)',
+                          // 简化渐变，使用更高性能的solid color
+                          backgroundColor: '#00c9ff',
+                          '&:hover': {
+                            backgroundColor: '#0099cc',
+                          },
                           textTransform: 'none',
                           borderRadius: '8px',
-                          height: '40px'
+                          height: '40px',
+                          // 避免不必要的重绘
+                          willChange: 'background-color',
+                          transition: 'background-color 0.2s ease'
                         }}
                       >
                         使用此模板

@@ -32,7 +32,7 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
           bottom: 20,
           left: 16,
           width: 2,
-          background: 'linear-gradient(to bottom, #e2e8f0 10%, #cbd5e1 50%, #e2e8f0 90%)',
+background: 'linear-gradient(to bottom, #ff0000 10%, #00ff00 50%, #0000ff 90%)',
           zIndex: 0,
           borderRadius: '4px',
           boxShadow: '0 0 4px rgba(0,0,0,0.05)',

@@ -17,7 +17,7 @@ const pathToSectionMap: Record<string, string> = {
     '/qa-assistant/assistant-list': 'assistant-list',
     '/qa-assistant/qa-management': 'qa-management',
     '/knowledge-base/files': 'knowledge-base',
-    '/knowledge-base/vectors': 'vectors',
+    '/knowledge-base/splitting-strategy': 'splitting-strategy',
     '/knowledge-base/metadata': 'metadata',
     '/knowledge-graph/database': 'graph-database',
     '/knowledge-graph/preview': 'graph-preview',
@@ -35,7 +35,7 @@ const sectionToPathMap: Record<string, string> = {
     'assistant-list': '/qa-assistant/assistant-list',
     'qa-management': '/qa-assistant/qa-management',
     'knowledge-base': '/knowledge-base/files',
-    'vectors': '/knowledge-base/vectors',
+    'splitting-strategy': '/knowledge-base/splitting-strategy',
     'metadata': '/knowledge-base/metadata',
     'graph-database': '/knowledge-graph/database',
     'graph-preview': '/knowledge-graph/preview',
@@ -53,6 +53,7 @@ interface AppContextType {
     setActiveSection: (section: string) => void;
     setActiveSubSection: (section: string) => void;
     toggleSidebar: () => void;
+    setSidebarExpanded: (expanded: boolean) => void;
     toggleDarkMode: () => void;
 }
 
@@ -121,6 +122,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setState(prev => ({ ...prev, sidebarExpanded: !prev.sidebarExpanded }));
     }, []);
 
+    // 设置侧边栏展开状态
+    const setSidebarExpanded = useCallback((expanded: boolean) => {
+        setState(prev => ({ ...prev, sidebarExpanded: expanded }));
+    }, []);
+
     // 切换暗黑模式
     const toggleDarkMode = useCallback(() => {
         setState(prev => ({ ...prev, darkMode: !prev.darkMode }));
@@ -132,8 +138,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setActiveSection,
         setActiveSubSection,
         toggleSidebar,
+        setSidebarExpanded,
         toggleDarkMode
-    }), [state, setActiveSection, setActiveSubSection, toggleSidebar, toggleDarkMode]);
+    }), [state, setActiveSection, setActiveSubSection, toggleSidebar, setSidebarExpanded, toggleDarkMode]);
 
     return (
         <AppContext.Provider value={contextValue}>

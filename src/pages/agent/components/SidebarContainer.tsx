@@ -33,7 +33,7 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({
     <Box 
       sx={{ 
         width: collapsed ? 60 : 220,
-        bgcolor: 'white',
+        bgcolor: 'transparent',
         borderRight: '1px solid',
         borderColor: '#e0e0e0',
         display: 'flex',

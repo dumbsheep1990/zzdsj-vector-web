@@ -1,12 +1,13 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AssistantList from '../pages/AssistantList';
+import AssistantListRedesigned from '../pages/AssistantListRedesigned';
 import QAManagement from '../pages/QAManagement';
 import PromptTemplates from '../pages/PromptTemplates';
 import Datasets from '../pages/Datasets';
 import KnowledgeBase from '../pages/KnowledgeBase';
-import Vectors from '../pages/Vectors';
-import Metadata from '../pages/Metadata';
+import SplittingStrategy from '../pages/SplittingStrategy';
+import SearchTestPage from '../pages/SearchTestPage';
 import Dashboard from '../pages/Dashboard';
 import DocumentManagement from '../pages/DocumentManagement';
 import DataIntegration from '../pages/DataIntegration';
@@ -14,18 +15,30 @@ import AgentTools from '../pages/AgentTools';
 import ToolFactory from '../pages/ToolFactory';
 import BasicSettings from '../pages/BasicSettings';
 import ModelSettings from '../pages/ModelSettings';
+import SecuritySettings from '../pages/SecuritySettings';
 import GraphDatabase from '../pages/GraphDatabase';
 import GraphPreview from '../pages/GraphPreview';
 import MCPCenter from '../pages/MCPCenter';
 import DataProcessingTools from '../pages/DataProcessingTools';
+import ToolPlaza from '../pages/ToolPlaza';
+// 助手管理页面(原工作流)
 import ApplicationOrchestrationPage from '../pages/workflow/ApplicationOrchestrationPage';
 import TaskOrchestrationPage from '../pages/workflow/TaskOrchestrationPage';
 
 // 智能体系统页面
 import AgentList from '../pages/agent/AgentList';
-import AgentBuilder from '../pages/agent/AgentBuilder';
-import AgentTemplate from '../pages/agent/AgentTemplate';
 import AgentDeployment from '../pages/agent/AgentDeployment';
+import AgentFlowBuilder from '../pages/agent/AgentFlowBuilder';
+import AgentOrchestration from '../pages/AgentOrchestration';
+
+// 智能报告系统页面
+import IntelligentReportsLayout from '../components/layout/IntelligentReportsLayout';
+import NextReportInterface from '../pages/intelligent-reports/NextReportInterface';
+import ReportList from '../pages/intelligent-reports/ReportList';
+import ReportTemplates from '../pages/intelligent-reports/ReportTemplates';
+import TaskManagement from '../pages/intelligent-reports/TaskManagement';
+import AgentCollaboration from '../pages/intelligent-reports/AgentCollaboration';
+import ReportDetail from '../pages/intelligent-reports/ReportDetail';
 
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
@@ -77,6 +90,11 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="/qa-assistant/assistant-list" element={
         <AuthGuard>
+          <AssistantListRedesigned />
+        </AuthGuard>
+      } />
+      <Route path="/qa-assistant/assistant-list-old" element={
+        <AuthGuard>
           <AssistantList />
         </AuthGuard>
       } />
@@ -106,16 +124,17 @@ const AppRoutes: React.FC = () => {
           <KnowledgeBase />
         </AuthGuard>
       } />
-      <Route path="/knowledge-base/vectors" element={
+      <Route path="/knowledge-base/splitting-strategy" element={
         <AuthGuard>
-          <Vectors />
+          <SplittingStrategy />
         </AuthGuard>
       } />
-      <Route path="/knowledge-base/metadata" element={
+      <Route path="/knowledge-base/search-test" element={
         <AuthGuard>
-          <Metadata />
+          <SearchTestPage />
         </AuthGuard>
       } />
+      
       
       <Route path="/knowledge-graph" element={
         <AuthGuard>
@@ -148,10 +167,20 @@ const AppRoutes: React.FC = () => {
           <ModelSettings />
         </AuthGuard>
       } />
+      <Route path="/settings/security" element={
+        <AuthGuard>
+          <SecuritySettings />
+        </AuthGuard>
+      } />
       
       <Route path="/tool-plaza" element={
         <AuthGuard>
-          <Navigate to="/tool-plaza/data-integration" replace />
+          <Navigate to="/tool-plaza/home" replace />
+        </AuthGuard>
+      } />
+      <Route path="/tool-plaza/home" element={
+        <AuthGuard>
+          <ToolPlaza />
         </AuthGuard>
       } />
       <Route path="/tool-plaza/data-integration" element={
@@ -180,6 +209,7 @@ const AppRoutes: React.FC = () => {
         </AuthGuard>
       } />
       
+      
       <Route path="/workflow" element={
         <AuthGuard>
           <Navigate to="/workflow/application-orchestration" replace />
@@ -206,19 +236,72 @@ const AppRoutes: React.FC = () => {
           <AgentList />
         </AuthGuard>
       } />
-      <Route path="/agent-system/builder" element={
-        <AuthGuard>
-          <AgentBuilder />
-        </AuthGuard>
-      } />
-      <Route path="/agent-system/template" element={
-        <AuthGuard>
-          <AgentTemplate />
-        </AuthGuard>
-      } />
       <Route path="/agent-system/deployment" element={
         <AuthGuard>
           <AgentDeployment />
+        </AuthGuard>
+      } />
+      
+      <Route path="/agent-system/flow-builder" element={
+        <AuthGuard>
+          <AgentFlowBuilder />
+        </AuthGuard>
+      } />
+      
+      <Route path="/agent-orchestration" element={
+        <AuthGuard>
+          <AgentOrchestration />
+        </AuthGuard>
+      } />
+      
+      {/* 智能报告路由 */}
+      <Route path="/intelligent-reports" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <NextReportInterface />
+          </IntelligentReportsLayout>
+        </AuthGuard>
+      } />
+      <Route path="/intelligent-reports/nextreport" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <NextReportInterface />
+          </IntelligentReportsLayout>
+        </AuthGuard>
+      } />
+      <Route path="/intelligent-reports/report-list" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <ReportList />
+          </IntelligentReportsLayout>
+        </AuthGuard>
+      } />
+      <Route path="/intelligent-reports/report-templates" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <ReportTemplates />
+          </IntelligentReportsLayout>
+        </AuthGuard>
+      } />
+      <Route path="/intelligent-reports/task-management" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <TaskManagement />
+          </IntelligentReportsLayout>
+        </AuthGuard>
+      } />
+      <Route path="/intelligent-reports/agent-collaboration" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <AgentCollaboration />
+          </IntelligentReportsLayout>
+        </AuthGuard>
+      } />
+      <Route path="/intelligent-reports/report/:reportId" element={
+        <AuthGuard>
+          <IntelligentReportsLayout>
+            <ReportDetail />
+          </IntelligentReportsLayout>
         </AuthGuard>
       } />
       

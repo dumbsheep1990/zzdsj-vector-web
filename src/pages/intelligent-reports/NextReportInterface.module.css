@@ -1,0 +1,165 @@
+/* NextReport Interface 专用样式 - 防止全局样式覆盖 */
+
+.nextReportContainer {
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+}
+
+/* 超级强制覆盖 - 阻止任何透明文本样式 */
+.nextReportContainer,
+.nextReportContainer *,
+.nextReportContainer *::before,
+.nextReportContainer *::after {
+  -webkit-text-fill-color: unset !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  text-fill-color: unset !important;
+}
+
+/* 最高优先级的样式覆盖 - 使用多重选择器提高特异性 */
+.nextReportContainer.nextReportContainer.nextReportContainer h1,
+div.nextReportContainer h1,
+html body div.nextReportContainer h1 {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer h2,
+div.nextReportContainer h2,
+html body div.nextReportContainer h2 {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer h3,
+div.nextReportContainer h3,
+html body div.nextReportContainer h3 {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+/* 特定的类选择器覆盖 */
+.nextReportContainer.nextReportContainer.nextReportContainer .subtitle,
+div.nextReportContainer .subtitle,
+html body div.nextReportContainer .subtitle {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer .description,
+div.nextReportContainer .description,
+html body div.nextReportContainer .description {
+  color: #4b5563 !important;
+  -webkit-text-fill-color: #4b5563 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer .cardTitle,
+div.nextReportContainer .cardTitle,
+html body div.nextReportContainer .cardTitle {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer .cardDescription,
+div.nextReportContainer .cardDescription,
+html body div.nextReportContainer .cardDescription {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer .stepTitle,
+div.nextReportContainer .stepTitle,
+html body div.nextReportContainer .stepTitle {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer.nextReportContainer.nextReportContainer .stepDescription,
+div.nextReportContainer .stepDescription,
+html body div.nextReportContainer .stepDescription {
+  color: #4b5563 !important;
+  -webkit-text-fill-color: #4b5563 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+/* 覆盖可能的Material-UI样式 */
+.nextReportContainer [class*="MuiCard"],
+.nextReportContainer [class*="MuiCard"] h1,
+.nextReportContainer [class*="MuiCard"] h2,
+.nextReportContainer [class*="MuiCard"] h3,
+.nextReportContainer [class*="MuiCard"] p {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* 强制覆盖任何渐变文本样式 */
+.nextReportContainer [style*="linear-gradient"],
+.nextReportContainer [class*="gradient"],
+.nextReportContainer [style*="background-clip"],
+.nextReportContainer [style*="-webkit-background-clip"],
+.nextReportContainer [style*="-webkit-text-fill-color"] {
+  color: inherit !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* 强制覆盖所有可能的Tailwind文本颜色类和渐变文本 */
+.nextReportContainer [class*="text-blue"],
+.nextReportContainer [class*="text-purple"],
+.nextReportContainer [class*="text-indigo"],
+.nextReportContainer [class*="text-transparent"],
+.nextReportContainer [class*="bg-clip-text"] {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+/* 直接通过类名强制覆盖Tailwind的透明文本 */
+.nextReportContainer .text-transparent {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+.nextReportContainer .bg-clip-text {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+/* 确保按钮保持白色文字 */
+.nextReportContainer button {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+.nextReportContainer svg {
+  color: inherit;
+}

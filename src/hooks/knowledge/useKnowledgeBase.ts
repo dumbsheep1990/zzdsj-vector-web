@@ -3,6 +3,7 @@ import { KnowledgeBaseItem } from '../../utils/types';
 import { useAPI } from '../common/useAPI';
 import { useList } from '../common/useList';
 import { message } from 'antd';
+import { knowledgeServiceApi, KnowledgeBaseCreateRequest, KnowledgeBaseUpdateRequest } from '../../utils/api/knowledge';
 
 // 定义知识库状态类型
 export type KnowledgeBaseStatus = '活跃' | '维护中' | '未启用';
@@ -16,6 +17,18 @@ export interface KnowledgeBaseCreateParams {
   description: string;
   category?: KnowledgeBaseCategory;
   tags?: string[];
+  // 添加后端需要的字段
+  embedding_provider?: string;
+  embedding_model?: string;
+  embedding_dimension?: number;
+  vector_store_type?: string;
+  chunk_size?: number;
+  chunk_overlap?: number;
+  similarity_threshold?: number;
+  enable_hybrid_search?: boolean;
+  enable_agno_integration?: boolean;
+  agno_search_type?: string;
+  settings?: Record<string, any>;
 }
 
 // 定义知识库更新参数接口
@@ -25,88 +38,85 @@ export interface KnowledgeBaseUpdateParams {
   category?: KnowledgeBaseCategory;
   status?: KnowledgeBaseStatus;
   tags?: string[];
+  similarity_threshold?: number;
+  enable_hybrid_search?: boolean;
+  enable_agno_integration?: boolean;
+  settings?: Record<string, any>;
 }
 
-// 模拟获取知识库列表的API函数
-const fetchKnowledgeBasesAPI = async (): Promise<KnowledgeBaseItem[]> => {
-  // 模拟网络请求延迟
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // 返回模拟数据
-  return [
-    {
-      id: 'kb-001',
-      name: '产品文档库',
-      description: '包含产品手册、技术规格和使用指南的知识库',
-      fileCount: 128,
-      vectorCount: 2458,
-      lastUpdated: '2025-04-29T14:20:30Z',
-      category: '文档',
-      size: '1.2GB',
-      status: '活跃',
-      vectorized: 85,
-      pendingFiles: 12,
-      tags: ['产品', '文档', 'API'],
-      recentKeywords: ['安装', '配置', '故障排除']
-    },
-    {
-      id: 'kb-002',
-      name: '法规标准库',
-      description: '各类行业标准、政策法规和合规要求的知识库',
-      fileCount: 76,
-      vectorCount: 1832,
-      lastUpdated: '2025-05-01T09:15:45Z',
-      category: '法规标准',
-      size: '890MB',
-      status: '活跃',
-      vectorized: 100,
-      pendingFiles: 0,
-      tags: ['法规', '合规', '标准'],
-      recentKeywords: ['ISO', '认证', '合规性']
-    },
-    {
-      id: 'kb-003',
-      name: '历史会议记录',
-      description: '公司内部会议记录、决策和讨论纪要的知识库',
-      fileCount: 215,
-      vectorCount: 3210,
-      lastUpdated: '2025-05-02T16:30:00Z',
-      category: '历史会议记录',
-      size: '1.8GB',
-      status: '维护中',
-      vectorized: 65,
-      pendingFiles: 32,
-      tags: ['会议', '决策', '内部'],
-      recentKeywords: ['项目', '计划', '进展']
-    }
-  ];
+// 转换后端数据为前端需要的格式
+const convertBackendToFrontend = (backendKb: any): KnowledgeBaseItem => {
+  return {
+    id: backendKb.id,
+    name: backendKb.name,
+    description: backendKb.description,
+    fileCount: backendKb.document_count || 0,
+    vectorCount: backendKb.vector_count || 0,
+    lastUpdated: backendKb.updated_at || backendKb.created_at,
+    category: '文档', // 默认分类
+    size: backendKb.size || '0KB',
+    status: backendKb.status === 'active' ? '活跃' : 
+            backendKb.status === 'maintenance' ? '维护中' : '未启用',
+    vectorized: backendKb.vectorized_percentage || 0,
+    pendingFiles: backendKb.pending_documents || 0,
+    tags: backendKb.tags || [],
+    recentKeywords: backendKb.recent_keywords || []
+  };
 };
 
-// 模拟创建知识库的API函数
+// 获取知识库列表的API函数
+const fetchKnowledgeBasesAPI = async (): Promise<KnowledgeBaseItem[]> => {
+  try {
+    const response = await knowledgeServiceApi.getKnowledgeBases();
+    
+    if (response.success) {
+      return response.data.knowledge_bases.map(convertBackendToFrontend);
+    } else {
+      throw new Error(response.message || '获取知识库列表失败');
+    }
+  } catch (error: any) {
+    console.error('获取知识库列表失败:', error);
+    throw error;
+  }
+};
+
+// 创建知识库的API函数
 const createKnowledgeBaseAPI = async (params: KnowledgeBaseCreateParams): Promise<KnowledgeBaseItem> => {
-  // 模拟网络请求延迟
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // 生成一个随机ID
-  const id = `kb-${Math.floor(Math.random() * 1000)}`;
-  const now = new Date().toISOString();
-  
-  // 返回模拟创建的知识库
-  return {
-    id,
-    name: params.name,
-    description: params.description,
-    fileCount: 0,
-    vectorCount: 0,
-    lastUpdated: now,
-    category: params.category || '其他',
-    size: '0KB',
-    status: '活跃',
-    vectorized: 0,
-    pendingFiles: 0,
-    tags: params.tags || [],
-    recentKeywords: []
-  };
+  try {
+    // 将前端参数转换为后端需要的格式
+    const createRequest: KnowledgeBaseCreateRequest = {
+      name: params.name,
+      description: params.description,
+      embedding_provider: params.embedding_provider || 'siliconflow',
+      embedding_model: params.embedding_model || 'Qwen/Qwen3-Embedding-8B',
+      embedding_dimension: params.embedding_dimension || 8192,
+      vector_store_type: params.vector_store_type || 'milvus',
+      chunk_size: params.chunk_size || 1024,
+      chunk_overlap: params.chunk_overlap || 128,
+      similarity_threshold: params.similarity_threshold || 0.7,
+      enable_hybrid_search: params.enable_hybrid_search ?? false,
+      enable_agno_integration: params.enable_agno_integration ?? false,
+      agno_search_type: params.agno_search_type || 'vector',
+      settings: params.settings || {}
+    };
+    
+    const response = await knowledgeServiceApi.createKnowledgeBase(createRequest);
+    
+    if (response.success) {
+      // 转换后端返回的数据为前端需要的格式
+      const newKb = convertBackendToFrontend(response.data);
+      // 设置前端特有的属性
+      newKb.category = params.category || '文档';
+      newKb.tags = params.tags || [];
+      
+      return newKb;
+    } else {
+      throw new Error(response.message || '创建知识库失败');
+    }
+  } catch (error: any) {
+    console.error('创建知识库失败:', error);
+    throw error;
+  }
 };
 
 // 模拟更新知识库的API函数

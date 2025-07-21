@@ -179,6 +179,47 @@ const DropdownMenuShortcut = ({
 };
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
 
+// 简单的 DropdownMenu 组件
+interface SimpleDropdownMenuProps {
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const SimpleDropdownMenu: React.FC<SimpleDropdownMenuProps> = ({ trigger, children, className }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className={`relative inline-block text-left ${className || ''}`} ref={dropdownRef}>
+      <div onClick={() => setIsOpen(!isOpen)}>
+        {trigger}
+      </div>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1" role="menu" aria-orientation="vertical">
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -195,4 +236,8 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  SimpleDropdownMenu
 };
+
+// 默认导出简单下拉菜单组件
+export default SimpleDropdownMenu;

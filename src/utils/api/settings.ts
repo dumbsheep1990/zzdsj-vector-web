@@ -7,7 +7,8 @@ import {
   SecurityConfig, 
   StorageConfig,
   ApiConfig,
-  SystemStatus
+  SystemStatus,
+  SensitiveWord
 } from '../../../shared/types/settings';
 import { Model } from '../../../shared/types/models';
 import apiClient from './client';
@@ -220,6 +221,89 @@ export const settingsApi = {
   clearCache(type?: 'api' | 'storage' | 'all') {
     const params = type ? { type } : undefined;
     return apiClient.post<{success: boolean, cleared: string[]}>(`${BASE_URL}/clear-cache`, params);
+  },
+  
+  /**
+   * 敏感词管理
+   */
+  
+  /**
+   * 获取敏感词列表
+   */
+  getSensitiveWords() {
+    return apiClient.get<{words: SensitiveWord[], total: number}>(`${BASE_URL}/sensitive-words`);
+  },
+  
+  /**
+   * 添加敏感词
+   */
+  addSensitiveWord(word: Omit<SensitiveWord, 'id' | 'createTime' | 'updateTime'>) {
+    return apiClient.post<SensitiveWord>(`${BASE_URL}/sensitive-words`, word);
+  },
+  
+  /**
+   * 更新敏感词
+   */
+  updateSensitiveWord(id: string, word: Partial<SensitiveWord>) {
+    return apiClient.put<SensitiveWord>(`${BASE_URL}/sensitive-words/${id}`, word);
+  },
+  
+  /**
+   * 删除敏感词
+   */
+  deleteSensitiveWord(id: string) {
+    return apiClient.delete<{success: boolean}>(`${BASE_URL}/sensitive-words/${id}`);
+  },
+  
+  /**
+   * 批量导入敏感词
+   */
+  importSensitiveWords(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return apiClient.post<{success: boolean, imported: number, failed: number}>(
+      `${BASE_URL}/sensitive-words/import`,
+      formData,
+      {
+        headers: {
+          'Content-Type': undefined as any
+        }
+      }
+    );
+  },
+  
+  /**
+   * 导出敏感词
+   */
+  exportSensitiveWords() {
+    return apiClient.get<Blob>(
+      `${BASE_URL}/sensitive-words/export`,
+      undefined,
+      {
+        headers: {
+          'Accept': 'application/octet-stream'
+        }
+      }
+    );
+  },
+  
+  /**
+   * 清除敏感词缓存
+   */
+  clearSensitiveWordCache() {
+    return apiClient.post<{success: boolean}>(`${BASE_URL}/sensitive-words/clear-cache`);
+  },
+  
+  /**
+   * 检测文本是否包含敏感词
+   */
+  checkSensitiveWords(text: string) {
+    return apiClient.post<{
+      isSensitive: boolean;
+      words: string[];
+      suggestion: string;
+    }>(`${BASE_URL}/sensitive-words/check`, { text });
   }
 };
 

@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { ButtonProps, buttonVariants } from "./Button";
 
-const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
+const PaginationComponent = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
     aria-label="pagination"
@@ -12,7 +12,7 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
     {...props}
   />
 );
-Pagination.displayName = "Pagination";
+PaginationComponent.displayName = "PaginationComponent";
 
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
@@ -106,12 +106,172 @@ const PaginationEllipsis = ({
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
+// 简单的分页组件
+interface SimplePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  className?: string;
+}
+
+const SimplePagination: React.FC<SimplePaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className
+}) => {
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const showEllipsis = totalPages > 7;
+    
+    if (!showEllipsis) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+          <button
+            key={i}
+            onClick={() => onPageChange(i)}
+            className={`px-3 py-2 text-sm font-medium rounded-md ${
+              i === currentPage
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {i}
+          </button>
+        );
+      }
+    } else {
+      // Show first page
+      pages.push(
+        <button
+          key={1}
+          onClick={() => onPageChange(1)}
+          className={`px-3 py-2 text-sm font-medium rounded-md ${
+            1 === currentPage
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          1
+        </button>
+      );
+
+      // Show ellipsis or pages around current page
+      if (currentPage > 3) {
+        pages.push(
+          <span key="ellipsis1" className="px-3 py-2 text-sm text-gray-500">
+            ...
+          </span>
+        );
+      }
+
+      // Show current page and surrounding pages
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(
+          <button
+            key={i}
+            onClick={() => onPageChange(i)}
+            className={`px-3 py-2 text-sm font-medium rounded-md ${
+              i === currentPage
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {i}
+          </button>
+        );
+      }
+
+      // Show ellipsis before last page
+      if (currentPage < totalPages - 2) {
+        pages.push(
+          <span key="ellipsis2" className="px-3 py-2 text-sm text-gray-500">
+            ...
+          </span>
+        );
+      }
+
+      // Show last page
+      if (totalPages > 1) {
+        pages.push(
+          <button
+            key={totalPages}
+            onClick={() => onPageChange(totalPages)}
+            className={`px-3 py-2 text-sm font-medium rounded-md ${
+              totalPages === currentPage
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {totalPages}
+          </button>
+        );
+      }
+    }
+
+    return pages;
+  };
+
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <div className={`flex items-center justify-center space-x-2 ${className || ''}`}>
+      <button
+        onClick={handlePrevious}
+        disabled={currentPage === 1}
+        className={`px-3 py-2 text-sm font-medium rounded-md border ${
+          currentPage === 1
+            ? 'text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed'
+            : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+        }`}
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+
+      {renderPageNumbers()}
+
+      <button
+        onClick={handleNext}
+        disabled={currentPage === totalPages}
+        className={`px-3 py-2 text-sm font-medium rounded-md border ${
+          currentPage === totalPages
+            ? 'text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed'
+            : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+        }`}
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
 export {
-  Pagination,
+  PaginationComponent as Pagination,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  SimplePagination
 };
+
+// 默认导出简单分页组件
+export default SimplePagination;
