@@ -24,7 +24,8 @@ import authRoutes from './api/auth';
 import assistantRoutes from './api/assistants';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
+const HOST = process.env.HOST || '0.0.0.0'; // 明确指定IPv4地址
 const isDev = process.env.NODE_ENV !== 'production';
 
 // 基础中间件配置
@@ -94,8 +95,9 @@ process.on('unhandledRejection', (reason) => {
 
 // 启动服务器
 if (require.main === module) {
-  const server = app.listen(PORT, () => {
-    logger.info(`服务运行在 http://localhost:${PORT}, 环境: ${process.env.NODE_ENV || 'development'}`);
+  const server = app.listen(PORT, HOST, () => {
+    logger.info(`服务运行在 http://${HOST}:${PORT}, 环境: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`监听地址: ${HOST} (IPv4), 端口: ${PORT}`);
   });
 
   // 优雅关闭

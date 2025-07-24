@@ -5,6 +5,8 @@ import { Settings, CheckCircle, ArrowLeft, Check } from 'lucide-react';
 
 // 导入模板选择步骤组件
 import BasicInfoStep, { AgentTemplate } from './components/BasicInfoStep';
+import ScenarioSelectionStep, { ScenarioConfig } from './components/ScenarioSelectionStep';
+import AgentTeamConfigStep from './components/AgentTeamConfigStep';
 import BuilderHeader from './components/BuilderHeader';
 
 // 导入模板专用配置组件
@@ -853,11 +855,23 @@ const StepConnector = styled(Box, {
 const AgentFlowBuilder: React.FC = () => {
   // 从钩子中获取状态
   const {
+    // 场景选择状态
+    isScenarioStep,
+    setIsScenarioStep,
+    selectedScenario,
+    setSelectedScenario,
+    
     // 模板选择状态
     isTemplateStep,
     setIsTemplateStep,
     selectedTemplate,
     setSelectedTemplate,
+    
+    // 智能体团队配置状态
+    isTeamConfigStep,
+    setIsTeamConfigStep,
+    agentTeamConfig,
+    setAgentTeamConfig,
     
     // 面板控制
     configPanelOpen,
@@ -878,13 +892,25 @@ const AgentFlowBuilder: React.FC = () => {
     currentStepModules
   } = useFlowBuilderState();
 
+  // 处理场景选择
+  const handleScenarioSelect = useCallback((scenario: ScenarioConfig) => {
+    setSelectedScenario(scenario);
+    setIsScenarioStep(false);
+    setIsTemplateStep(true);
+  }, [setSelectedScenario, setIsScenarioStep, setIsTemplateStep]);
+
   // 处理模板选择
   const handleTemplateSelect = useCallback((template: AgentTemplate) => {
     setSelectedTemplate(template);
     setIsTemplateStep(false);
-    setActiveStepId('model'); // 默认选中第一个步骤
+    setIsTeamConfigStep(true); // 转到智能体团队配置步骤
     setSelectedTab(0); // 重置选中的tab
-  }, [setSelectedTemplate, setIsTemplateStep, setActiveStepId]);
+  }, [setSelectedTemplate, setIsTemplateStep, setIsTeamConfigStep]);
+
+  // 处理智能体团队配置
+  const handleTeamConfigChange = useCallback((teamConfig: any) => {
+    setAgentTeamConfig(teamConfig);
+  }, [setAgentTeamConfig]);
 
   // 处理步骤点击
   const handleStepClick = useCallback((stepId: string) => {
@@ -1001,12 +1027,23 @@ const AgentFlowBuilder: React.FC = () => {
     );
   }, [handleConfigSave, handleStepClick, flowSteps, activeStepId]);
 
-  // 清理旧的配置相关代码
+  // 返回到场景选择
+  const handleBackToScenario = useCallback(() => {
+    setIsScenarioStep(true);
+    setIsTemplateStep(false);
+    setIsTeamConfigStep(false);
+    setSelectedScenario(null);
+    setSelectedTemplate(null);
+    setAgentTeamConfig(null);
+  }, [setIsScenarioStep, setIsTemplateStep, setIsTeamConfigStep, setSelectedScenario, setSelectedTemplate, setAgentTeamConfig]);
+
+  // 从团队配置返回到模板选择
   const handleBackToTemplate = useCallback(() => {
     setIsTemplateStep(true);
+    setIsTeamConfigStep(false);
     setSelectedTemplate(null);
-    setActiveStepId(null);
-  }, [setIsTemplateStep, setSelectedTemplate, setActiveStepId]);
+    setAgentTeamConfig(null);
+  }, [setIsTemplateStep, setIsTeamConfigStep, setSelectedTemplate, setAgentTeamConfig]);
 
   return (
     <>
@@ -1057,16 +1094,81 @@ const AgentFlowBuilder: React.FC = () => {
             flexDirection: 'column',
             transition: 'width 0.3s ease'
           }}>
+            {/* 场景选择阶段 */}
+            {isScenarioStep && (
+              <ScenarioSelectionStep 
+                onScenarioSelect={handleScenarioSelect}
+                selectedScenario={selectedScenario?.id}
+              />
+            )}
+
             {/* 模板选择阶段 */}
-            {isTemplateStep && (
-              <BasicInfoStep 
-                onTemplateSelect={handleTemplateSelect}
-                selectedTemplate={selectedTemplate?.id}
+            {!isScenarioStep && isTemplateStep && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                {/* 返回到场景选择按钮 */}
+                <Box sx={{
+                  display: 'flex', 
+                  alignItems: 'center',
+                  p: 2,
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+                }}>
+                  <IconButton 
+                    sx={{ 
+                      mr: 2,
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      }
+                    }} 
+                    size="small" 
+                    onClick={handleBackToScenario}
+                  >
+                    <ArrowLeft size={20} />
+                  </IconButton>
+                  <Typography variant="h6" sx={{ 
+                    fontSize: '16px', 
+                    color: '#334155', 
+                    fontWeight: 600 
+                  }}>
+                    返回场景选择
+                  </Typography>
+                  {selectedScenario && (
+                    <Box sx={{ ml: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#64748b' }}>
+                        当前场景:
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        color: selectedScenario.color || '#6366f1',
+                        fontWeight: 600 
+                      }}>
+                        {selectedScenario.name}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                
+                {/* 模板选择组件 */}
+                <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                  <BasicInfoStep 
+                    onTemplateSelect={handleTemplateSelect}
+                    selectedTemplate={selectedTemplate?.id}
+                  />
+                </Box>
+              </Box>
+            )}
+
+            {/* 智能体团队配置阶段 */}
+            {!isScenarioStep && !isTemplateStep && isTeamConfigStep && selectedScenario && selectedTemplate && (
+              <AgentTeamConfigStep
+                selectedScenario={selectedScenario}
+                selectedTemplate={selectedTemplate}
+                onTeamConfigChange={handleTeamConfigChange}
+                onBack={handleBackToTemplate}
               />
             )}
 
             {/* 流程构建阶段 */}
-            {!isTemplateStep && (
+            {!isScenarioStep && !isTemplateStep && !isTeamConfigStep && (
               <>
                 {/* 返回按钮区域 */}
                 <Box sx={{

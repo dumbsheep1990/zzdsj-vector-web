@@ -167,6 +167,9 @@ export class KnowledgeService {
         `${this.baseUrl}/bases/${knowledgeBaseId}/documents`,
         { params }
       );
+      if (!response.data) {
+        throw new Error('获取知识库文档列表失败：服务器返回空数据');
+      }
       return response.data;
     } catch (error) {
       logger.error(`获取知识库文档列表失败, 知识库ID: ${knowledgeBaseId}:`, error);

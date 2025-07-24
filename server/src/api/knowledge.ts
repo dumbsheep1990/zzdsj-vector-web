@@ -66,12 +66,7 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const success = await knowledgeService.deleteKnowledgeBase(id);
-    
-    if (!success) {
-      return res.status(404).json({ error: '未找到指定知识库' });
-    }
-    
+    await knowledgeService.deleteKnowledgeBase(id);
     res.status(204).end();
   } catch (error) {
     logger.error(`删除知识库失败 ID: ${req.params.id}:`, error);
@@ -83,7 +78,7 @@ router.delete('/:id', async (req, res, next) => {
 router.get('/:id/files', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const data = await knowledgeService.getKnowledgeBaseFiles(id);
+    const data = await knowledgeService.getDocuments(id);
     res.json(data);
   } catch (error) {
     logger.error(`获取知识库文件列表失败 ID: ${req.params.id}:`, error);

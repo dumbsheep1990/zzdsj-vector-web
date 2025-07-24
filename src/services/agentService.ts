@@ -113,7 +113,7 @@ export interface FlowEdge {
 
 // 智能体服务类
 export class AgentService {
-  private baseURL = 'http://localhost:8081';
+  private baseURL = (import.meta.env.VITE_AGENT_SERVICE_URL?.replace('/api/v1', '') || 'http://localhost:8081');
   private offlineMode = false;
 
   // 设置离线模式

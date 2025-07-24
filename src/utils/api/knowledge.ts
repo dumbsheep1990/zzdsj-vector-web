@@ -6,7 +6,7 @@ import { KnowledgeBaseItem, FileItem } from '../types';
 import apiClient from './client';
 
 // 知识库微服务基础URL（通过网关）
-const KNOWLEDGE_SERVICE_URL = 'http://localhost:8082/api/v1';
+const KNOWLEDGE_SERVICE_URL = import.meta.env.VITE_KNOWLEDGE_SERVICE_URL || 'http://localhost:8082/api/v1';
 
 // 请求参数类型定义
 export interface KnowledgeBaseCreateRequest {

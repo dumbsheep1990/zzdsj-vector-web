@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { AgentTemplate } from '../components/BasicInfoStep';
+import { ScenarioConfig } from '../components/ScenarioSelectionStep';
+import { AgentTeam } from '../types/agentTeam';
 
 /**
  * 流程步骤类型定义
@@ -31,6 +33,10 @@ export interface FlowModule {
  */
 export interface FlowBuilderState {
   // 流程步骤状态
+  isScenarioStep: boolean;
+  setIsScenarioStep: (value: boolean) => void;
+  selectedScenario: ScenarioConfig | null;
+  setSelectedScenario: (scenario: ScenarioConfig | null) => void;
   isTemplateStep: boolean;
   setIsTemplateStep: (value: boolean) => void;
   selectedTemplate: AgentTemplate | null;
@@ -51,6 +57,12 @@ export interface FlowBuilderState {
   
   // 当前步骤的模块
   currentStepModules: FlowModule[];
+  
+  // 智能体团队配置
+  isTeamConfigStep: boolean;
+  setIsTeamConfigStep: (value: boolean) => void;
+  agentTeamConfig: AgentTeam | null;
+  setAgentTeamConfig: (config: AgentTeam | null) => void;
 }
 
 /**
@@ -58,8 +70,12 @@ export interface FlowBuilderState {
  * 遵循单一职责原则，专注于管理流程构建器的状态
  */
 export function useFlowBuilderState(): FlowBuilderState {
+  // 场景选择步骤状态
+  const [isScenarioStep, setIsScenarioStep] = useState<boolean>(true);
+  const [selectedScenario, setSelectedScenario] = useState<ScenarioConfig | null>(null);
+  
   // 当前是否在模板选择步骤
-  const [isTemplateStep, setIsTemplateStep] = useState<boolean>(true);
+  const [isTemplateStep, setIsTemplateStep] = useState<boolean>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<AgentTemplate | null>(null);
   
   // 当前活动步骤
@@ -70,6 +86,10 @@ export function useFlowBuilderState(): FlowBuilderState {
   
   // 当前编辑的模块
   const [editingModule, setEditingModule] = useState<FlowModule | null>(null);
+  
+  // 智能体团队配置步骤状态
+  const [isTeamConfigStep, setIsTeamConfigStep] = useState<boolean>(false);
+  const [agentTeamConfig, setAgentTeamConfig] = useState<AgentTeam | null>(null);
   
   // 根据模板类型生成流程步骤
   const flowSteps = useMemo<FlowStep[]>(() => {
@@ -478,6 +498,10 @@ export function useFlowBuilderState(): FlowBuilderState {
   // 返回所有状态和操作方法，组织良好的API便于使用
   return {
     // 流程步骤状态
+    isScenarioStep,
+    setIsScenarioStep,
+    selectedScenario,
+    setSelectedScenario,
     isTemplateStep,
     setIsTemplateStep,
     selectedTemplate,
@@ -497,6 +521,12 @@ export function useFlowBuilderState(): FlowBuilderState {
     setFlowModules,
     
     // 当前步骤的模块
-    currentStepModules
+    currentStepModules,
+    
+    // 智能体团队配置
+    isTeamConfigStep,
+    setIsTeamConfigStep,
+    agentTeamConfig,
+    setAgentTeamConfig
   };
 }
