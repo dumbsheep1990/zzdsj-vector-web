@@ -4,3 +4,28 @@
 {"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-24 10:45:33"}
 {"level":"info","message":"GET /health 127.0.0.1","service":"vector-bff","timestamp":"2025-07-24 10:45:52"}
 {"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-24 11:07:07"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-27 20:11:50"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-27 20:11:50"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-27 22:53:09"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-27 22:53:13"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-27 22:53:13"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-27 22:56:44"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-27 23:02:40"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-27 23:02:40"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-27 23:58:26"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-27 23:58:28"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-27 23:58:28"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-28 13:16:47"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-28 13:16:47"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-28 13:36:55"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-28 13:51:24"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-28 13:51:24"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-28 14:21:40"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-28 14:21:42"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-28 14:21:42"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-28 17:44:28"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-28 23:17:30"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-28 23:17:30"}
+{"level":"info","message":"接收到关闭信号，优雅关闭中...","service":"vector-bff","timestamp":"2025-07-29 00:03:38"}
+{"level":"info","message":"服务运行在 http://0.0.0.0:3001, 环境: development","service":"vector-bff","timestamp":"2025-07-29 00:03:41"}
+{"level":"info","message":"监听地址: 0.0.0.0 (IPv4), 端口: 3001","service":"vector-bff","timestamp":"2025-07-29 00:03:41"}

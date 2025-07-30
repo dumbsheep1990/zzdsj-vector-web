@@ -102,7 +102,7 @@ export const knowledgeServiceApi = {
    * @param params 查询参数
    */
   async getKnowledgeBases(params: KnowledgeBaseListParams = {}) {
-    const response = await fetch(`${KNOWLEDGE_SERVICE_URL}/knowledge-bases?${new URLSearchParams(params as any)}`);
+    const response = await fetch(`${KNOWLEDGE_SERVICE_URL}/knowledge-bases/?${new URLSearchParams(params as any)}`);
     return response.json();
   },
   

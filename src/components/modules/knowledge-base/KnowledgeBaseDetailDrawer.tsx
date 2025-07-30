@@ -312,116 +312,16 @@ const KnowledgeBaseDetailDrawer: React.FC<KnowledgeBaseDetailDrawerProps> = ({
   );
 
   const renderFilesTab = () => (
-    <div className="space-y-4">
-      {/* 文件管理头部 - 紧凑设计 */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-50 rounded-lg mr-3">
-              <FileText size={18} className="text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800">文件管理</h3>
-              <p className="text-sm text-gray-500">共 {files.length} 个文件</p>
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            <Button size="sm" variant="default" className="text-sm">
-              <Upload size={14} className="mr-1" />
-              上传
-            </Button>
-            <Button size="sm" variant="secondary" className="text-sm">
-              <Download size={14} className="mr-1" />
-              导出
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      {/* 文件列表 - 紧凑设计 */}
-      {isLoading ? (
-        <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200">
-          <div className="overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">文件名</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">类型</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">大小</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">状态</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">日期</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {files.map((file) => (
-                  <tr key={file.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="p-1 bg-blue-50 rounded mr-3">
-                          <FileText size={16} className="text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">{file.name}</p>
-                          <p className="text-xs text-gray-500">{file.path}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">
-                        {file.type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{file.size}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-block px-2 py-1 text-xs rounded-md ${
-                        file.status === '已向量化' ? 'bg-green-100 text-green-700' : 
-                        file.status === '处理中' ? 'bg-yellow-100 text-yellow-700' : 
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {file.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{file.date}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-xs p-1 h-auto"
-                          onClick={() => console.log('查看', file)}
-                        >
-                          <Eye size={12} />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-xs p-1 h-auto"
-                          onClick={() => console.log('编辑', file)}
-                        >
-                          <Edit3 size={12} />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-xs p-1 h-auto text-red-600"
-                          onClick={() => console.log('删除', file)}
-                        >
-                          <Trash2 size={12} />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+    <div className="h-full">
+      <FileManagementPanel
+        title="文件管理"
+        initialFiles={files}
+        knowledgeBaseId={knowledgeBase?.id}
+        onFileAction={(action, file) => {
+          console.log('File action:', action, file);
+          // 这里可以处理文件操作，如删除、编辑等
+        }}
+      />
     </div>
   );
 

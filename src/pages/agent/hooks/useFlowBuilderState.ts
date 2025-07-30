@@ -63,6 +63,12 @@ export interface FlowBuilderState {
   setIsTeamConfigStep: (value: boolean) => void;
   agentTeamConfig: AgentTeam | null;
   setAgentTeamConfig: (config: AgentTeam | null) => void;
+  
+  // 模型配置状态
+  isModelConfigStep: boolean;
+  setIsModelConfigStep: (value: boolean) => void;
+  modelConfig: any;
+  setModelConfig: (config: any) => void;
 }
 
 /**
@@ -91,54 +97,54 @@ export function useFlowBuilderState(): FlowBuilderState {
   const [isTeamConfigStep, setIsTeamConfigStep] = useState<boolean>(false);
   const [agentTeamConfig, setAgentTeamConfig] = useState<AgentTeam | null>(null);
   
-  // 根据模板类型生成流程步骤
+  // 模型配置状态
+  const [isModelConfigStep, setIsModelConfigStep] = useState<boolean>(false);
+  const [modelConfig, setModelConfig] = useState<any>(null);
+  
+  // 根据模板类型生成流程步骤 - 重新设计为智能体配置导向
   const flowSteps = useMemo<FlowStep[]>(() => {
     if (!selectedTemplate) {
       // 默认通用流程
       return [
-        { id: 'model', title: '模型配置', description: '选择和配置AI模型参数', order: 1 },
-        { id: 'capabilities', title: '能力配置', description: '配置智能体的核心能力', order: 2 },
-        { id: 'tools', title: '工具集成', description: '添加和配置外部工具', order: 3 },
-        { id: 'advanced', title: '高级设置', description: '配置高级参数和部署选项', order: 4 }
+        { id: 'agent-overview', title: '智能体概览', description: '查看智能体团队配置', order: 1 },
+        { id: 'agent-config', title: '智能体配置', description: '配置各智能体的详细参数', order: 2 },
+        { id: 'workflow-preview', title: '工作流预览', description: '预览智能体协作流程', order: 3 },
+        { id: 'deployment', title: '部署配置', description: '配置部署和发布选项', order: 4 }
       ];
     }
 
-    // 基于Agno框架的模板特定流程
+    // 基于Agno框架的Agent Team模式流程
     switch (selectedTemplate.agentType) {
       case 'simple-qa':
-        // Level 1: Agents with tools and instructions (简化为3步)
+        // 简单问答智能体流程
         return [
-          { id: 'model', title: '基础模型', description: '选择轻量级快速响应模型', order: 1 },
-          { id: 'instructions', title: '指令设置', description: '配置系统提示词', order: 2 },
-          { id: 'tools', title: '基础工具配置', description: '配置查询和信息检索工具', order: 3 }
+          { id: 'agent-overview', title: '智能体概览', description: '查看已配置的3个智能体团队', order: 1 },
+          { id: 'workflow-preview', title: '工作流预览', description: '预览问答流程和协作方式', order: 2 },
+          { id: 'deployment', title: '部署配置', description: '配置发布和测试选项', order: 3 }
         ];
       
       case 'deep-thinking':
-        // Level 2-3: Agents with knowledge, storage, memory and reasoning
+        // 深度思考智能体流程
         return [
-          { id: 'model', title: '推理模型', description: '选择支持复杂推理的模型', order: 1 },
-          { id: 'reasoning', title: '推理配置', description: '配置思维链和分析策略', order: 2 },
-          { id: 'knowledge', title: '知识系统', description: '配置知识库和检索增强', order: 3 },
-          { id: 'memory', title: '记忆系统', description: '配置上下文记忆和学习能力', order: 4 },
-          { id: 'tools', title: '分析工具', description: '配置数据分析和推理工具', order: 5 }
+          { id: 'agent-overview', title: '智能体概览', description: '查看已配置的5-7个智能体团队', order: 1 },
+          { id: 'workflow-preview', title: '工作流预览', description: '预览深度思考和分析流程', order: 2 },
+          { id: 'deployment', title: '部署配置', description: '配置高级部署选项', order: 3 }
         ];
       
       case 'intelligent-planning':
-        // Level 4-5: Agent Teams + Agentic Workflows
+        // 智能规划智能体流程
         return [
-          { id: 'model', title: '规划模型', description: '选择任务规划和决策模型', order: 1 },
-          { id: 'planning', title: '规划引擎', description: '配置任务分解和规划算法', order: 2 },
-          { id: 'workflow', title: '工作流配置', description: '设计执行流程和状态管理', order: 3 },
-          { id: 'tools', title: '执行工具', description: '配置任务执行和监控工具', order: 4 },
-          { id: 'coordination', title: '协调机制', description: '配置多任务协调和资源调度', order: 5 }
+          { id: 'agent-overview', title: '智能体概览', description: '查看已配置的规划智能体团队', order: 1 },
+          { id: 'workflow-preview', title: '工作流预览', description: '预览任务规划和执行流程', order: 2 },
+          { id: 'deployment', title: '部署配置', description: '配置企业级部署选项', order: 3 }
         ];
       
       default:
         return [
-          { id: 'model', title: '模型配置', description: '选择和配置AI模型参数', order: 1 },
-          { id: 'capabilities', title: '能力配置', description: '配置智能体的核心能力', order: 2 },
-          { id: 'tools', title: '工具集成', description: '添加和配置外部工具', order: 3 },
-          { id: 'advanced', title: '高级设置', description: '配置高级参数和部署选项', order: 4 }
+          { id: 'agent-overview', title: '智能体概览', description: '查看智能体团队配置', order: 1 },
+          { id: 'agent-config', title: '智能体配置', description: '配置各智能体的详细参数', order: 2 },
+          { id: 'workflow-preview', title: '工作流预览', description: '预览智能体协作流程', order: 3 },
+          { id: 'deployment', title: '部署配置', description: '配置部署和发布选项', order: 4 }
         ];
     }
   }, [selectedTemplate]);
@@ -157,68 +163,38 @@ export function useFlowBuilderState(): FlowBuilderState {
 
     switch (selectedTemplate.agentType) {
       case 'simple-qa':
-        // 简单问答智能体模块配置
+        // 简单问答智能体模块配置 - 重新设计为智能体导向
         modules = [
-          // 基础模型配置
+          // 智能体概览
           {
-            id: 'lightweight-model',
-            title: '轻量级模型选择',
-            description: '选择快速响应的轻量级模型',
-            type: 'input',
-            stepId: 'model',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'response-parameters',
-            title: '响应参数',
-            description: '配置温度、响应长度限制等',
+            id: 'team-overview',
+            title: '团队概览',
+            description: '查看3个智能体的配置和协作关系',
             type: 'config',
-            stepId: 'model',
-            configurable: true,
+            stepId: 'agent-overview',
+            configurable: false,
             required: true,
-            configured: false
+            configured: true
           },
-          // 指令配置
+
+          // 工作流预览
           {
-            id: 'system-instructions',
-            title: '系统指令',
-            description: '设置简洁明确的系统提示词',
+            id: 'workflow-preview',
+            title: '工作流预览',
+            description: '预览智能体协作流程',
             type: 'config',
-            stepId: 'instructions',
-            configurable: true,
+            stepId: 'workflow-preview',
+            configurable: false,
             required: true,
-            configured: false
+            configured: true
           },
-          // 基础工具
+          // 部署配置
           {
-            id: 'query-tools',
-            title: '查询工具',
-            description: '配置信息查询和检索工具',
-            type: 'function',
-            stepId: 'tools',
-            configurable: true,
-            required: false,
-            configured: false
-          },
-          // 性能优化
-          {
-            id: 'cache-config',
-            title: '缓存配置',
-            description: '配置响应缓存和优化策略',
+            id: 'deployment-config',
+            title: '部署配置',
+            description: '配置发布和测试选项',
             type: 'config',
-            stepId: 'optimization',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'concurrency-limits',
-            title: '并发限制',
-            description: '设置并发处理和限流参数',
-            type: 'config',
-            stepId: 'optimization',
+            stepId: 'deployment',
             configurable: true,
             required: true,
             configured: false
@@ -227,232 +203,78 @@ export function useFlowBuilderState(): FlowBuilderState {
         break;
 
       case 'deep-thinking':
-        // 深度思考智能体模块配置
+        // 深度思考智能体模块配置 - 重新设计为智能体导向
         modules = [
-          // 模板专用流程配置
+          // 智能体概览
           {
-            id: 'template-flow-config',
-            title: '深度思考流程配置',
-            description: '配置推理深度、协作模式和质量控制',
+            id: 'team-overview',
+            title: '团队概览',
+            description: '查看5-7个智能体的配置和协作关系',
             type: 'config',
-            stepId: 'reasoning',
-            configurable: true,
+            stepId: 'agent-overview',
+            configurable: false,
             required: true,
-            configured: false
+            configured: true
           },
-          // 推理模型
+
+          // 工作流预览
           {
-            id: 'reasoning-model',
-            title: '推理模型选择',
-            description: '选择支持复杂推理的高级模型',
-            type: 'input',
-            stepId: 'model',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'model-reasoning-params',
-            title: '推理参数',
-            description: '配置推理深度和思维链参数',
+            id: 'workflow-preview',
+            title: '工作流预览',
+            description: '预览深度思考和分析流程',
             type: 'config',
-            stepId: 'model',
-            configurable: true,
+            stepId: 'workflow-preview',
+            configurable: false,
             required: true,
-            configured: false
+            configured: true
           },
-          // 推理配置
+          // 部署配置
           {
-            id: 'reasoning-strategy',
-            title: '推理策略',
-            description: '配置多步推理和思维链模式',
+            id: 'deployment-config',
+            title: '部署配置',
+            description: '配置高级部署选项',
             type: 'config',
-            stepId: 'reasoning',
+            stepId: 'deployment',
             configurable: true,
             required: true,
-            configured: false
-          },
-          {
-            id: 'analysis-depth',
-            title: '分析深度',
-            description: '设置分析层次和推理步骤',
-            type: 'config',
-            stepId: 'reasoning',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          // 知识系统
-          {
-            id: 'knowledge-base',
-            title: '知识库配置',
-            description: '配置领域知识和向量数据库',
-            type: 'function',
-            stepId: 'knowledge',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'rag-retrieval',
-            title: 'RAG检索系统',
-            description: '配置检索增强生成系统',
-            type: 'function',
-            stepId: 'knowledge',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          // 记忆系统
-          {
-            id: 'context-memory',
-            title: '上下文记忆',
-            description: '配置会话记忆和上下文管理',
-            type: 'config',
-            stepId: 'memory',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'learning-system',
-            title: '学习系统',
-            description: '配置经验积累和学习机制',
-            type: 'function',
-            stepId: 'memory',
-            configurable: true,
-            required: false,
-            configured: false
-          },
-          // 分析工具
-          {
-            id: 'analysis-tools',
-            title: '分析工具集',
-            description: '配置数据分析和可视化工具',
-            type: 'function',
-            stepId: 'tools',
-            configurable: true,
-            required: false,
             configured: false
           }
         ];
         break;
 
       case 'intelligent-planning':
-        // 智能规划智能体模块配置
+        // 智能规划智能体模块配置 - 重新设计为智能体导向
         modules = [
-          // 模板专用流程配置
+          // 智能体概览
           {
-            id: 'template-flow-config',
-            title: '智能规划流程配置',
-            description: '配置规划视野、资源分配和协调机制',
+            id: 'team-overview',
+            title: '团队概览',
+            description: '查看规划智能体团队配置',
             type: 'config',
-            stepId: 'planning',
-            configurable: true,
+            stepId: 'agent-overview',
+            configurable: false,
             required: true,
-            configured: false
+            configured: true
           },
-          // 规划模型
+
+          // 工作流预览
           {
-            id: 'planning-model',
-            title: '规划模型选择',
-            description: '选择支持任务规划的决策模型',
-            type: 'input',
-            stepId: 'model',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'decision-parameters',
-            title: '决策参数',
-            description: '配置决策权重和优化目标',
+            id: 'workflow-preview',
+            title: '工作流预览',
+            description: '预览任务规划和执行流程',
             type: 'config',
-            stepId: 'model',
-            configurable: true,
+            stepId: 'workflow-preview',
+            configurable: false,
             required: true,
-            configured: false
+            configured: true
           },
-          // 规划引擎
+          // 部署配置
           {
-            id: 'task-decomposition',
-            title: '任务分解',
-            description: '配置任务拆解和依赖分析',
-            type: 'function',
-            stepId: 'planning',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'planning-algorithms',
-            title: '规划算法',
-            description: '选择和配置规划策略算法',
+            id: 'deployment-config',
+            title: '部署配置',
+            description: '配置企业级部署选项',
             type: 'config',
-            stepId: 'planning',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          // 工作流配置
-          {
-            id: 'workflow-design',
-            title: '工作流设计',
-            description: '设计执行流程和状态转换',
-            type: 'function',
-            stepId: 'workflow',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'state-management',
-            title: '状态管理',
-            description: '配置状态持久化和恢复机制',
-            type: 'config',
-            stepId: 'workflow',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          // 执行工具
-          {
-            id: 'execution-tools',
-            title: '执行工具集',
-            description: '配置任务执行和API集成工具',
-            type: 'function',
-            stepId: 'tools',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'monitoring-tools',
-            title: '监控工具',
-            description: '配置执行监控和异常处理工具',
-            type: 'function',
-            stepId: 'tools',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          // 协调机制
-          {
-            id: 'resource-scheduler',
-            title: '资源调度',
-            description: '配置资源分配和调度策略',
-            type: 'config',
-            stepId: 'coordination',
-            configurable: true,
-            required: true,
-            configured: false
-          },
-          {
-            id: 'error-handling',
-            title: '错误处理',
-            description: '配置异常处理和恢复机制',
-            type: 'config',
-            stepId: 'coordination',
+            stepId: 'deployment',
             configurable: true,
             required: true,
             configured: false
@@ -527,6 +349,12 @@ export function useFlowBuilderState(): FlowBuilderState {
     isTeamConfigStep,
     setIsTeamConfigStep,
     agentTeamConfig,
-    setAgentTeamConfig
+    setAgentTeamConfig,
+    
+    // 模型配置状态
+    isModelConfigStep,
+    setIsModelConfigStep,
+    modelConfig,
+    setModelConfig
   };
 }

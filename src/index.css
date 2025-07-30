@@ -88,7 +88,7 @@ code {
 [style*="linear-gradient(45deg, #9c27b0, #7b1fa2)"],
 button[style*="#9c27b0"],
 .MuiButton-containedSecondary,
-.MuiButton-root[style*="background: linear-gradient"] {
+.MuiButton-root[style*="background: linear-gradient"]:not(.bg-gradient-to-r):not([class*="from-green"]):not([class*="to-emerald"]) {
   background: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
@@ -105,7 +105,7 @@ button[style*="#9c27b0"],
 [style*="linear-gradient(45deg, #9c27b0, #7b1fa2)"]:hover,
 button[style*="#9c27b0"]:hover,
 .MuiButton-containedSecondary:hover,
-.MuiButton-root[style*="background: linear-gradient"]:hover {
+.MuiButton-root[style*="background: linear-gradient"]:not(.bg-gradient-to-r):not([class*="from-green"]):not([class*="to-emerald"]):hover {
   background: rgba(255, 255, 255, 0.95) !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
   border: 2px solid rgba(255, 255, 255, 0.8) !important;
@@ -217,6 +217,28 @@ button[style*="#9c27b0"]:hover,
   background: rgba(255, 255, 255, 0.95) !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
   transform: translateY(-2px) !important;
+}
+
+/* 修复知识库创建按钮的样式覆盖问题 */
+/* 修复知识库创建按钮的样式覆盖问题 - 最高优先级 */
+button.bg-gradient-to-r.from-green-600.to-emerald-600,
+motion.button.bg-gradient-to-r.from-green-600.to-emerald-600,
+[class*="bg-gradient-to-r"][class*="from-green-600"][class*="to-emerald-600"] {
+  background: linear-gradient(to right, #16a34a, #059669) !important;
+  color: white !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+button.bg-gradient-to-r.from-green-600.to-emerald-600:hover,
+motion.button.bg-gradient-to-r.from-green-600.to-emerald-600:hover,
+[class*="bg-gradient-to-r"][class*="from-green-600"][class*="to-emerald-600"]:hover {
+  background: linear-gradient(to right, #15803d, #047857) !important;
+  color: white !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* 定制滚动条样式 */

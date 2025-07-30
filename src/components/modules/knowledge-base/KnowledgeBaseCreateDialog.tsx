@@ -820,6 +820,19 @@ const KnowledgeBaseCreateDialog: React.FC<KnowledgeBaseCreateDialogProps> = ({
                   onClick={handleSubmit}
                   disabled={isCreating}
                   className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'linear-gradient(to right, #16a34a, #059669)',
+                    color: 'white',
+                    backgroundImage: 'linear-gradient(to right, #16a34a, #059669)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(to right, #15803d, #047857)';
+                    e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #15803d, #047857)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(to right, #16a34a, #059669)';
+                    e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #16a34a, #059669)';
+                  }}
                 >
                   {isCreating ? (
                     <>

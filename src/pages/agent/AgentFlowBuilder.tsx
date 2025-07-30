@@ -9,6 +9,10 @@ import ScenarioSelectionStep, { ScenarioConfig } from './components/ScenarioSele
 import AgentTeamConfigStep from './components/AgentTeamConfigStep';
 import BuilderHeader from './components/BuilderHeader';
 
+// 导入新的步骤组件
+import AgentOverviewStep from './components/AgentOverviewStep';
+import ModelConfigurationStep from './components/ModelConfigurationStep';
+
 // 导入模板专用配置组件
 import {
   SimpleQAFlowConfig,
@@ -873,6 +877,12 @@ const AgentFlowBuilder: React.FC = () => {
     agentTeamConfig,
     setAgentTeamConfig,
     
+    // 模型配置状态
+    isModelConfigStep,
+    setIsModelConfigStep,
+    modelConfig,
+    setModelConfig,
+    
     // 面板控制
     configPanelOpen,
     setConfigPanelOpen,
@@ -911,6 +921,21 @@ const AgentFlowBuilder: React.FC = () => {
   const handleTeamConfigChange = useCallback((teamConfig: any) => {
     setAgentTeamConfig(teamConfig);
   }, [setAgentTeamConfig]);
+
+  // 处理从团队配置到模型配置的过渡
+  const handleTeamConfigComplete = useCallback(() => {
+    setIsTeamConfigStep(false);
+    setIsModelConfigStep(true);
+  }, [setIsTeamConfigStep, setIsModelConfigStep]);
+  
+  // 处理从模型配置到流程构建的过渡
+  const handleModelConfigComplete = useCallback(() => {
+    setIsModelConfigStep(false);
+    // 设置第一个步骤为活动状态
+    if (flowSteps.length > 0) {
+      setActiveStepId(flowSteps[0].id);
+    }
+  }, [setIsModelConfigStep, flowSteps, setActiveStepId]);
 
   // 处理步骤点击
   const handleStepClick = useCallback((stepId: string) => {
@@ -1164,6 +1189,22 @@ const AgentFlowBuilder: React.FC = () => {
                 selectedTemplate={selectedTemplate}
                 onTeamConfigChange={handleTeamConfigChange}
                 onBack={handleBackToTemplate}
+                onComplete={handleTeamConfigComplete}
+              />
+            )}
+
+            {/* 模型配置阶段 */}
+            {!isScenarioStep && !isTemplateStep && !isTeamConfigStep && isModelConfigStep && selectedScenario && selectedTemplate && agentTeamConfig && (
+              <ModelConfigurationStep
+                selectedScenario={selectedScenario}
+                selectedTemplate={selectedTemplate}
+                agentTeam={agentTeamConfig}
+                onModelConfigChange={setModelConfig}
+                onBack={() => {
+                  setIsModelConfigStep(false);
+                  setIsTeamConfigStep(true);
+                }}
+                onComplete={handleModelConfigComplete}
               />
             )}
 
@@ -1622,6 +1663,44 @@ const AgentFlowBuilder: React.FC = () => {
                             {(() => {
                               const currentModule = currentStepModules[selectedTab];
                               
+                              // 检查是否为智能体概览模块（只读显示）
+                              if (currentModule.id === 'team-overview' && agentTeamConfig) {
+                                return (
+                                  <AgentOverviewStep
+                                    agentTeam={agentTeamConfig}
+                                    selectedTemplate={selectedTemplate}
+                                  />
+                                );
+                              }
+
+                              // 检查是否为工作流预览模块
+                              if (currentModule.id === 'workflow-preview' && agentTeamConfig) {
+                                return (
+                                  <Box sx={{ p: 4, textAlign: 'center' }}>
+                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                                      工作流预览
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                      智能体协作流程预览（功能开发中）
+                                    </Typography>
+                                  </Box>
+                                );
+                              }
+
+                              // 检查是否为部署配置模块
+                              if (currentModule.id === 'deployment-config') {
+                                return (
+                                  <Box sx={{ p: 4, textAlign: 'center' }}>
+                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                                      部署配置
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                      配置部署和发布选项（功能开发中）
+                                    </Typography>
+                                  </Box>
+                                );
+                              }
+
                               // 检查是否为简单问答模板的分解配置模块
                               if (selectedTemplate?.agentType === 'simple-qa') {
                                 switch (currentModule.id) {
@@ -1632,7 +1711,6 @@ const AgentFlowBuilder: React.FC = () => {
                                         onChange={setSimpleQAConfig}
                                       />
                                     );
-
                                 }
                               }
                               
