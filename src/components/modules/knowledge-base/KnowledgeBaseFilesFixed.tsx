@@ -9,72 +9,65 @@ interface KnowledgeBaseFilesProps {
   userId?: string;
   title?: string;
   onClose?: () => void;
+  messageServiceUrl?: string;
+  apiBaseUrl?: string;
 }
 
-const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({
-  knowledgeBaseId = 'default',
-  userId = 'user-123', // TODO: 从用户上下文获取真实用户ID
+const KnowledgeBaseFilesFixed: React.FC<KnowledgeBaseFilesProps> = ({
+  knowledgeBaseId = 'default',  // 实际应用中应该传入真实的知识库ID
+  userId = 'user-123',          // 实际应用中应该从用户上下文获取
   title = "知识库文件列表",
-  onClose
+  onClose,
+  messageServiceUrl = 'http://localhost:8089',
+  apiBaseUrl = 'http://localhost:8082'
 }) => {
-  // Use knowledgeBaseId for loading/filtering files when needed
   console.log(`Knowledge base files for ID: ${knowledgeBaseId}`);
-  // State management - 简化状态管理，因为IntegratedFileManager内部处理数据
+  
+  // 状态管理 - 简化的状态，因为IntegratedFileManager内部管理了大部分状态
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState<boolean>(false);
   
-  // Handle file selection
+  // 处理文件选择 - 用于显示详情抽屉
   const handleFileSelect = (file: FileItem) => {
     setSelectedFile(file);
     setShowDetailDrawer(true);
   };
   
-  // Handle file deletion - IntegratedFileManager处理删除逻辑
-  const handleDeleteFile = (fileId: string) => {
-    setShowDetailDrawer(false);
-  };
-  
-  // Handle file status toggle - IntegratedFileManager通过SSE自动更新状态
-  const handleToggleStatus = (fileId: string, status: string) => {
-    console.log(`状态更新: ${fileId} -> ${status}`);
-  };
-
-  // Custom event handler for the IntegratedFileManager
+  // 处理文件操作 - 集成到IntegratedFileManager的回调
   const handleFileAction = (action: 'view' | 'edit' | 'delete', file: FileItem) => {
     if (action === 'view' || action === 'edit') {
       handleFileSelect(file);
-    } else if (action === 'delete') {
-      handleDeleteFile(file.id || '');
     }
+    // 删除操作由IntegratedFileManager内部处理，不需要额外处理
   };
   
-  // Animation state
+  // 动画状态
   const [animationClass, setAnimationClass] = useState<string>('fade-in');
   
-  // Add animation when component mounts
+  // 组件挂载时添加动画
   useEffect(() => {
     setAnimationClass('fade-in');
     
-    // Add custom scrollbar class to body when the component mounts
+    // 添加自定义滚动条样式
     document.body.classList.add('overflow-hidden');
     
-    // Clean up when the component unmounts
+    // 清理函数
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
   }, []);
   
-  // Handle close with animation
+  // 带动画的关闭处理
   const handleClose = () => {
     setAnimationClass('fade-out');
     setTimeout(() => {
       if (onClose) onClose();
-    }, 200); // Match animation duration
+    }, 200); // 匹配动画持续时间
   };
   
   return (
     <div className={`relative h-full ${animationClass}`}>
-      {/* Main File Management Panel */}
+      {/* 主要的文件管理面板 - 使用IntegratedFileManager替代FileManagementPanel */}
       <div className="h-full">
         <IntegratedFileManager
           knowledgeBaseId={knowledgeBaseId}
@@ -82,22 +75,28 @@ const KnowledgeBaseFiles: React.FC<KnowledgeBaseFilesProps> = ({
           title={title}
           onClose={handleClose}
           onFileAction={handleFileAction}
-          messageServiceUrl="http://localhost:8089"
-          apiBaseUrl="http://localhost:8082"
+          messageServiceUrl={messageServiceUrl}
+          apiBaseUrl={apiBaseUrl}
         />
       </div>
       
-      {/* File Detail Drawer (Overlay) */}
+      {/* 文件详情抽屉（覆盖层）- 保持原有功能 */}
       {showDetailDrawer && selectedFile && (
         <FileDetailDrawer 
           file={selectedFile}
           onClose={() => setShowDetailDrawer(false)}
-          onDelete={handleDeleteFile}
-          onToggleStatus={handleToggleStatus}
+          onDelete={(fileId: string) => {
+            // 删除后关闭抽屉，IntegratedFileManager会自动刷新列表
+            setShowDetailDrawer(false);
+          }}
+          onToggleStatus={(fileId: string, status: string) => {
+            // 状态更新由IntegratedFileManager通过SSE自动处理
+            console.log(`状态更新: ${fileId} -> ${status}`);
+          }}
         />
       )}
     </div>
   );
 };
 
-export default KnowledgeBaseFiles;
+export default KnowledgeBaseFilesFixed;

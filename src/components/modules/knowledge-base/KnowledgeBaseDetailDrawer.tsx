@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Database, FileText, Search, Settings, Upload, Download, Edit3, Trash2, RefreshCw, Eye, BarChart3, Calendar, Tag, Filter, CheckCircle, Clock, AlertCircle, TestTube, Sliders } from 'lucide-react';
 import { KnowledgeBaseItem, FileItem } from '../../../utils/types';
-import FileManagementPanel from '../files/FileManagementPanel';
+import IntegratedFileManager from '../files/IntegratedFileManager';
 import SearchControlPanel from './SearchControlPanel';
 import IndexConfigSelector from './IndexConfigSelector';
 import { Badge } from '../../ui/Badge';
@@ -313,13 +313,16 @@ const KnowledgeBaseDetailDrawer: React.FC<KnowledgeBaseDetailDrawerProps> = ({
 
   const renderFilesTab = () => (
     <div className="h-full">
-      <FileManagementPanel
+      <IntegratedFileManager
+        key={`file-manager-${knowledgeBase?.id}`} // 使用key确保组件不会因为tab切换而重新挂载
+        knowledgeBaseId={knowledgeBase?.id || 'default'}
+        userId="user-123" // TODO: 从用户上下文获取真实用户ID
         title="文件管理"
-        initialFiles={files}
-        knowledgeBaseId={knowledgeBase?.id}
+        messageServiceUrl="http://localhost:8089"
+        apiBaseUrl="http://localhost:8082"
         onFileAction={(action, file) => {
           console.log('File action:', action, file);
-          // 这里可以处理文件操作，如删除、编辑等
+          // 处理文件操作，如删除、编辑等
         }}
       />
     </div>
@@ -764,10 +767,18 @@ const KnowledgeBaseDetailDrawer: React.FC<KnowledgeBaseDetailDrawerProps> = ({
         {/* 内容区域 - 精致化设计 */}
         <div className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100/50">
           <div className="p-6">
-            {activeTab === 'overview' && renderOverviewTab()}
-            {activeTab === 'files' && renderFilesTab()}
-            {activeTab === 'search' && renderSearchTab()}
-            {activeTab === 'settings' && renderSettingsTab()}
+            <div className={activeTab === 'overview' ? 'block' : 'hidden'}>
+              {renderOverviewTab()}
+            </div>
+            <div className={activeTab === 'files' ? 'block h-full' : 'hidden'}>
+              {renderFilesTab()}
+            </div>
+            <div className={activeTab === 'search' ? 'block' : 'hidden'}>
+              {renderSearchTab()}
+            </div>
+            <div className={activeTab === 'settings' ? 'block' : 'hidden'}>
+              {renderSettingsTab()}
+            </div>
           </div>
         </div>
       </div>
